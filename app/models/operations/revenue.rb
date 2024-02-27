@@ -14,7 +14,7 @@ end
 #
 #  id             :bigint           not null, primary key
 #  code           :integer          not null
-#  currency_id    :string(255)      not null
+#  currency_code    :string(255)      not null
 #  member_id      :bigint
 #  reference_type :string(255)
 #  reference_id   :bigint
@@ -25,6 +25,6 @@ end
 #
 # Indexes
 #
-#  index_revenues_on_currency_id                      (currency_id)
+#  index_revenues_on_currency_code                      (currency_code)
 #  index_revenues_on_reference_type_and_reference_id  (reference_type,reference_id)
 #

@@ -1,6 +1,6 @@
 module Ethereum::Heco
   module Params
-    def native_currency_id
+    def native_currency_code
       'ht'
     end
 

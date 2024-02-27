@@ -8,12 +8,12 @@ describe API::V2::Admin::Adjustments, type: :request do
 
   describe 'GET /api/v2/admin/adjustments' do
     let!(:adjustments) do
-      create(:adjustment, currency_id: 'btc')
-      create(:adjustment, currency_id: 'btc')
-      create(:adjustment, currency_id: 'btc')
+      create(:adjustment, currency_code: 'btc')
+      create(:adjustment, currency_code: 'btc')
+      create(:adjustment, currency_code: 'btc')
     end
-    let!(:accepted) { create(:adjustment, currency_id: 'btc', receiving_account_number: "BTC-202-#{member.uid}").tap { |a| a.accept!(validator: member) } }
-    let!(:rejected) { create(:adjustment, currency_id: 'btc', receiving_account_number: "BTC-202-#{member.uid}").tap { |a| a.reject!(validator: member) } }
+    let!(:accepted) { create(:adjustment, currency_code: 'btc', receiving_account_number: "BTC-202-#{member.uid}").tap { |a| a.accept!(validator: member) } }
+    let!(:rejected) { create(:adjustment, currency_code: 'btc', receiving_account_number: "BTC-202-#{member.uid}").tap { |a| a.reject!(validator: member) } }
 
     it 'get all adjustments' do
       api_get '/api/v2/admin/adjustments', token: token
@@ -46,8 +46,8 @@ describe API::V2::Admin::Adjustments, type: :request do
     end
 
     context 'with filters' do
-      let!(:adjustment_with_category) { create(:adjustment, currency_id: 'btc', category: 'balance_anomaly', receiving_account_number: "BTC-202-#{member.uid}") }
-      let!(:eth_adjustment) { create(:adjustment, currency_id: 'eth', receiving_account_number: "eth-202-#{member.uid}").tap { |a| a.accept!(validator: member) } }
+      let!(:adjustment_with_category) { create(:adjustment, currency_code: 'btc', category: 'balance_anomaly', receiving_account_number: "BTC-202-#{member.uid}") }
+      let!(:eth_adjustment) { create(:adjustment, currency_code: 'eth', receiving_account_number: "eth-202-#{member.uid}").tap { |a| a.accept!(validator: member) } }
 
       it 'filter by accepted state' do
         api_get '/api/v2/admin/adjustments', token: token, params: { state: 'accepted' }
@@ -73,7 +73,7 @@ describe API::V2::Admin::Adjustments, type: :request do
         result = JSON.parse(response.body)
 
         expect(response).to be_successful
-        expect(response.headers['Total'].to_i).to eq(Adjustment.where(currency_id: 'eth').count)
+        expect(response.headers['Total'].to_i).to eq(Adjustment.where(currency_code: 'eth').count)
         expect(result.first['id']).to eq(eth_adjustment.id)
       end
 
@@ -81,7 +81,7 @@ describe API::V2::Admin::Adjustments, type: :request do
         api_get '/api/v2/admin/adjustments', token: token, params: { currency: 'btc' }
 
         expect(response).to be_successful
-        expect(response.headers['Total'].to_i).to eq(Adjustment.where(currency_id: 'btc').count)
+        expect(response.headers['Total'].to_i).to eq(Adjustment.where(currency_code: 'btc').count)
       end
 
       it 'validates currency' do
@@ -103,9 +103,9 @@ describe API::V2::Admin::Adjustments, type: :request do
   end
 
   describe 'GET /api/v2/admin/adjustments/:id' do
-    let!(:adjustment1) { create(:adjustment, currency_id: 'btc') }
-    let!(:adjustment2) { create(:adjustment, currency_id: 'eth', receiving_account_number: "ETH-202-#{member.uid}") }
-    let!(:adjustment3) { create(:adjustment, currency_id: 'eth', receiving_account_number: "ETH-302-#{member.uid}") }
+    let!(:adjustment1) { create(:adjustment, currency_code: 'btc') }
+    let!(:adjustment2) { create(:adjustment, currency_code: 'eth', receiving_account_number: "ETH-202-#{member.uid}") }
+    let!(:adjustment3) { create(:adjustment, currency_code: 'eth', receiving_account_number: "ETH-302-#{member.uid}") }
 
     it 'get specified adjustment' do
       api_get "/api/v2/admin/adjustments/#{adjustment1.id}", token: token
@@ -113,7 +113,7 @@ describe API::V2::Admin::Adjustments, type: :request do
 
       expect(response).to be_successful
       expect(result['id']).to eq adjustment1.id
-      expect(result['currency']).to eq adjustment1.currency_id
+      expect(result['currency']).to eq adjustment1.currency_code
     end
 
     it 'get specified adjustment' do
@@ -122,7 +122,7 @@ describe API::V2::Admin::Adjustments, type: :request do
 
       expect(response).to be_successful
       expect(result['id']).to eq adjustment2.id
-      expect(result['currency']).to eq adjustment2.currency_id
+      expect(result['currency']).to eq adjustment2.currency_code
       expect(result['receiving_account_code']).to eq '202'
       expect(result['receiving_member_uid']).to eq member.uid
     end
@@ -133,7 +133,7 @@ describe API::V2::Admin::Adjustments, type: :request do
 
       expect(response).to be_successful
       expect(result['id']).to eq adjustment3.id
-      expect(result['currency']).to eq adjustment3.currency_id
+      expect(result['currency']).to eq adjustment3.currency_code
       expect(result['receiving_account_code']).to eq '302'
       expect(result['receiving_member_uid'].blank?).to be_truthy
     end
@@ -146,7 +146,7 @@ describe API::V2::Admin::Adjustments, type: :request do
         description: 'sample sdjustment',
         category: 'asset_registration',
         amount: 100.0,
-        currency_id: :btc,
+        currency_code: :btc,
         asset_account_code: 102,
         receiving_account_code: 202,
         receiving_member_uid: member.uid
@@ -210,14 +210,14 @@ describe API::V2::Admin::Adjustments, type: :request do
     end
 
     it 'validates right currency' do
-      api_post '/api/v2/admin/adjustments/new', token: token, params: params.merge(currency_id: 'uah')
+      api_post '/api/v2/admin/adjustments/new', token: token, params: params.merge(currency_code: 'uah')
 
       expect(response).not_to be_successful
       expect(response).to include_api_error('admin.adjustment.currency_doesnt_exist')
     end
 
     it 'validates coin and fiat accounts numbers' do
-      api_post '/api/v2/admin/adjustments/new', token: token, params: params.merge(currency_id: 'btc', asset_account_code: 101)
+      api_post '/api/v2/admin/adjustments/new', token: token, params: params.merge(currency_code: 'btc', asset_account_code: 101)
 
       expect(response).not_to be_successful
       expect(response).to include_api_error('Prebuild operations are invalid')
@@ -270,7 +270,7 @@ describe API::V2::Admin::Adjustments, type: :request do
   end
 
   describe 'POST /api/v2/admin/adjustments/action (accept)' do
-    let!(:adjustment) { create(:adjustment, currency_id: 'btc', receiving_account_number: "btc-202-#{member.uid}") }
+    let!(:adjustment) { create(:adjustment, currency_code: 'btc', receiving_account_number: "btc-202-#{member.uid}") }
 
     it 'accepts adjustment' do
       expect {
@@ -317,7 +317,7 @@ describe API::V2::Admin::Adjustments, type: :request do
     end
 
     context 'adjustment without member' do
-      let!(:adjustment) { create(:adjustment, currency_id: 'btc', receiving_account_number: "btc-402-") }
+      let!(:adjustment) { create(:adjustment, currency_code: 'btc', receiving_account_number: "btc-402-") }
 
       it 'should accept adjustment' do
         adjustment.update(amount: -10000000.0)
@@ -333,7 +333,7 @@ describe API::V2::Admin::Adjustments, type: :request do
     end
 
     context 'already accepted' do
-      let!(:adjustment) { create(:adjustment, currency_id: 'btc', receiving_account_number: "btc-202-#{member.uid}").tap { |a| a.accept!(validator: member) } }
+      let!(:adjustment) { create(:adjustment, currency_code: 'btc', receiving_account_number: "btc-202-#{member.uid}").tap { |a| a.accept!(validator: member) } }
 
       it 'returns status and error' do
         api_post '/api/v2/admin/adjustments/action', token: token, params: { id: adjustment.id, action: :accept }
@@ -356,7 +356,7 @@ describe API::V2::Admin::Adjustments, type: :request do
     end
 
     context 'already rejected' do
-      let!(:adjustment) { create(:adjustment, currency_id: 'btc', receiving_account_number: "btc-202-#{member.uid}").tap { |a| a.reject!(validator: member) } }
+      let!(:adjustment) { create(:adjustment, currency_code: 'btc', receiving_account_number: "btc-202-#{member.uid}").tap { |a| a.reject!(validator: member) } }
 
       it 'returns status and error' do
         api_post '/api/v2/admin/adjustments/action', token: token, params: { id: adjustment.id, action: :accept }
@@ -380,7 +380,7 @@ describe API::V2::Admin::Adjustments, type: :request do
   end
 
   describe 'POST /api/v2/admin/adjustments/action (reject)' do
-    let!(:adjustment) { create(:adjustment, currency_id: 'btc', receiving_account_number: "btc-202-#{member.uid}") }
+    let!(:adjustment) { create(:adjustment, currency_code: 'btc', receiving_account_number: "btc-202-#{member.uid}") }
 
     it 'rejects adjustment' do
       expect {
@@ -402,7 +402,7 @@ describe API::V2::Admin::Adjustments, type: :request do
     end
 
     context 'already rejected' do
-      let!(:adjustment) { create(:adjustment, currency_id: 'btc', receiving_account_number: "btc-202-#{member.uid}").tap { |a| a.reject!(validator: member) } }
+      let!(:adjustment) { create(:adjustment, currency_code: 'btc', receiving_account_number: "btc-202-#{member.uid}").tap { |a| a.reject!(validator: member) } }
 
       it 'returns status and error' do
         api_post '/api/v2/admin/adjustments/action', token: token, params: { id: adjustment.id, action: :accept }
@@ -425,7 +425,7 @@ describe API::V2::Admin::Adjustments, type: :request do
     end
 
     context 'already accepted' do
-      let!(:adjustment) { create(:adjustment, currency_id: 'btc', receiving_account_number: "btc-202-#{member.uid}").tap { |a| a.accept!(validator: member) } }
+      let!(:adjustment) { create(:adjustment, currency_code: 'btc', receiving_account_number: "btc-202-#{member.uid}").tap { |a| a.accept!(validator: member) } }
 
       it 'returns status and error' do
         api_post '/api/v2/admin/adjustments/action', token: token, params: { id: adjustment.id, action: :reject }

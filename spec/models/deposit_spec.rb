@@ -12,7 +12,7 @@ describe Deposit do
   end
 
   context 'fee is set to fixed value of 10' do
-    before { BlockchainCurrency.find_by(currency_id: :usd).update(deposit_fee: 10) }
+    before { BlockchainCurrency.find_by(currency_code: :usd).update(deposit_fee: 10) }
     it 'computes fee' do
       expect(deposit.fee).to eql 10.to_d
       expect(deposit.amount).to eql 90.to_d
@@ -20,7 +20,7 @@ describe Deposit do
   end
 
   context 'fee exceeds amount' do
-    before { BlockchainCurrency.find_by(currency_id: :usd).update(deposit_fee: 1.1) }
+    before { BlockchainCurrency.find_by(currency_code: :usd).update(deposit_fee: 1.1) }
     let(:amount) { 1 }
     let(:deposit) { build(:deposit_usd, member: member, amount: amount, currency: currency) }
     it 'fails validation' do
@@ -39,7 +39,7 @@ describe Deposit do
 
   context 'validation' do
     let(:valid_attributes) do
-      { currency_id:    :btc,
+      { currency_code:    :btc,
         blockchain_key: 'btc-testnet',
         address: Faker::Blockchain::Bitcoin.address,
         txid: Faker::Lorem.characters(64),
@@ -132,7 +132,7 @@ describe Deposit do
 
       context 'greater than zero deposit fee' do
         before do
-          BlockchainCurrency.find_by(currency_id: :usd, blockchain_key: nil).update(deposit_fee: 0.01)
+          BlockchainCurrency.find_by(currency_code: :usd, blockchain_key: nil).update(deposit_fee: 0.01)
         end
 
         let(:currency) do
@@ -188,7 +188,7 @@ describe Deposit do
               expect(subject.member.balance_for(currency: subject.currency, kind: :main)).to eq 3.7
 
               # Transfer funds directly to main account on deposit accepted step (1 liability)
-              liabilities = Operations::Liability.where(currency_id: subject.currency.id, member_id: subject.member.id, reference_type: 'Deposit')
+              liabilities = Operations::Liability.where(currency_code: subject.currency.id, member_id: subject.member.id, reference_type: 'Deposit')
               expect(liabilities.count).to eq 1
 
               account = Operations::Account.find_by(kind: :main, currency_type: subject.currency.type, type: 'liability')
@@ -216,7 +216,7 @@ describe Deposit do
               expect(subject.member.balance_for(currency: subject.currency, kind: :main)).to eq 0
 
               # Lock funds on deposit accepted step (1 liability)
-              liabilities = Operations::Liability.where(currency_id: subject.currency.id, member_id: subject.member.id, reference_type: 'Deposit')
+              liabilities = Operations::Liability.where(currency_code: subject.currency.id, member_id: subject.member.id, reference_type: 'Deposit')
               expect(liabilities.count).to eq 1
 
               account = Operations::Account.find_by(kind: :locked, currency_type: subject.currency.type, type: 'liability', scope: 'member')
@@ -244,7 +244,7 @@ describe Deposit do
               expect(subject.member.balance_for(currency: subject.currency, kind: :main)).to eq 0
 
               # Lock funds on deposit accepted step (1 liability)
-              liabilities = Operations::Liability.where(currency_id: subject.currency.id, member_id: subject.member.id, reference_type: 'Deposit')
+              liabilities = Operations::Liability.where(currency_code: subject.currency.id, member_id: subject.member.id, reference_type: 'Deposit')
               expect(liabilities.count).to eq 1
 
               account = Operations::Account.find_by(kind: :locked, currency_type: subject.currency.type, type: 'liability', scope: 'member')
@@ -319,7 +319,7 @@ describe Deposit do
               subject.member.legacy_balance_for(currency: subject.currency, kind: kind)
             )
 
-            liabilities = Operations::Liability.where(currency_id: subject.currency.id, member_id: subject.member.id)
+            liabilities = Operations::Liability.where(currency_code: subject.currency.id, member_id: subject.member.id)
             expect(liabilities.count).to eq 3
 
             # Lock funds on deposit accepted step (1 liability)
@@ -362,7 +362,7 @@ describe Deposit do
           expect(subject.member.balance_for(currency: subject.currency, kind: :main)).to eq 0
 
           # Lock funds on deposit accepted step (1 liability)
-          liabilities = Operations::Liability.where(currency_id: subject.currency.id, member_id: subject.member.id, reference_type: 'Deposit')
+          liabilities = Operations::Liability.where(currency_code: subject.currency.id, member_id: subject.member.id, reference_type: 'Deposit')
           expect(liabilities.count).to eq 1
 
           account = Operations::Account.find_by(kind: :locked, currency_type: subject.currency.type, type: 'liability', scope: 'member')
@@ -434,7 +434,7 @@ describe Deposit do
             subject.member.legacy_balance_for(currency: subject.currency, kind: kind)
           )
 
-          liabilities = Operations::Liability.where(currency_id: subject.currency.id, member_id: subject.member.id)
+          liabilities = Operations::Liability.where(currency_code: subject.currency.id, member_id: subject.member.id)
           expect(liabilities.count).to eq 3
 
           # Lock funds on deposit accepted step (1 liability)
@@ -470,7 +470,7 @@ describe Deposit do
           )
 
           # There is only one liability with transferring funds directly to main account
-          liabilities = Operations::Liability.where(currency_id: subject.currency.id, member_id: subject.member.id, reference_type: 'Deposit')
+          liabilities = Operations::Liability.where(currency_code: subject.currency.id, member_id: subject.member.id, reference_type: 'Deposit')
           expect(liabilities.count).to eq 1
 
           account = Operations::Account.find_by(kind: :main, currency_type: subject.currency.type, type: 'liability')

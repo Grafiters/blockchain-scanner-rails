@@ -85,7 +85,7 @@ describe Order, '#submit' do
 
   context 'validations' do
     before do
-      order.member.accounts.find_by_currency_id(order.currency).update(balance: 0)
+      order.member.accounts.find_by_currency_code(order.currency).update(balance: 0)
     end
 
     it 'insufficient balance' do

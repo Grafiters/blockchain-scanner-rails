@@ -33,7 +33,7 @@ describe API::V2::Admin::Deposits, type: :request do
       expect(actual.length).to eq expected.length
       expect(actual.map { |a| a['state'] }).to match_array expected.map(&:aasm_state)
       expect(actual.map { |a| a['id'] }).to match_array expected.map(&:id)
-      expect(actual.map { |a| a['currency'] }).to match_array expected.map(&:currency_id)
+      expect(actual.map { |a| a['currency'] }).to match_array expected.map(&:currency_code)
       expect(actual.map { |a| a['blockchain_key'] }).to match_array expected.map(&:blockchain_key)
       expect(actual.map { |a| a['member'] }).to match_array expected.map(&:member_id)
       expect(actual.map { |a| a['type'] }).to match_array(expected.map { |d| d.currency.coin? ? 'coin' : 'fiat' })
@@ -91,7 +91,7 @@ describe API::V2::Admin::Deposits, type: :request do
         expect(actual.length).to eq expected.length
         expect(actual.map { |a| a['state'] }).to match_array expected.map(&:aasm_state)
         expect(actual.map { |a| a['id'] }).to match_array expected.map(&:id)
-        expect(actual.map { |a| a['currency'] }).to match_array expected.map(&:currency_id)
+        expect(actual.map { |a| a['currency'] }).to match_array expected.map(&:currency_code)
         expect(actual.map { |a| a['blockchain_key'] }).to match_array expected.map(&:blockchain_key)
         expect(actual.map { |a| a['member'] }).to all eq level_3_member.id
         expect(actual.map { |a| a['type'] }).to match_array(expected.map { |d| d.currency.coin? ? 'coin' : 'fiat' })
@@ -108,7 +108,7 @@ describe API::V2::Admin::Deposits, type: :request do
         expect(actual.length).to eq expected.length
         expect(actual.map { |a| a['state'] }).to match_array expected.map(&:aasm_state)
         expect(actual.map { |a| a['id'] }).to match_array expected.map(&:id)
-        expect(actual.map { |a| a['currency'] }).to match_array expected.map(&:currency_id)
+        expect(actual.map { |a| a['currency'] }).to match_array expected.map(&:currency_code)
         expect(actual.map { |a| a['blockchain_key'] }).to match_array expected.map(&:blockchain_key)
         expect(actual.map { |a| a['type'] }).to match_array(expected.map { |d| d.currency.coin? ? 'coin' : 'fiat' })
         expect(actual.map { |a| a['uid'] }).to match_array(expected.map { |d| d.member.uid })
@@ -124,7 +124,7 @@ describe API::V2::Admin::Deposits, type: :request do
         expect(actual.length).to eq expected.length
         expect(actual.map { |a| a['state'] }).to match_array expected.map(&:aasm_state)
         expect(actual.map { |a| a['id'] }).to match_array expected.map(&:id)
-        expect(actual.map { |a| a['currency'] }).to match_array expected.map(&:currency_id)
+        expect(actual.map { |a| a['currency'] }).to match_array expected.map(&:currency_code)
         expect(actual.map { |a| a['member'] }).to match_array expected.map(&:member_id)
         expect(actual.map { |a| a['blockchain_key'] }).to match_array expected.map(&:blockchain_key)
         expect(actual.map { |a| a['type'] }).to all eq 'coin'
@@ -138,7 +138,7 @@ describe API::V2::Admin::Deposits, type: :request do
         expect(response_body.length).to eq expected.length
         expect(response_body.map { |a| a['state'] }).to match_array expected.map(&:aasm_state)
         expect(response_body.map { |a| a['id'] }).to match_array expected.map(&:id)
-        expect(response_body.map { |a| a['currency'] }).to match_array expected.map(&:currency_id)
+        expect(response_body.map { |a| a['currency'] }).to match_array expected.map(&:currency_code)
         expect(response_body.map { |a| a['member'] }).to all eq level_3_member.id
         expect(response_body.map { |a| a['blockchain_key'] }).to match_array expected.map(&:blockchain_key)
         expect(response_body.map { |a| a['type'] }).to match_array(expected.map { |d| d.currency.coin? ? 'coin' : 'fiat' })
@@ -320,7 +320,7 @@ describe API::V2::Admin::Deposits, type: :request do
       let(:currency) { :btc }
       let(:blockchain_key) { 'btc-testnet' }
 
-      before { BlockchainCurrency.find_by(currency_id: currency).update!(deposit_enabled: false) }
+      before { BlockchainCurrency.find_by(currency_code: currency).update!(deposit_enabled: false) }
 
       it 'returns error' do
         api_post url, params: { currency: currency, blockchain_key: blockchain_key, uid: level_3_member.uid}, token: token

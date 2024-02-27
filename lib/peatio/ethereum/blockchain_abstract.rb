@@ -34,7 +34,7 @@ module Ethereum
       @settings[:currencies]&.each do |c|
         if c.dig(:options, contract_address_option).present?
           @erc20 << c
-        elsif c[:id] == native_currency_id
+        elsif c[:id] == native_currency_code
           raise "Unexpected duplicated native token #{c[:id]}" unless @eth.nil?
 
           @eth = c
@@ -109,26 +109,26 @@ module Ethereum
       raise Peatio::Blockchain::ClientError, e
     end
 
-    def load_balance_of_address!(address, currency_id)
-      currency = settings[:currencies].find { |c| c[:id] == currency_id.to_s }
+    def load_balance_of_address!(address, currency_code)
+      currency = settings[:currencies].find { |c| c[:id] == currency_code.to_s }
       raise UndefinedCurrencyError unless currency
 
       if currency.dig(:options, contract_address_option).present?
         load_erc20_balance(address, currency)
-      elsif currency_id.to_s == native_currency_id
+      elsif currency_code.to_s == native_currency_code
         client.json_rpc(:eth_getBalance, [normalize_address(address), 'latest'])
               .hex
               .to_d
               .yield_self { |amount| convert_from_base_unit(amount, currency) }
       else
-        raise Peatio::Blockchain::ClientError.new("Currency #{currency_id} doesn't have option #{contract_address_option}")
+        raise Peatio::Blockchain::ClientError.new("Currency #{currency_code} doesn't have option #{contract_address_option}")
       end
     rescue Ethereum::Client::Error => e
       raise Peatio::Blockchain::ClientError, e
     end
 
     def fetch_transaction(transaction)
-      currency = settings[:currencies].find { |c| c.fetch(:id) == transaction.currency_id }
+      currency = settings[:currencies].find { |c| c.fetch(:id) == transaction.currency_code }
       return if currency.blank?
 
       txn_receipt = client.json_rpc(:eth_getTransactionReceipt, [transaction.hash])
@@ -199,7 +199,7 @@ module Ethereum
           to_address:     normalize_address(block_txn['to']),
           txout:          block_txn.fetch('transactionIndex').to_i(16),
           block_number:   block_txn.fetch('blockNumber').to_i(16),
-          currency_id:    @eth.fetch(:id),
+          currency_code:    @eth.fetch(:id),
           status:         transaction_status(block_txn)
         }
       ]
@@ -231,7 +231,7 @@ module Ethereum
                              to_address:      destination_address,
                              txout:           log['logIndex'].to_i(16),
                              block_number:    txn_receipt.fetch('blockNumber').to_i(16),
-                             currency_id:     currency.fetch(:id),
+                             currency_code:     currency.fetch(:id),
                              status:          transaction_status(txn_receipt) }
         end
       end
@@ -244,7 +244,7 @@ module Ethereum
       currencies.each_with_object([]) do |currency, invalid_txs|
         invalid_txs << { hash:         normalize_txid(txn_receipt.fetch('transactionHash')),
                          block_number: txn_receipt.fetch('blockNumber').to_i(16),
-                         currency_id:  currency.fetch(:id),
+                         currency_code:  currency.fetch(:id),
                          status:       transaction_status(txn_receipt) }
       end
     end

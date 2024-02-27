@@ -245,7 +245,7 @@ describe API::V2::Management::Beneficiaries, type: :request do
         end
 
         context 'disabled withdrawal for currency' do
-          let(:blockchain_currency) { BlockchainCurrency.find_by(currency_id: 'btc') }
+          let(:blockchain_currency) { BlockchainCurrency.find_by(currency_code: 'btc') }
           before do
             blockchain_currency.update(withdrawal_enabled: false)
           end
@@ -273,7 +273,7 @@ describe API::V2::Management::Beneficiaries, type: :request do
               create(:beneficiary,
                      member: member,
                      blockchain_key: beneficiary_data[:blockchain_key],
-                     currency_id: beneficiary_data[:currency],
+                     currency_code: beneficiary_data[:currency],
                      data: {address: beneficiary_data.dig(:data, :address)})
             end
 
@@ -289,7 +289,7 @@ describe API::V2::Management::Beneficiaries, type: :request do
               create(:beneficiary,
                      member: member,
                      blockchain_key: 'eth-rinkeby',
-                     currency_id: :eth,
+                     currency_code: :eth,
                      data: {address: beneficiary_data.dig(:data, :address)})
             end
 
@@ -365,7 +365,7 @@ describe API::V2::Management::Beneficiaries, type: :request do
               before do
                 create(:beneficiary,
                        member: member,
-                       currency_id: beneficiary_data[:currency],
+                       currency_code: beneficiary_data[:currency],
                        data: beneficiary_data[:data])
               end
 

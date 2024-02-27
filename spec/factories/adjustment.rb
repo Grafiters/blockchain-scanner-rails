@@ -7,7 +7,7 @@ FactoryBot.define do
     description { Faker::Coffee.notes }
     category { 'asset_registration' }
     amount { Faker::Number.positive }
-    currency_id { Currency.ids.sample }
+    currency_code { Currency.ids.sample }
     creator { create(:member) }
     asset_account_code { 102 }
     receiving_account_number { "BTC-#{[402, 302].sample}" }

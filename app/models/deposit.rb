@@ -19,8 +19,8 @@ class Deposit < ApplicationRecord
   belongs_to :currency, required: true
   belongs_to :member, required: true
   belongs_to :blockchain, foreign_key: :blockchain_key, primary_key: :key
-  belongs_to :blockchain_coin_currency, -> { where.not(blockchain_key: nil) }, class_name: 'BlockchainCurrency', foreign_key: %i[blockchain_key currency_id], primary_key: %i[blockchain_key currency_id]
-  belongs_to :blockchain_fiat_currency, -> { where(blockchain_key: nil) }, class_name: 'BlockchainCurrency', foreign_key: :currency_id, primary_key: :currency_id
+  belongs_to :blockchain_coin_currency, -> { where.not(blockchain_key: nil) }, class_name: 'BlockchainCurrency', foreign_key: %i[blockchain_key currency_code], primary_key: %i[blockchain_key currency_code]
+  belongs_to :blockchain_fiat_currency, -> { where(blockchain_key: nil) }, class_name: 'BlockchainCurrency', foreign_key: :currency_code, primary_key: :currency_code
 
   acts_as_eventable prefix: 'deposit', on: %i[create update]
 
@@ -146,7 +146,7 @@ class Deposit < ApplicationRecord
     return nil if Peatio::App.config.manual_deposit_approval && Peatio::AML.adapter.blank?
 
     from_addresses.each do |address|
-      result = Peatio::AML.check!(address, currency_id, member.uid)
+      result = Peatio::AML.check!(address, currency_code, member.uid)
       if result.risk_detected
         aml_suspicious!
         return nil
@@ -187,7 +187,7 @@ class Deposit < ApplicationRecord
   def spread_between_wallets!
     return false if spread.present?
 
-    spread = WalletService.new(Wallet.active_deposit_wallet(currency_id, blockchain_key)).spread_deposit(self)
+    spread = WalletService.new(Wallet.active_deposit_wallet(currency_code, blockchain_key)).spread_deposit(self)
     update!(spread: spread.map(&:as_json))
   end
 
@@ -221,7 +221,7 @@ class Deposit < ApplicationRecord
     { tid:                      tid,
       user:                     { uid: member.uid, email: member.email },
       uid:                      member.uid,
-      currency:                 currency_id,
+      currency:                 currency_code,
       amount:                   amount.to_s('F'),
       state:                    aasm_state,
       wallet_state:             wallet_state,
@@ -295,7 +295,7 @@ end
 #
 #  id             :bigint           not null, primary key
 #  member_id      :bigint           not null
-#  currency_id    :string(10)       not null
+#  currency_code    :string(10)       not null
 #  blockchain_key :string(255)
 #  amount         :decimal(32, 16)  not null
 #  fee            :decimal(32, 16)  not null
@@ -316,9 +316,9 @@ end
 #
 # Indexes
 #
-#  index_deposits_on_aasm_state_and_member_id_and_currency_id  (aasm_state,member_id,currency_id)
-#  index_deposits_on_currency_id                               (currency_id)
-#  index_deposits_on_currency_id_and_txid_and_txout            (currency_id,txid,txout) UNIQUE
+#  index_deposits_on_aasm_state_and_member_id_and_currency_code  (aasm_state,member_id,currency_code)
+#  index_deposits_on_currency_code                               (currency_code)
+#  index_deposits_on_currency_code_and_txid_and_txout            (currency_code,txid,txout) UNIQUE
 #  index_deposits_on_member_id_and_txid                        (member_id,txid)
 #  index_deposits_on_tid                                       (tid)
 #  index_deposits_on_type                                      (type)

@@ -34,7 +34,7 @@ namespace :import do
 
   # Required fields for import accounts balances:
   # - uid
-  # - currency_id
+  # - currency_code
   #
   # Make sure that you create required currency
   # Usage:
@@ -50,7 +50,7 @@ namespace :import do
       row = row.to_h.compact.symbolize_keys!
       uid = row[:uid]
       member = Member.find_by_uid!(uid)
-      currency = Currency.find(row[:currency_id])
+      currency = Currency.find(row[:currency_code])
       account = Account.find_or_create_by!(member: member, currency: currency)
       main_balance = row[:main_balance].to_d
       locked_balance = row[:locked_balance].to_d
@@ -86,7 +86,7 @@ namespace :import do
       PaymentAddress.create(member_id: member.id, wallet_id: wallet.id, address: row[:address], secret: row[:secret], details: row[:details])
       count += 1
     rescue StandardError => e
-      message = { error: e.message, uid: row[:uid], currency_id: currency_id[:currency_id] }
+      message = { error: e.message, uid: row[:uid], currency_code: currency_code[:currency_code] }
       Rails.logger.error message
       errors_count += 1
     end
@@ -104,11 +104,11 @@ namespace :import do
       row = row.to_h.compact.symbolize_keys!
       uid = row[:uid]
       member = Member.find_by_uid!(uid)
-      wallet = Wallet.active_deposit_wallet(row[:currency_id])
+      wallet = Wallet.active_deposit_wallet(row[:currency_code])
       PaymentAddress.create(member_id: member.id, wallet_id: wallet.id, address: row[:address], secret: row[:secret], details: row[:details])
       count += 1
     rescue StandardError => e
-      message = { error: e.message, uid: row[:uid], currency_id: currency_id[:currency_id] }
+      message = { error: e.message, uid: row[:uid], currency_code: currency_code[:currency_code] }
       Rails.logger.error message
       errors_count += 1
     end
@@ -134,7 +134,7 @@ namespace :import do
                                      blockchain_key: blockchain_key, state: 'active')
       count += 1
     rescue StandardError => e
-      message = { error: e.message, uid: row[:uid], currency_id: currency_id[:currency_id] }
+      message = { error: e.message, uid: row[:uid], currency_code: currency_code[:currency_code] }
       Rails.logger.error message
       errors_count += 1
     end

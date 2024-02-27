@@ -7,7 +7,7 @@ module Deposits
   class Coin < Deposit
     validate { errors.add(:currency, :invalid) if currency && !currency.coin? }
     validates :address, :txid, presence: true
-    validates :txid, uniqueness: { scope: %i[currency_id txout] }
+    validates :txid, uniqueness: { scope: %i[currency_code txout] }
 
     before_validation do
       if blockchain_api.present? && blockchain_api.case_sensitive? == false
@@ -34,7 +34,7 @@ end
 #
 #  id             :bigint           not null, primary key
 #  member_id      :bigint           not null
-#  currency_id    :string(10)       not null
+#  currency_code    :string(10)       not null
 #  blockchain_key :string(255)
 #  amount         :decimal(32, 16)  not null
 #  fee            :decimal(32, 16)  not null
@@ -55,9 +55,9 @@ end
 #
 # Indexes
 #
-#  index_deposits_on_aasm_state_and_member_id_and_currency_id  (aasm_state,member_id,currency_id)
-#  index_deposits_on_currency_id                               (currency_id)
-#  index_deposits_on_currency_id_and_txid_and_txout            (currency_id,txid,txout) UNIQUE
+#  index_deposits_on_aasm_state_and_member_id_and_currency_code  (aasm_state,member_id,currency_code)
+#  index_deposits_on_currency_code                               (currency_code)
+#  index_deposits_on_currency_code_and_txid_and_txout            (currency_code,txid,txout) UNIQUE
 #  index_deposits_on_member_id_and_txid                        (member_id,txid)
 #  index_deposits_on_tid                                       (tid)
 #  index_deposits_on_type                                      (type)

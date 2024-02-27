@@ -15,13 +15,13 @@ DROP TABLE IF EXISTS `accounts`;
 CREATE TABLE `accounts` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `member_id` int(11) NOT NULL,
-  `currency_id` varchar(10) NOT NULL,
+  `currency_code` varchar(10) NOT NULL,
   `balance` decimal(32,16) NOT NULL DEFAULT '0.0000000000000000',
   `locked` decimal(32,16) NOT NULL DEFAULT '0.0000000000000000',
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `index_accounts_on_currency_id_and_member_id` (`currency_id`,`member_id`),
+  UNIQUE KEY `index_accounts_on_currency_code_and_member_id` (`currency_code`,`member_id`),
   KEY `index_accounts_on_member_id` (`member_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -37,14 +37,14 @@ CREATE TABLE `adjustments` (
   `amount` decimal(32,16) NOT NULL,
   `asset_account_code` smallint(5) unsigned NOT NULL,
   `receiving_account_number` varchar(64) NOT NULL,
-  `currency_id` varchar(255) NOT NULL,
+  `currency_code` varchar(255) NOT NULL,
   `category` tinyint(4) NOT NULL,
   `state` tinyint(4) NOT NULL,
   `created_at` datetime(3) NOT NULL,
   `updated_at` datetime(3) NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `index_adjustments_on_currency_id` (`currency_id`),
-  KEY `index_adjustments_on_currency_id_and_state` (`currency_id`,`state`)
+  KEY `index_adjustments_on_currency_code` (`currency_code`),
+  KEY `index_adjustments_on_currency_code_and_state` (`currency_code`,`state`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `ar_internal_metadata`;
@@ -64,7 +64,7 @@ DROP TABLE IF EXISTS `assets`;
 CREATE TABLE `assets` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `code` int(11) NOT NULL,
-  `currency_id` varchar(255) NOT NULL,
+  `currency_code` varchar(255) NOT NULL,
   `reference_type` varchar(255) DEFAULT NULL,
   `reference_id` int(11) DEFAULT NULL,
   `debit` decimal(32,16) NOT NULL DEFAULT '0.0000000000000000',
@@ -72,7 +72,7 @@ CREATE TABLE `assets` (
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `index_assets_on_currency_id` (`currency_id`),
+  KEY `index_assets_on_currency_code` (`currency_code`),
   KEY `index_assets_on_reference_type_and_reference_id` (`reference_type`,`reference_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -82,7 +82,7 @@ DROP TABLE IF EXISTS `beneficiaries`;
 CREATE TABLE `beneficiaries` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `member_id` bigint(20) NOT NULL,
-  `currency_id` varchar(10) NOT NULL,
+  `currency_code` varchar(10) NOT NULL,
   `name` varchar(64) NOT NULL,
   `description` varchar(255) DEFAULT '',
   `data` json DEFAULT NULL,
@@ -93,7 +93,7 @@ CREATE TABLE `beneficiaries` (
   `updated_at` datetime NOT NULL,
   PRIMARY KEY (`id`),
   KEY `index_beneficiaries_on_member_id` (`member_id`),
-  KEY `index_beneficiaries_on_currency_id` (`currency_id`)
+  KEY `index_beneficiaries_on_currency_code` (`currency_code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `blockchains`;
@@ -153,7 +153,7 @@ DROP TABLE IF EXISTS `deposits`;
 CREATE TABLE `deposits` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `member_id` int(11) NOT NULL,
-  `currency_id` varchar(10) NOT NULL,
+  `currency_code` varchar(10) NOT NULL,
   `amount` decimal(32,16) NOT NULL,
   `fee` decimal(32,16) NOT NULL,
   `address` varchar(95) DEFAULT NULL,
@@ -169,11 +169,11 @@ CREATE TABLE `deposits` (
   `updated_at` datetime(3) NOT NULL,
   `completed_at` datetime(3) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `index_deposits_on_currency_id_and_txid_and_txout` (`currency_id`,`txid`,`txout`),
-  KEY `index_deposits_on_currency_id` (`currency_id`),
+  UNIQUE KEY `index_deposits_on_currency_code_and_txid_and_txout` (`currency_code`,`txid`,`txout`),
+  KEY `index_deposits_on_currency_code` (`currency_code`),
   KEY `index_deposits_on_type` (`type`),
   KEY `index_deposits_on_member_id_and_txid` (`member_id`,`txid`),
-  KEY `index_deposits_on_aasm_state_and_member_id_and_currency_id` (`aasm_state`,`member_id`,`currency_id`),
+  KEY `index_deposits_on_aasm_state_and_member_id_and_currency_code` (`aasm_state`,`member_id`,`currency_code`),
   KEY `index_deposits_on_tid` (`tid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -199,7 +199,7 @@ DROP TABLE IF EXISTS `expenses`;
 CREATE TABLE `expenses` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `code` int(11) NOT NULL,
-  `currency_id` varchar(255) NOT NULL,
+  `currency_code` varchar(255) NOT NULL,
   `reference_type` varchar(255) DEFAULT NULL,
   `reference_id` int(11) DEFAULT NULL,
   `debit` decimal(32,16) NOT NULL DEFAULT '0.0000000000000000',
@@ -207,7 +207,7 @@ CREATE TABLE `expenses` (
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `index_expenses_on_currency_id` (`currency_id`),
+  KEY `index_expenses_on_currency_code` (`currency_code`),
   KEY `index_expenses_on_reference_type_and_reference_id` (`reference_type`,`reference_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -233,7 +233,7 @@ DROP TABLE IF EXISTS `liabilities`;
 CREATE TABLE `liabilities` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `code` int(11) NOT NULL,
-  `currency_id` varchar(255) NOT NULL,
+  `currency_code` varchar(255) NOT NULL,
   `member_id` int(11) DEFAULT NULL,
   `reference_type` varchar(255) DEFAULT NULL,
   `reference_id` int(11) DEFAULT NULL,
@@ -242,7 +242,7 @@ CREATE TABLE `liabilities` (
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `index_liabilities_on_currency_id` (`currency_id`),
+  KEY `index_liabilities_on_currency_code` (`currency_code`),
   KEY `index_liabilities_on_member_id` (`member_id`),
   KEY `index_liabilities_on_reference_type_and_reference_id` (`reference_type`,`reference_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -352,7 +352,7 @@ DROP TABLE IF EXISTS `payment_addresses`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `payment_addresses` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `currency_id` varchar(10) NOT NULL,
+  `currency_code` varchar(10) NOT NULL,
   `account_id` int(11) NOT NULL,
   `address` varchar(95) DEFAULT NULL,
   `secret_encrypted` varchar(255) DEFAULT NULL,
@@ -360,7 +360,7 @@ CREATE TABLE `payment_addresses` (
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `index_payment_addresses_on_currency_id_and_address` (`currency_id`,`address`)
+  UNIQUE KEY `index_payment_addresses_on_currency_code_and_address` (`currency_code`,`address`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `refunds`;
@@ -384,7 +384,7 @@ DROP TABLE IF EXISTS `revenues`;
 CREATE TABLE `revenues` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `code` int(11) NOT NULL,
-  `currency_id` varchar(255) NOT NULL,
+  `currency_code` varchar(255) NOT NULL,
   `member_id` int(11) DEFAULT NULL,
   `reference_type` varchar(255) DEFAULT NULL,
   `reference_id` int(11) DEFAULT NULL,
@@ -393,7 +393,7 @@ CREATE TABLE `revenues` (
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `index_revenues_on_currency_id` (`currency_id`),
+  KEY `index_revenues_on_currency_code` (`currency_code`),
   KEY `index_revenues_on_reference_type_and_reference_id` (`reference_type`,`reference_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -411,8 +411,8 @@ DROP TABLE IF EXISTS `stats_member_pnl`;
 CREATE TABLE `stats_member_pnl` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `member_id` int(11) NOT NULL,
-  `pnl_currency_id` varchar(10) NOT NULL,
-  `currency_id` varchar(10) NOT NULL,
+  `pnl_currency_code` varchar(10) NOT NULL,
+  `currency_code` varchar(10) NOT NULL,
   `total_credit` decimal(48,16) DEFAULT '0.0000000000000000',
   `total_credit_fees` decimal(48,16) DEFAULT '0.0000000000000000',
   `total_debit_fees` decimal(48,16) DEFAULT '0.0000000000000000',
@@ -424,7 +424,7 @@ CREATE TABLE `stats_member_pnl` (
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `index_currency_ids_and_member_id` (`pnl_currency_id`,`currency_id`,`member_id`)
+  UNIQUE KEY `index_currency_codes_and_member_id` (`pnl_currency_code`,`currency_code`,`member_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `stats_member_pnl_idx`;
@@ -432,15 +432,15 @@ DROP TABLE IF EXISTS `stats_member_pnl_idx`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `stats_member_pnl_idx` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `pnl_currency_id` varchar(10) NOT NULL,
-  `currency_id` varchar(10) NOT NULL,
+  `pnl_currency_code` varchar(10) NOT NULL,
+  `currency_code` varchar(10) NOT NULL,
   `reference_type` varchar(255) NOT NULL,
   `last_id` bigint(20) DEFAULT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `index_currency_ids_and_type` (`pnl_currency_id`,`currency_id`,`reference_type`),
-  KEY `index_currency_ids_and_last_id` (`pnl_currency_id`,`currency_id`,`last_id`)
+  UNIQUE KEY `index_currency_codes_and_type` (`pnl_currency_code`,`currency_code`,`reference_type`),
+  KEY `index_currency_codes_and_last_id` (`pnl_currency_code`,`currency_code`,`last_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `trades`;
@@ -521,7 +521,7 @@ DROP TABLE IF EXISTS `wallets`;
 CREATE TABLE `wallets` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `blockchain_key` varchar(32) DEFAULT NULL,
-  `currency_id` varchar(10) DEFAULT NULL,
+  `currency_code` varchar(10) DEFAULT NULL,
   `name` varchar(64) DEFAULT NULL,
   `address` varchar(255) NOT NULL,
   `kind` int(11) NOT NULL,
@@ -534,8 +534,8 @@ CREATE TABLE `wallets` (
   PRIMARY KEY (`id`),
   KEY `index_wallets_on_status` (`status`),
   KEY `index_wallets_on_kind` (`kind`),
-  KEY `index_wallets_on_currency_id` (`currency_id`),
-  KEY `index_wallets_on_kind_and_currency_id_and_status` (`kind`,`currency_id`,`status`)
+  KEY `index_wallets_on_currency_code` (`currency_code`),
+  KEY `index_wallets_on_kind_and_currency_code_and_status` (`kind`,`currency_code`,`status`)
 ) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `withdraws`;
@@ -545,7 +545,7 @@ CREATE TABLE `withdraws` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `member_id` int(11) NOT NULL,
   `beneficiary_id` bigint(20) DEFAULT NULL,
-  `currency_id` varchar(10) NOT NULL,
+  `currency_code` varchar(10) NOT NULL,
   `amount` decimal(32,16) NOT NULL,
   `fee` decimal(32,16) NOT NULL,
   `txid` varchar(128) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
@@ -561,8 +561,8 @@ CREATE TABLE `withdraws` (
   `updated_at` datetime(3) NOT NULL,
   `completed_at` datetime(3) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `index_withdraws_on_currency_id_and_txid` (`currency_id`,`txid`),
-  KEY `index_withdraws_on_currency_id` (`currency_id`),
+  UNIQUE KEY `index_withdraws_on_currency_code_and_txid` (`currency_code`,`txid`),
+  KEY `index_withdraws_on_currency_code` (`currency_code`),
   KEY `index_withdraws_on_aasm_state` (`aasm_state`),
   KEY `index_withdraws_on_member_id` (`member_id`),
   KEY `index_withdraws_on_type` (`type`),

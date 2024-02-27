@@ -22,7 +22,7 @@ module Operations
 
     def as_json_for_events_processor
       { code:           code,
-        currency:       currency_id,
+        currency:       currency_code,
         member_id:      member_id,
         reference_id:   reference_id,
         reference_type: reference_type&.downcase,
@@ -39,7 +39,7 @@ end
 #
 #  id             :bigint           not null, primary key
 #  code           :integer          not null
-#  currency_id    :string(255)      not null
+#  currency_code    :string(255)      not null
 #  member_id      :bigint
 #  reference_type :string(255)
 #  reference_id   :bigint
@@ -50,7 +50,7 @@ end
 #
 # Indexes
 #
-#  index_liabilities_on_currency_id                      (currency_id)
+#  index_liabilities_on_currency_code                      (currency_code)
 #  index_liabilities_on_member_id                        (member_id)
 #  index_liabilities_on_reference_type_and_reference_id  (reference_type,reference_id)
 #

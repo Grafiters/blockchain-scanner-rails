@@ -5,7 +5,7 @@
 # @abstract
 class Operation < ApplicationRecord
   belongs_to :reference, polymorphic: true
-  belongs_to :currency, foreign_key: :currency_id
+  belongs_to :currency, foreign_key: :currency_code
   belongs_to :account, class_name: 'Operations::Account',
              foreign_key: :code, primary_key: :code
 
@@ -49,7 +49,7 @@ class Operation < ApplicationRecord
         currency_type: currency.type
       ).code
 
-      opt.merge(credit: amount, currency_id: currency.id)
+      opt.merge(credit: amount, currency_code: currency.id)
          .yield_self { |attr| new(attr) }
          .tap(&:save!)
     end
@@ -63,7 +63,7 @@ class Operation < ApplicationRecord
         currency_type: currency.type
       ).code
 
-      opt.merge(debit: amount, currency_id: currency.id)
+      opt.merge(debit: amount, currency_code: currency.id)
          .yield_self { |attr| new(attr) }
          .tap(&:save!)
     end
@@ -82,7 +82,7 @@ class Operation < ApplicationRecord
         db_balances = all
         db_balances = db_balances.where('created_at > ?', created_at_from) if created_at_from.present?
         db_balances = db_balances.where('created_at < ?', created_at_to) if created_at_to.present?
-        db_balances = db_balances.group(:currency_id)
+        db_balances = db_balances.group(:currency_code)
                                  .sum('credit - debit')
 
         Currency.ids.map(&:to_sym).each_with_object({}) do |id, memo|

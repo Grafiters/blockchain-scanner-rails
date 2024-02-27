@@ -57,7 +57,7 @@ module Bench
       DEFAULT_DEPOSIT_AMOUNT = 1_000_000_000
       def initialize(options)
         @options = options
-        @currency = Currency.find(options[:currency_id])
+        @currency = Currency.find(options[:currency_code])
       end
 
       def create

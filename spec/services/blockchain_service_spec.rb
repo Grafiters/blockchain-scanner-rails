@@ -26,13 +26,13 @@ describe BlockchainService do
 
   let!(:member) { create(:member) }
 
-  let(:transaction) { Peatio::Transaction.new(hash: 'fake_txid', to_address: 'fake_address', from_addresses: ['fake_address'], amount: 5, block_number: 3, currency_id: 'fake1', txout: 4, status: 'success') }
+  let(:transaction) { Peatio::Transaction.new(hash: 'fake_txid', to_address: 'fake_address', from_addresses: ['fake_address'], amount: 5, block_number: 3, currency_code: 'fake1', txout: 4, status: 'success') }
 
   let(:expected_transactions) do
     [
-      { hash: 'fake_hash1', to_address: 'fake_address', amount: 1, block_number: 2, currency_id: 'fake1', txout: 1, from_addresses: ['fake_address'], status: 'success' },
-      { hash: 'fake_hash2', to_address: 'fake_address1', amount: 2, block_number: 2, currency_id: 'fake1', txout: 2, from_addresses: ['fake_address'], status: 'success' },
-      { hash: 'fake_hash3', to_address: 'fake_address2', amount: 3, block_number: 2, currency_id: 'fake2', txout: 3, from_addresses: ['fake_address'], status: 'success' }
+      { hash: 'fake_hash1', to_address: 'fake_address', amount: 1, block_number: 2, currency_code: 'fake1', txout: 1, from_addresses: ['fake_address'], status: 'success' },
+      { hash: 'fake_hash2', to_address: 'fake_address1', amount: 2, block_number: 2, currency_code: 'fake1', txout: 2, from_addresses: ['fake_address'], status: 'success' },
+      { hash: 'fake_hash3', to_address: 'fake_address2', amount: 3, block_number: 2, currency_code: 'fake2', txout: 3, from_addresses: ['fake_address'], status: 'success' }
     ].map { |t| Peatio::Transaction.new(t) }
   end
 
@@ -304,7 +304,7 @@ describe BlockchainService do
       end
 
       let!(:transaction) do
-        Peatio::Transaction.new(hash: 'fake_hash', to_address: 'fake_address', amount: 1, block_number: 3, currency_id: fake_currency1.id, txout: 10, status: 'failed')
+        Peatio::Transaction.new(hash: 'fake_hash', to_address: 'fake_address', amount: 1, block_number: 3, currency_code: fake_currency1.id, txout: 10, status: 'failed')
       end
 
       before do
@@ -336,11 +336,11 @@ describe BlockchainService do
       end
 
       let!(:transaction) do
-        Peatio::Transaction.new(hash: 'fake_hash', to_address: 'fake_address', amount: 1, block_number: 3, currency_id: fake_currency1.id, txout: 10, status: 'pending')
+        Peatio::Transaction.new(hash: 'fake_hash', to_address: 'fake_address', amount: 1, block_number: 3, currency_code: fake_currency1.id, txout: 10, status: 'pending')
       end
 
       let!(:failed_transaction) do
-        Peatio::Transaction.new(hash: 'fake_hash', to_address: 'fake_address', amount: 1, block_number: 3, currency_id: fake_currency1.id, txout: 10, status: 'failed')
+        Peatio::Transaction.new(hash: 'fake_hash', to_address: 'fake_address', amount: 1, block_number: 3, currency_code: fake_currency1.id, txout: 10, status: 'failed')
       end
 
       before do
@@ -374,11 +374,11 @@ describe BlockchainService do
       end
 
       let!(:transaction) do
-        Peatio::Transaction.new(hash: 'fake_hash', to_address: 'fake_address', amount: 1, block_number: 3, currency_id: fake_currency1.id, txout: 10, status: 'pending')
+        Peatio::Transaction.new(hash: 'fake_hash', to_address: 'fake_address', amount: 1, block_number: 3, currency_code: fake_currency1.id, txout: 10, status: 'pending')
       end
 
       let!(:succeed_transaction) do
-        Peatio::Transaction.new(hash: 'fake_hash', to_address: 'fake_address', amount: 1, block_number: 3, currency_id: fake_currency1.id, txout: 10, status: 'success')
+        Peatio::Transaction.new(hash: 'fake_hash', to_address: 'fake_address', amount: 1, block_number: 3, currency_code: fake_currency1.id, txout: 10, status: 'success')
       end
 
       before do
@@ -400,9 +400,9 @@ describe BlockchainService do
   describe 'Several blocks' do
     let(:expected_transactions1) do
       [
-        { hash: 'fake_hash4', to_address: 'fake_address4', amount: 1, block_number: 3, currency_id: 'fake1', txout: 1, status: 'success' },
-        { hash: 'fake_hash5', to_address: 'fake_address4', amount: 2, block_number: 3, currency_id: 'fake1', txout: 2, status: 'success' },
-        { hash: 'fake_hash6', to_address: 'fake_address4', amount: 3, block_number: 3, currency_id: 'fake2', txout: 1, status: 'success' }
+        { hash: 'fake_hash4', to_address: 'fake_address4', amount: 1, block_number: 3, currency_code: 'fake1', txout: 1, status: 'success' },
+        { hash: 'fake_hash5', to_address: 'fake_address4', amount: 2, block_number: 3, currency_code: 'fake1', txout: 2, status: 'success' },
+        { hash: 'fake_hash6', to_address: 'fake_address4', amount: 3, block_number: 3, currency_code: 'fake2', txout: 1, status: 'success' }
       ].map { |t| Peatio::Transaction.new(t) }
     end
 

@@ -52,7 +52,7 @@ describe WalletService do
       Peatio::Transaction.new(hash:        '0xfake',
                               to_address:  withdrawal.rid,
                               amount:      withdrawal.amount,
-                              currency_id: currency.id)
+                              currency_code: currency.id)
     end
 
     before do
@@ -82,7 +82,7 @@ describe WalletService do
     #   * Partial spread between first, second and third.
     #   * Deposit doesn't fit to all wallets.
 
-    let(:deposit) { Deposit.new(amount: 1.2, currency_id: :fake) }
+    let(:deposit) { Deposit.new(amount: 1.2, currency_code: :fake) }
 
     context 'Single wallet' do
 
@@ -100,7 +100,7 @@ describe WalletService do
           [{ to_address: 'destination-wallet-1',
              status: 'pending',
              amount: deposit.amount,
-             currency_id: currency.id,
+             currency_code: currency.id,
              options: { external_wallet_id: 1 } }.as_json].map(&:symbolize_keys)
         end
 
@@ -123,7 +123,7 @@ describe WalletService do
         end
 
         let(:expected_spread) do
-          [{:amount=>"1.2", :currency_id=>"fake", :status=>"skipped", :to_address=>"destination-wallet-1"}]
+          [{:amount=>"1.2", :currency_code=>"fake", :status=>"skipped", :to_address=>"destination-wallet-1"}]
         end
 
         subject { service.send(:spread_between_wallets, deposit, destination_wallets) }
@@ -146,7 +146,7 @@ describe WalletService do
           [{ to_address: 'destination-wallet-1',
              status: 'pending',
              amount: deposit.amount,
-             currency_id: currency.id }.as_json].map(&:symbolize_keys)
+             currency_code: currency.id }.as_json].map(&:symbolize_keys)
         end
 
         subject { service.send(:spread_between_wallets, deposit, destination_wallets) }
@@ -177,7 +177,7 @@ describe WalletService do
           [{ to_address: 'destination-wallet-1',
              status: 'pending',
              amount: deposit.amount,
-             currency_id: currency.id }.as_json].map(&:symbolize_keys)
+             currency_code: currency.id }.as_json].map(&:symbolize_keys)
         end
 
         subject { service.send(:spread_between_wallets, deposit, destination_wallets) }
@@ -205,7 +205,7 @@ describe WalletService do
           [{ to_address: 'destination-wallet-2',
              status: 'pending',
              amount: deposit.amount,
-             currency_id: currency.id }.as_json].map(&:symbolize_keys)
+             currency_code: currency.id }.as_json].map(&:symbolize_keys)
         end
 
         subject { service.send(:spread_between_wallets, deposit, destination_wallets) }
@@ -218,7 +218,7 @@ describe WalletService do
 
       context 'Partial spread between first and second' do
 
-        let(:deposit) { Deposit.new(amount: 10, currency_id: :fake) }
+        let(:deposit) { Deposit.new(amount: 10, currency_code: :fake) }
 
         let(:destination_wallets) do
           [{ address: 'destination-wallet-1',
@@ -235,11 +235,11 @@ describe WalletService do
           [{ to_address: 'destination-wallet-1',
              status: 'pending',
              amount: '5.0',
-             currency_id: currency.id },
+             currency_code: currency.id },
            { to_address: 'destination-wallet-2',
              status: 'pending',
              amount: '5.0',
-             currency_id: currency.id }.as_json].map(&:symbolize_keys)
+             currency_code: currency.id }.as_json].map(&:symbolize_keys)
         end
 
         subject { service.send(:spread_between_wallets, deposit, destination_wallets) }
@@ -266,7 +266,7 @@ describe WalletService do
           [{ to_address: 'destination-wallet-2',
              status: 'pending',
              amount: '1.2',
-             currency_id: currency.id }.as_json].map(&:symbolize_keys)
+             currency_code: currency.id }.as_json].map(&:symbolize_keys)
         end
 
         subject { service.send(:spread_between_wallets, deposit, destination_wallets) }
@@ -294,7 +294,7 @@ describe WalletService do
           [{ to_address: 'destination-wallet-2',
              status: 'pending',
              amount: '1.2',
-             currency_id: currency.id }.as_json].map(&:symbolize_keys)
+             currency_code: currency.id }.as_json].map(&:symbolize_keys)
         end
 
         subject { service.send(:spread_between_wallets, deposit, destination_wallets) }
@@ -333,7 +333,7 @@ describe WalletService do
 
       context 'Partial spread between first and second' do
 
-        let(:deposit) { Deposit.new(amount: 10, currency_id: :fake) }
+        let(:deposit) { Deposit.new(amount: 10, currency_code: :fake) }
 
         let(:destination_wallets) do
           [{ address: 'destination-wallet-1',
@@ -354,11 +354,11 @@ describe WalletService do
           [{ to_address: 'destination-wallet-1',
              status: 'pending',
              amount: '5.0',
-             currency_id: currency.id },
+             currency_code: currency.id },
            { to_address: 'destination-wallet-2',
              status: 'pending',
              amount: '5.0',
-             currency_id: currency.id }.as_json].map(&:symbolize_keys)
+             currency_code: currency.id }.as_json].map(&:symbolize_keys)
         end
 
         subject { service.send(:spread_between_wallets, deposit, destination_wallets) }
@@ -371,7 +371,7 @@ describe WalletService do
 
       context 'Partial spread between first and third' do
 
-        let(:deposit) { Deposit.new(amount: 10, currency_id: :fake) }
+        let(:deposit) { Deposit.new(amount: 10, currency_code: :fake) }
 
         let(:destination_wallets) do
           [{ address: 'destination-wallet-1',
@@ -392,11 +392,11 @@ describe WalletService do
           [{ to_address: 'destination-wallet-1',
              status: 'pending',
              amount: '5.0',
-             currency_id: currency.id },
+             currency_code: currency.id },
            { to_address: 'destination-wallet-3',
              status: 'pending',
              amount: '5.0',
-             currency_id: currency.id }.as_json].map(&:symbolize_keys)
+             currency_code: currency.id }.as_json].map(&:symbolize_keys)
         end
 
         subject { service.send(:spread_between_wallets, deposit, destination_wallets) }
@@ -428,7 +428,7 @@ describe WalletService do
           [{ to_address: 'destination-wallet-3',
              status: 'pending',
              amount: deposit.amount,
-             currency_id: currency.id }.as_json].map(&:symbolize_keys)
+             currency_code: currency.id }.as_json].map(&:symbolize_keys)
         end
 
         subject { service.send(:spread_between_wallets, deposit, destination_wallets) }
@@ -441,7 +441,7 @@ describe WalletService do
 
       context 'Partial spread between first, second and third' do
 
-        let(:deposit) { Deposit.new(amount: 10, currency_id: :fake) }
+        let(:deposit) { Deposit.new(amount: 10, currency_code: :fake) }
 
         let(:destination_wallets) do
           [{ address: 'destination-wallet-1',
@@ -462,15 +462,15 @@ describe WalletService do
           [{ to_address: 'destination-wallet-1',
              status: 'pending',
              amount: '3.0',
-             currency_id: currency.id },
+             currency_code: currency.id },
            { to_address: 'destination-wallet-2',
              status: 'pending',
              amount: '3.0',
-             currency_id: currency.id },
+             currency_code: currency.id },
            { to_address: 'destination-wallet-3',
              status: 'pending',
              amount: '4.0',
-             currency_id: currency.id }.as_json].map(&:symbolize_keys)
+             currency_code: currency.id }.as_json].map(&:symbolize_keys)
         end
 
         subject { service.send(:spread_between_wallets, deposit, destination_wallets) }
@@ -483,7 +483,7 @@ describe WalletService do
 
       context 'Partial spread between first, second and third + skip deposit collection option' do
 
-        let(:deposit) { Deposit.new(amount: 10, currency_id: :fake) }
+        let(:deposit) { Deposit.new(amount: 10, currency_code: :fake) }
 
         let(:destination_wallets) do
           [{ address: 'destination-wallet-1',
@@ -505,15 +505,15 @@ describe WalletService do
           [{ to_address: 'destination-wallet-1',
              status: 'skipped',
              amount: '3.0',
-             currency_id: currency.id },
+             currency_code: currency.id },
            { to_address: 'destination-wallet-2',
              status: 'pending',
              amount: '3.0',
-             currency_id: currency.id },
+             currency_code: currency.id },
            { to_address: 'destination-wallet-3',
              status: 'pending',
              amount: '4.0',
-             currency_id: currency.id}]
+             currency_code: currency.id}]
         end
 
         subject { service.send(:spread_between_wallets, deposit, destination_wallets) }
@@ -547,7 +547,7 @@ describe WalletService do
       [{ to_address: 'fake-cold',
          status: 'pending',
          amount: '2.0',
-         currency_id: currency.id }]
+         currency_code: currency.id }]
     end
 
     subject { service.spread_deposit(deposit) }
@@ -559,7 +559,7 @@ describe WalletService do
       end
 
       it 'spreads everything to cold wallet' do
-        expect(Wallet.active_retired.withdraw.joins(:currencies).where(currencies: { id: deposit.currency_id }).count).to eq 2
+        expect(Wallet.active_retired.withdraw.joins(:currencies).where(currencies: { id: deposit.currency_code }).count).to eq 2
 
         expect(subject.map(&:as_json).map(&:symbolize_keys)).to contain_exactly(*expected_spread)
         expect(subject).to all(be_a(Peatio::Transaction))
@@ -574,7 +574,7 @@ describe WalletService do
       end
 
       it 'skips warm wallet and spreads everything to cold wallet' do
-        expect(Wallet.active_retired.withdraw.joins(:currencies).where(currencies: { id: deposit.currency_id }).count).to eq 3
+        expect(Wallet.active_retired.withdraw.joins(:currencies).where(currencies: { id: deposit.currency_code }).count).to eq 3
 
         expect(subject.map(&:as_json).map(&:symbolize_keys)).to contain_exactly(*expected_spread)
         expect(subject).to all(be_a(Peatio::Transaction))
@@ -597,7 +597,7 @@ describe WalletService do
           [{ to_address: 'fake-hot',
              status: 'pending',
              amount: deposit.amount.to_s,
-             currency_id: currency.id }]
+             currency_code: currency.id }]
         end
 
         before do
@@ -620,7 +620,7 @@ describe WalletService do
           [{ to_address: 'fake-cold',
              status: 'pending',
              amount: deposit.amount.to_s,
-             currency_id: currency.id }]
+             currency_code: currency.id }]
         end
 
         before do
@@ -641,11 +641,11 @@ describe WalletService do
           [{ to_address: 'fake-hot',
              status: 'pending',
              amount: '1.38095238',
-             currency_id: currency.id },
+             currency_code: currency.id },
            { to_address: 'fake-cold',
              status: 'pending',
              amount: '0.61904762',
-             currency_id: currency.id }]
+             currency_code: currency.id }]
         end
 
         before do
@@ -688,14 +688,14 @@ describe WalletService do
       let(:spread_deposit) do
         [Peatio::Transaction.new(to_address: 'fake-cold',
                                  amount: '2.0',
-                                 currency_id: currency.id)]
+                                 currency_code: currency.id)]
       end
 
       let(:transaction) do
         [Peatio::Transaction.new(hash:        '0xfake',
                                 to_address:  cold_wallet.address,
                                 amount:      deposit.amount,
-                                currency_id: currency.id)]
+                                currency_code: currency.id)]
       end
 
       subject { service.collect_deposit!(deposit, spread_deposit) }
@@ -716,21 +716,21 @@ describe WalletService do
       let(:spread_deposit) do
         [Peatio::Transaction.new(to_address: 'fake-hot',
                                 amount: '2.0',
-                                currency_id: currency.id),
+                                currency_code: currency.id),
          Peatio::Transaction.new(to_address: 'fake-hot',
                                  amount: '2.0',
-                                 currency_id: currency.id)]
+                                 currency_code: currency.id)]
       end
 
       let(:transaction) do
         [{ hash:        '0xfake',
            to_address:  hot_wallet.address,
            amount:      deposit.amount,
-           currency_id: currency.id },
+           currency_code: currency.id },
          { hash:        '0xfake1',
            to_address:  cold_wallet.address,
            amount:      deposit.amount,
-           currency_id: currency.id }].map { |t| Peatio::Transaction.new(t)}
+           currency_code: currency.id }].map { |t| Peatio::Transaction.new(t)}
       end
 
       subject { service.collect_deposit!(deposit, spread_deposit) }
@@ -768,7 +768,7 @@ describe WalletService do
     let(:spread_deposit) do
       [Peatio::Transaction.new(to_address: 'fake-cold',
                                amount: '2.0',
-                               currency_id: currency.id,
+                               currency_code: currency.id,
                                options: { external_wallet_id: 1})]
     end
 
@@ -776,7 +776,7 @@ describe WalletService do
       [Peatio::Transaction.new( hash:        '0xfake',
                                 to_address:  deposit.address,
                                 amount:      '0.01',
-                                currency_id: currency.id,
+                                currency_code: currency.id,
                                 options: { gas_limit: 21_000, gas_price: 10_000_000_000 })]
     end
 
@@ -799,7 +799,7 @@ describe WalletService do
     context 'Adapter collect fees for erc20 transaction with parent_id configuration' do
       let!(:eth_blockchain_currency) { create(:blockchain_currency, :eth_network, blockchain_key: 'fake-testnet') }
       let!(:blockchain_currency) { create(:blockchain_currency, :trst_network, blockchain_key: 'fake-testnet') }
-      let(:deposit) { create(:deposit_btc, blockchain_key: 'fake-testnet', amount: amount, currency_id: 'trst') }
+      let(:deposit) { create(:deposit_btc, blockchain_key: 'fake-testnet', amount: amount, currency_code: 'trst') }
 
 
       subject { service.deposit_collection_fees!(deposit, spread_deposit) }
@@ -846,7 +846,7 @@ describe WalletService do
       Peatio::Transaction.new(hash:        '0xfake',
                                to_address:  'user_address',
                                amount:      refund_deposit.amount,
-                               currency_id: currency.id)
+                               currency_code: currency.id)
     end
 
     let!(:refund) { Refund.create(deposit: refund_deposit, address: 'user_address') }

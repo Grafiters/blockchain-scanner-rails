@@ -21,7 +21,7 @@ class OrderAsk < Order
 
   # @deprecated
   def hold_account!
-    Account.lock.find_by!(member_id: member_id, currency_id: ask)
+    Account.lock.find_by!(member_id: member_id, currency_code: ask)
   end
 
   def expect_account
@@ -29,7 +29,7 @@ class OrderAsk < Order
   end
 
   def expect_account!
-    Account.lock.find_by!(member_id: member_id, currency_id: bid)
+    Account.lock.find_by!(member_id: member_id, currency_code: bid)
   end
 
   def avg_price

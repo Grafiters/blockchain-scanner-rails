@@ -3,13 +3,13 @@
 
 module Operations
   class << self
-    def build_account_number(currency_id:, account_code:, member_uid: nil)
-      [currency_id.to_s, account_code.to_s, member_uid].compact.join('-')
+    def build_account_number(currency_code:, account_code:, member_uid: nil)
+      [currency_code.to_s, account_code.to_s, member_uid].compact.join('-')
     end
 
     def split_account_number(account_number:)
-      currency_id, code, member_uid = account_number.split('-')
-      { currency_id: currency_id,
+      currency_code, code, member_uid = account_number.split('-')
+      { currency_code: currency_code,
         code: code,
         member_uid: member_uid }
     end
@@ -55,10 +55,10 @@ module Operations
       expenses = operations.select { |op| op.is_a?(Operations::Expense) }
 
       (assets + expenses).each do |op|
-        balance_sheet[op.currency_id] += op.amount
+        balance_sheet[op.currency_code] += op.amount
       end
       (liabilities + revenues).each do |op|
-        balance_sheet[op.currency_id] -= op.amount
+        balance_sheet[op.currency_code] -= op.amount
       end
 
       balance_sheet.delete_if { |_k, v| v.zero? }.empty?

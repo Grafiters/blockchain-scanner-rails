@@ -3,21 +3,21 @@
 FactoryBot.define do
   factory :blockchain_currency do
 		trait :usd_network do
-			currency_id          { 'usd' }
+			currency_code          { 'usd' }
       withdraw_fee         { 0.1 }
 			status               { 'enabled' }
       options              { {} }
 		end
 
 		trait :eur_network do
-			currency_id          { 'eur' }
+			currency_code          { 'eur' }
       withdraw_fee         { 0.1 }
       status               { 'disabled' }
       options              { {} }
     end
 
     trait :btc_network do
-      currency_id          { 'btc' }
+      currency_code          { 'btc' }
       blockchain_key       { 'btc-testnet' }
       base_factor          { 100_000_000 }
       withdraw_fee         { 0.01 }
@@ -25,7 +25,7 @@ FactoryBot.define do
     end
 
     trait :eth_network do
-			currency_id          { 'eth' }
+			currency_code          { 'eth' }
       blockchain_key       { 'eth-rinkeby' }
       base_factor          { 1_000_000_000_000_000_000 }
       withdraw_fee         { 0.025 }
@@ -35,7 +35,7 @@ FactoryBot.define do
     end
 
     trait :trst_network do
-			currency_id          { 'trst' }
+			currency_code          { 'trst' }
       parent_id            { 'eth' }
       blockchain_key       { 'eth-rinkeby' }
       base_factor          { 1_000_000 }
@@ -47,7 +47,7 @@ FactoryBot.define do
     end
 
     trait :tom_network do
-			currency_id          { 'tom' }
+			currency_code          { 'tom' }
       parent_id            { 'eth' }
       blockchain_key       { 'eth-rinkeby' }
       base_factor          { 1_000_000 }
@@ -59,7 +59,7 @@ FactoryBot.define do
     end
 
     trait :ring_network do
-			currency_id          { 'ring' }
+			currency_code          { 'ring' }
       parent_id            { 'eth' }
       blockchain_key       { 'eth-kovan' }
       base_factor          { 1_000_000 }
@@ -70,7 +70,7 @@ FactoryBot.define do
 
     trait :fake_network do
       blockchain_key      { 'fake-testnet' }
-      currency_id         { 'fake' }
+      currency_code         { 'fake' }
       base_factor         { 1_000_000 }
       withdraw_fee        { 0.02 }
       options             { {} }
@@ -79,7 +79,7 @@ FactoryBot.define do
     trait :xagm_cx_network do
       blockchain_key      { 'eth-rinkeby' }
       parent_id           { 'eth' }
-      currency_id         { 'xagm.cx' }
+      currency_code         { 'xagm.cx' }
       base_factor         { 1_000_000 }
       withdraw_fee        { 0.02 }
       options             { {} }

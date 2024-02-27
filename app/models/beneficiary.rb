@@ -129,7 +129,7 @@ class Beneficiary < ApplicationRecord
 
   def as_json_for_event_api
     { user:        { uid: member.uid, email: member.email },
-      currency:    currency_id,
+      currency:    currency_code,
       name:        name,
       description: description,
       data:        data,
@@ -141,7 +141,7 @@ class Beneficiary < ApplicationRecord
   end
 
   def aml_check!
-    result = Peatio::AML.check!(rid, currency_id, member.uid)
+    result = Peatio::AML.check!(rid, currency_code, member.uid)
     if result.risk_detected
       b.aml_suspicious!
       return nil
@@ -192,7 +192,7 @@ class Beneficiary < ApplicationRecord
 
   def fiat_rid
     return unless currency.fiat?
-    "%s-%s-%08d" % [data.symbolize_keys[:full_name].downcase.split.join('-'), currency_id.downcase, id]
+    "%s-%s-%08d" % [data.symbolize_keys[:full_name].downcase.split.join('-'), currency_code.downcase, id]
   end
 end
 
@@ -203,7 +203,7 @@ end
 #
 #  id             :bigint           not null, primary key
 #  member_id      :bigint           not null
-#  currency_id    :string(10)       not null
+#  currency_code    :string(10)       not null
 #  blockchain_key :string(255)
 #  name           :string(64)       not null
 #  description    :string(255)      default("")
@@ -216,6 +216,6 @@ end
 #
 # Indexes
 #
-#  index_beneficiaries_on_currency_id  (currency_id)
+#  index_beneficiaries_on_currency_code  (currency_code)
 #  index_beneficiaries_on_member_id    (member_id)
 #

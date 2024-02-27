@@ -411,7 +411,7 @@ describe API::V2::Admin::Blockchains, type: :request do
       let!(:blockchain) { Blockchain.find_by(key: 'btc-testnet') }
       let(:service) { BlockchainService.new(blockchain) }
       let!(:currency) { create(:currency, :btc, id: 'fake') }
-      let!(:blockchain_currency) { BlockchainCurrency.create(currency_id: 'fake', blockchain_key: blockchain.key)}
+      let!(:blockchain_currency) { BlockchainCurrency.create(currency_code: 'fake', blockchain_key: blockchain.key)}
       let(:block_number) { 3 }
       let!(:member) { create(:member) }
       let!(:fake_blockchain) { create(:blockchain, 'fake-testnet') }
@@ -427,7 +427,7 @@ describe API::V2::Admin::Blockchains, type: :request do
       end
 
       context 'deposit' do
-        let(:transaction) { Peatio::Transaction.new(hash: 'fake_txid', from_addresses: ['fake_address'], to_address: 'fake_address', amount: 5, block_number: block_number, currency_id: 'fake', txout: 4, status: 'success') }
+        let(:transaction) { Peatio::Transaction.new(hash: 'fake_txid', from_addresses: ['fake_address'], to_address: 'fake_address', amount: 5, block_number: block_number, currency_code: 'fake', txout: 4, status: 'success') }
         let(:expected_block) { Peatio::Block.new(block_number, [transaction]) }
 
         before do
@@ -469,11 +469,11 @@ describe API::V2::Admin::Blockchains, type: :request do
         end
 
         let!(:transaction) do
-          Peatio::Transaction.new(hash: 'fake_hash', to_address: 'fake_address', amount: 1, block_number: block_number, currency_id: currency.id, txout: 10, status: 'pending')
+          Peatio::Transaction.new(hash: 'fake_hash', to_address: 'fake_address', amount: 1, block_number: block_number, currency_code: currency.id, txout: 10, status: 'pending')
         end
 
         let!(:succeed_transaction) do
-          Peatio::Transaction.new(hash: 'fake_hash', to_address: 'fake_address', from_addresses: ['fake_address'], amount: 1, block_number: block_number, currency_id: currency.id, txout: 10, status: 'success')
+          Peatio::Transaction.new(hash: 'fake_hash', to_address: 'fake_address', from_addresses: ['fake_address'], amount: 1, block_number: block_number, currency_code: currency.id, txout: 10, status: 'success')
         end
 
         let(:expected_block) { Peatio::Block.new(block_number, [transaction]) }

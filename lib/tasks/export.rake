@@ -80,15 +80,15 @@ namespace :export do
     errors_count = 0
     begin
       CSV.open(args.export_path, 'w') do |csv|
-        csv << %w[uid currency_id main_balance locked_balance]
+        csv << %w[uid currency_code main_balance locked_balance]
         Account.find_each do |account|
           if account.balance.positive? || account.locked.positive?
-            csv << [account.member.uid, account.currency_id, account.balance, account.locked]
+            csv << [account.member.uid, account.currency_code, account.balance, account.locked]
             count += 1
           end
         end
       rescue StandardError => e
-        message = { error: e.message, uid: account.member.uid, currency_id: account.currency_id }
+        message = { error: e.message, uid: account.member.uid, currency_code: account.currency_code }
         Rails.logger.error message
         errors_count += 1
       end

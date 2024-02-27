@@ -36,8 +36,8 @@ module Ripple
       raise Peatio::Blockchain::ClientError, e
     end
 
-    def load_balance_of_address!(address, currency_id)
-      currency = settings[:currencies].find { |c| c[:id] == currency_id.to_s }
+    def load_balance_of_address!(address, currency_code)
+      currency = settings[:currencies].find { |c| c[:id] == currency_code.to_s }
       raise UndefinedCurrencyError unless currency
 
       client.rest_api(:post,'/get-balance',{address: normalize_address(address)})
@@ -61,7 +61,7 @@ module Ripple
                            txout: tx_hash.dig('metaData','TransactionIndex'),
                            to_address: address,
                            status: check_status(tx_hash),
-                           currency_id: currency[:id],
+                           currency_code: currency[:id],
                            amount: convert_from_base_unit(tx_hash.dig('metaData', 'delivered_amount'), currency) }
       end
     end

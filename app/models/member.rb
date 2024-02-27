@@ -45,14 +45,14 @@ class Member < ApplicationRecord
 
   def get_account(model_or_id_or_code)
     if model_or_id_or_code.is_a?(String) || model_or_id_or_code.is_a?(Symbol)
-      accounts.find_or_create_by(currency_id: model_or_id_or_code)
+      accounts.find_or_create_by(currency_code: model_or_id_or_code)
     elsif model_or_id_or_code.is_a?(Currency)
       accounts.find_or_create_by(currency: model_or_id_or_code)
     end
   # Thread Safe Account creation
   rescue ActiveRecord::RecordNotUnique
     if model_or_id_or_code.is_a?(String) || model_or_id_or_code.is_a?(Symbol)
-      accounts.find_by(currency_id: model_or_id_or_code)
+      accounts.find_by(currency_code: model_or_id_or_code)
     elsif model_or_id_or_code.is_a?(Currency)
       accounts.find_by(currency: model_or_id_or_code)
     end

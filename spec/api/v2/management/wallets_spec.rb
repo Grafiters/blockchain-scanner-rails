@@ -26,7 +26,7 @@ describe API::V2::Management::Wallets, type: :request do
 
       result = JSON.parse(response.body)
       expect(result.fetch('id')).to eq wallet.id
-      expect(result.fetch('currencies')).to eq wallet.currency_ids
+      expect(result.fetch('currencies')).to eq wallet.currency_codes
       expect(result.fetch('address')).to eq wallet.address
     end
 
@@ -214,7 +214,7 @@ describe API::V2::Management::Wallets, type: :request do
       expect(response.body).to match(/management.wallet.invalid_kind/i)
     end
 
-    it 'validate currency_id' do
+    it 'validate currency_code' do
       data.merge!(id: 1, name: 'Test', kind: 'deposit', address: 'blank', blockchain_key: 'btc-testnet', gateway: 'geth', settings: { uri: 'http://127.0.0.1:18332'}, currencies: 'test')
       request
 
@@ -313,7 +313,7 @@ describe API::V2::Management::Wallets, type: :request do
       expect(response.body).to match(/management.wallet.invalid_kind/i)
     end
 
-    it 'validate currency_id' do
+    it 'validate currency_code' do
       data.merge!(id: Wallet.first.id, currencies: 'test ')
       request
 

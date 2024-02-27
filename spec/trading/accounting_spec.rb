@@ -32,9 +32,9 @@ describe 'Accounting' do
        member:        buyer
   end
 
-  let(:deposit_btc) { create(:deposit_btc, member: seller, amount: order_ask.locked, currency_id: :btc) }
+  let(:deposit_btc) { create(:deposit_btc, member: seller, amount: order_ask.locked, currency_code: :btc) }
 
-  let(:deposit_usd) { create(:deposit_usd, member: buyer, amount: order_bid.locked, currency_id: :usd) }
+  let(:deposit_usd) { create(:deposit_usd, member: buyer, amount: order_bid.locked, currency_code: :usd) }
 
   let :executor do
     ask = Matching::LimitOrder.new(order_ask.to_matching_attributes)
@@ -84,7 +84,7 @@ describe 'Accounting' do
 
   context 'withdraws' do
     before do
-      BlockchainCurrency.find_by(currency_id: 'btc').update(auto_update_fees_enabled: false, withdraw_fee: 0.01)
+      BlockchainCurrency.find_by(currency_code: 'btc').update(auto_update_fees_enabled: false, withdraw_fee: 0.01)
     end
 
     let(:btc_withdraw) { create(:btc_withdraw, sum: 1000.to_d, member: buyer ) }

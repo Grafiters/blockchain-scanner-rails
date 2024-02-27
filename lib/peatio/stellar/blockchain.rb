@@ -37,8 +37,8 @@ module Stellar
       raise Peatio::Blockchain::ClientError, e
     end
 
-    def load_balance_of_address!(address, currency_id)
-      currency = settings[:currencies].find { |c| c[:id] == currency_id.to_s }
+    def load_balance_of_address!(address, currency_code)
+      currency = settings[:currencies].find { |c| c[:id] == currency_code.to_s }
       raise UndefinedCurrencyError unless currency
       client.rest_api(:post,'/get-balance',{address: normalize_address(address)})
                       .fetch('balance')
@@ -60,7 +60,7 @@ module Stellar
                            txout: 1,
                            to_address: address,
                            status: 'success',
-                           currency_id: currency[:id],
+                           currency_code: currency[:id],
                            amount: convert_from_base_unit(tx_hash.dig('amount'), currency) }
       end
     end

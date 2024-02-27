@@ -12,7 +12,7 @@ class Transaction < ApplicationRecord
   # == Relationships ========================================================
 
   belongs_to :reference, polymorphic: true
-  belongs_to :currency, foreign_key: :currency_id
+  belongs_to :currency, foreign_key: :currency_code
 
   # == Validations ==========================================================
 
@@ -43,7 +43,7 @@ end
 # Table name: transactions
 #
 #  id             :bigint           not null, primary key
-#  currency_id    :string(255)      not null
+#  currency_code    :string(255)      not null
 #  reference_type :string(255)
 #  reference_id   :bigint
 #  txid           :string(255)
@@ -59,8 +59,8 @@ end
 #
 # Indexes
 #
-#  index_transactions_on_currency_id                      (currency_id)
-#  index_transactions_on_currency_id_and_txid             (currency_id,txid) UNIQUE
+#  index_transactions_on_currency_code                      (currency_code)
+#  index_transactions_on_currency_code_and_txid             (currency_code,txid) UNIQUE
 #  index_transactions_on_reference_type_and_reference_id  (reference_type,reference_id)
 #  index_transactions_on_txid                             (txid)
 #

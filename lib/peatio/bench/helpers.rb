@@ -4,7 +4,7 @@ module Bench
   module Helpers
     def become_billionaire(member)
       @currencies.each do |c|
-        Factories.create(:deposit, member_id: member.id, currency_id: c.id)
+        Factories.create(:deposit, member_id: member.id, currency_code: c.id)
       end
     end
   end

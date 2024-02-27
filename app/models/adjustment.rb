@@ -33,7 +33,7 @@ class Adjustment < ApplicationRecord
 
   validates :validator, presence: { unless: :pending? }
   validates :category, inclusion: { in: CATEGORIES }
-  validates :currency_id, inclusion: { in: ->(_) { Currency.codes } }
+  validates :currency_code, inclusion: { in: ->(_) { Currency.codes } }
   validate do
     errors.add(:base, 'invalidates accounting equation') unless Operations.validate_accounting_equation(fetch_operations)
   end
@@ -109,7 +109,7 @@ class Adjustment < ApplicationRecord
 
   def prebuild_operations
     account_number_hash = Operations.split_account_number(account_number: receiving_account_number)
-    currency_id = account_number_hash[:currency_id]
+    currency_code = account_number_hash[:currency_code]
     code = account_number_hash[:code]
     member = Member.find_by(uid: account_number_hash[:member_uid]) if account_number_hash.key?(:member_uid)
 
@@ -118,7 +118,7 @@ class Adjustment < ApplicationRecord
     klass = Operations.klass_for(code: code)
 
     params = {
-      currency_id: currency_id.downcase,
+      currency_code: currency_code.downcase,
       code: asset_account_code,
       debit: debit.to_d,
       credit: credit.to_d,
@@ -148,7 +148,7 @@ end
 #  amount                   :decimal(32, 16)  not null
 #  asset_account_code       :integer          unsigned, not null
 #  receiving_account_number :string(64)       not null
-#  currency_id              :string(255)      not null
+#  currency_code              :string(255)      not null
 #  category                 :integer          not null
 #  state                    :integer          not null
 #  created_at               :datetime         not null
@@ -156,6 +156,6 @@ end
 #
 # Indexes
 #
-#  index_adjustments_on_currency_id            (currency_id)
-#  index_adjustments_on_currency_id_and_state  (currency_id,state)
+#  index_adjustments_on_currency_code            (currency_code)
+#  index_adjustments_on_currency_code_and_state  (currency_code,state)
 #

@@ -6,7 +6,7 @@ FactoryBot.define do
 
     trait :eth_deposit do
       after(:create) do |w|
-        CurrencyWallet.create(currency_id: 'eth', wallet_id: w.id)
+        CurrencyWallet.create(currency_code: 'eth', wallet_id: w.id)
       end
       blockchain_key     { 'eth-rinkeby' }
       name               { 'Ethereum Deposit Wallet' }
@@ -21,7 +21,7 @@ FactoryBot.define do
 
     trait :eth_opendax_cloud_deposit do
       after(:create) do |w|
-        CurrencyWallet.create(currency_id: 'eth', wallet_id: w.id)
+        CurrencyWallet.create(currency_code: 'eth', wallet_id: w.id)
       end
       blockchain_key     { 'eth-rinkeby' }
       name               { 'Ethereum Deposit Opendax Cloud Wallet' }
@@ -36,7 +36,7 @@ FactoryBot.define do
 
     trait :eth_hot do
       after(:create) do |w|
-        CurrencyWallet.create(currency_id: 'eth', wallet_id: w.id)
+        CurrencyWallet.create(currency_code: 'eth', wallet_id: w.id)
       end
       blockchain_key     { 'eth-rinkeby' }
       name               { 'Ethereum Hot Wallet' }
@@ -51,7 +51,7 @@ FactoryBot.define do
 
     trait :eth_opendax_cloud_hot do
       after(:create) do |w|
-        CurrencyWallet.create(currency_id: 'eth', wallet_id: w.id)
+        CurrencyWallet.create(currency_code: 'eth', wallet_id: w.id)
       end
       blockchain_key     { 'eth-rinkeby' }
       name               { 'Ethereum Hot Opendax Cloud Wallet' }
@@ -66,7 +66,7 @@ FactoryBot.define do
 
     trait :eth_warm do
       after(:create) do |w|
-        CurrencyWallet.create(currency_id: 'eth', wallet_id: w.id)
+        CurrencyWallet.create(currency_code: 'eth', wallet_id: w.id)
       end
       blockchain_key     { 'eth-rinkeby' }
       name               { 'Ethereum Warm Wallet' }
@@ -81,7 +81,7 @@ FactoryBot.define do
 
     trait :eth_cold do
       after(:create) do |w|
-        CurrencyWallet.create(currency_id: 'eth', wallet_id: w.id)
+        CurrencyWallet.create(currency_code: 'eth', wallet_id: w.id)
       end
       blockchain_key     { 'eth-rinkeby' }
       name               { 'Ethereum Cold Wallet' }
@@ -96,7 +96,7 @@ FactoryBot.define do
 
     trait :eth_fee do
       after(:create) do |w|
-        CurrencyWallet.create(currency_id: 'eth', wallet_id: w.id)
+        CurrencyWallet.create(currency_code: 'eth', wallet_id: w.id)
       end
       blockchain_key     { 'eth-rinkeby' }
       name               { 'Ethereum Fee Wallet' }
@@ -111,7 +111,7 @@ FactoryBot.define do
 
     trait :trst_deposit do
       after(:create) do |w|
-        CurrencyWallet.create(currency_id: 'trst', wallet_id: w.id)
+        CurrencyWallet.create(currency_code: 'trst', wallet_id: w.id)
       end
       blockchain_key     { 'eth-rinkeby' }
       name               { 'Trust Coin Deposit Wallet' }
@@ -126,7 +126,7 @@ FactoryBot.define do
 
     trait :trst_hot do
       after(:create) do |w|
-        CurrencyWallet.create(currency_id: 'trst', wallet_id: w.id)
+        CurrencyWallet.create(currency_code: 'trst', wallet_id: w.id)
       end
       blockchain_key     { 'eth-rinkeby' }
       name               { 'Trust Coin Hot Wallet' }
@@ -141,7 +141,7 @@ FactoryBot.define do
 
     trait :btc_deposit do
       after(:create) do |w|
-        CurrencyWallet.create(currency_id: 'btc', wallet_id: w.id)
+        CurrencyWallet.create(currency_code: 'btc', wallet_id: w.id)
       end
       blockchain_key     { 'btc-testnet' }
       name               { 'Bitcoin Deposit Wallet' }
@@ -156,7 +156,7 @@ FactoryBot.define do
 
     trait :btc_hot do
       after(:create) do |w|
-        CurrencyWallet.create(currency_id: 'btc', wallet_id: w.id)
+        CurrencyWallet.create(currency_code: 'btc', wallet_id: w.id)
       end
       blockchain_key     { 'btc-testnet' }
       name               { 'Bitcoin Hot Wallet' }
@@ -171,7 +171,7 @@ FactoryBot.define do
 
     trait :fake_deposit do
       after(:create) do |w|
-        CurrencyWallet.create(currency_id: 'fake', wallet_id: w.id)
+        CurrencyWallet.create(currency_code: 'fake', wallet_id: w.id)
       end
       blockchain_key    { 'fake-testnet' }
       name              { 'Fake Currency Deposit Wallet' }
@@ -185,7 +185,7 @@ FactoryBot.define do
 
     trait :fake_hot do
       after(:create) do |w|
-        CurrencyWallet.create(currency_id: 'fake', wallet_id: w.id)
+        CurrencyWallet.create(currency_code: 'fake', wallet_id: w.id)
       end
       blockchain_key    { 'fake-testnet' }
       name              { 'Fake Currency Hot Wallet' }
@@ -199,7 +199,7 @@ FactoryBot.define do
 
     trait :fake_warm do
       after(:create) do |w|
-        CurrencyWallet.create(currency_id: 'fake', wallet_id: w.id)
+        CurrencyWallet.create(currency_code: 'fake', wallet_id: w.id)
       end
       blockchain_key    { 'fake-testnet' }
       name              { 'Fake Currency Warm Wallet' }
@@ -213,7 +213,7 @@ FactoryBot.define do
 
     trait :fake_cold do
       after(:create) do |w|
-        CurrencyWallet.create(currency_id: 'fake', wallet_id: w.id)
+        CurrencyWallet.create(currency_code: 'fake', wallet_id: w.id)
       end
       blockchain_key    { 'fake-testnet' }
       name              { 'Fake Currency Cold Wallet' }
@@ -227,7 +227,7 @@ FactoryBot.define do
 
     trait :fake_fee do
       after(:create) do |w|
-        CurrencyWallet.create(currency_id: 'fake', wallet_id: w.id)
+        CurrencyWallet.create(currency_code: 'fake', wallet_id: w.id)
       end
       blockchain_key     { 'fake-testnet' }
       name               { 'Fake Currency Fee Wallet' }

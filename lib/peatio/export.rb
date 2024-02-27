@@ -12,7 +12,7 @@ module Peatio
                 'data' => m.try(:data),
                 'key' => m.try(:key),
                 'secret' => m.try(:secret),
-                'currency_ids' => m.try(:currency_ids))
+                'currency_codes' => m.try(:currency_codes))
       end.map { |r| r.transform_values! { |v| v.is_a?(BigDecimal) ? v.to_f : v } }.map(&:compact)
     end
 
@@ -21,7 +21,7 @@ module Peatio
     end
 
     def export_blockchains
-      export('Blockchain').map { |b| b.except('id', 'currency_ids') }
+      export('Blockchain').map { |b| b.except('id', 'currency_codes') }
     end
 
     def export_currencies

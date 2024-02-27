@@ -89,7 +89,7 @@ module Workers
               if @runner_pool[b.key].blank?
                 logger.warn { "Starting the new runner for #{b.key} (no runner found in pool)" }
                 @runner_pool[b.key] = Runner.new(b, max_ts).tap(&:start)
-              elsif @runner_pool[b.key].ts < max_ts
+              elsif @runner_pool[b.key].ts <= max_ts
                 logger.warn { "Recreating a runner for #{b.key} (#{Time.at(@runner_pool[b.key].ts)} < #{Time.at(max_ts)})" }
                 @runner_pool.delete(b.key).stop
                 @runner_pool[b.key] = Runner.new(b, max_ts).tap(&:start)

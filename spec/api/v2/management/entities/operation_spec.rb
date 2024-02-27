@@ -10,7 +10,7 @@ describe API::V2::Management::Entities::Operation do
 
       it do
         expect(subject.code).to eq record.code
-        expect(subject.currency).to eq record.currency_id
+        expect(subject.currency).to eq record.currency_code
         expect(subject.created_at).to eq record.created_at.iso8601
       end
 
@@ -39,7 +39,7 @@ describe API::V2::Management::Entities::Operation do
 
       it do
         expect(subject.code).to eq record.code
-        expect(subject.currency).to eq record.currency_id
+        expect(subject.currency).to eq record.currency_code
         expect(subject.uid).to eq record.member.uid
         expect(subject.created_at).to eq record.created_at.iso8601
       end

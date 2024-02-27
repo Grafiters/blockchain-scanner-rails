@@ -10,7 +10,7 @@ Also you can do an adjustment for admin account but after airdrop make sure to d
 
 2. Prepare csv file for airdrop with the following format
 
-|      uid      | currency_id | amount |
+|      uid      | currency_code | amount |
 |---------------|-------------|--------|
 | ID1000003838  | usdt        |  100   |
 | ID1000003839  | usdt        |  100   |

@@ -319,7 +319,7 @@ describe API::V2::Account::Withdraws, type: :request do
     end
 
     context 'disabled withdrawal for currency' do
-      let(:blockchain_currency) { BlockchainCurrency.find_by(currency_id: 'usd') }
+      let(:blockchain_currency) { BlockchainCurrency.find_by(currency_code: 'usd') }
 
       before do
         blockchain_currency.update!(withdrawal_enabled: false)

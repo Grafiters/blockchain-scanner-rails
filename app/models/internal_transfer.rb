@@ -64,7 +64,7 @@ end
 # Table name: internal_transfers
 #
 #  id          :bigint           not null, primary key
-#  currency_id :string(255)      not null
+#  currency_code :string(255)      not null
 #  amount      :decimal(32, 16)  not null
 #  sender_id   :bigint           not null
 #  receiver_id :bigint           not null

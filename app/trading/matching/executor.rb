@@ -89,9 +89,9 @@ module Matching
 
         accounts_table = Account
           .lock
-          .select(:member_id, :currency_id, :balance, :locked)
-          .where(member_id: [@maker_order.member_id, @taker_order .member_id].uniq, currency_id: [@market.base_unit, @market.quote_unit])
-          .each_with_object({}) { |record, memo| memo["#{record.currency_id}:#{record.member_id}"] = record }
+          .select(:member_id, :currency_code, :balance, :locked)
+          .where(member_id: [@maker_order.member_id, @taker_order .member_id].uniq, currency_code: [@market.base_unit, @market.quote_unit])
+          .each_with_object({}) { |record, memo| memo["#{record.currency_code}:#{record.member_id}"] = record }
 
         @trade = Trade.new \
           maker_order:   @maker_order,

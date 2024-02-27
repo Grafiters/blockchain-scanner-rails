@@ -299,7 +299,7 @@ class Trade < ApplicationRecord
       kind: :main,
       member_id: sell_order.member_id
     )
-    Account.find_by(currency_id: sell_order.income_currency.id, member_id: sell_order.member_id).sub_funds(seller_income)
+    Account.find_by(currency_code: sell_order.income_currency.id, member_id: sell_order.member_id).sub_funds(seller_income)
 
     # Credit main fiat/crypto Liability account for member who created ask.
     Operations::Liability.credit!(
@@ -309,7 +309,7 @@ class Trade < ApplicationRecord
       kind: :main,
       member_id: sell_order.member_id
     )
-    Account.find_by(currency_id: sell_order.outcome_currency.id, member_id: sell_order.member_id).plus_funds(seller_outcome)
+    Account.find_by(currency_code: sell_order.outcome_currency.id, member_id: sell_order.member_id).plus_funds(seller_outcome)
   end
 
   def revert_buy_side!
@@ -325,7 +325,7 @@ class Trade < ApplicationRecord
       kind: :main,
       member_id: buy_order.member_id
     )
-    Account.find_by(currency_id: buy_order.income_currency.id, member_id: buy_order.member_id).sub_funds(buyer_income)
+    Account.find_by(currency_code: buy_order.income_currency.id, member_id: buy_order.member_id).sub_funds(buyer_income)
 
     # Credit main fiat/crypto Liability account for member who created bid.
     Operations::Liability.credit!(
@@ -335,7 +335,7 @@ class Trade < ApplicationRecord
       kind: :main,
       member_id: buy_order.member_id
     )
-    Account.find_by(currency_id: buy_order.outcome_currency.id, member_id: buy_order.member_id).plus_funds(buyer_outcome)
+    Account.find_by(currency_code: buy_order.outcome_currency.id, member_id: buy_order.member_id).plus_funds(buyer_outcome)
   end
 
   def revert_fees!

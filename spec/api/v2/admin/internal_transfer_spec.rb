@@ -58,7 +58,7 @@ describe API::V2::Admin::InternalTransfers, type: :request do
       it 'by currency' do
         api_get endpoint, token: token, params: { currency: 'btc' }
 
-        expect(response_body.count).to eq(InternalTransfer.where(currency_id: 'btc').count)
+        expect(response_body.count).to eq(InternalTransfer.where(currency_code: 'btc').count)
       end
 
       it 'returns orders for specific sender by uid' do

@@ -33,7 +33,7 @@ describe OWHDWallet::WalletETH do
     end
 
     let(:eth) do
-      BlockchainCurrency.find_by(currency_id: :eth)
+      BlockchainCurrency.find_by(currency_code: :eth)
     end
 
     let(:settings) do
@@ -72,7 +72,7 @@ describe OWHDWallet::WalletETH do
 
     context 'erc-20' do
       let(:trst) do
-        BlockchainCurrency.find_by(currency_id: :trst)
+        BlockchainCurrency.find_by(currency_code: :trst)
       end
 
       let(:settings) do
@@ -120,16 +120,16 @@ describe OWHDWallet::WalletETH do
     let(:fee_wallet) { Wallet.joins(:currencies).find_by(currencies: { id: :eth }, kind: :fee) }
 
     let(:trst) do
-      BlockchainCurrency.find_by(currency_id: :trst)
+      BlockchainCurrency.find_by(currency_code: :trst)
     end
 
     let(:spread_deposit) do
       [{ to_address: 'fake-hot',
          amount: '2.0',
-         currency_id: trst.id },
+         currency_code: trst.id },
        { to_address: 'fake-hot',
          amount: '2.0',
-         currency_id: trst.id }]
+         currency_code: trst.id }]
     end
 
     let(:settings) do
@@ -180,7 +180,7 @@ describe OWHDWallet::WalletETH do
 
       result = wallet.prepare_deposit_collection!(transaction, spread_deposit, trst.to_blockchain_api_settings)
       expect(result.first.as_json.symbolize_keys).to eq(amount: '1.1',
-                                                        currency_id: 'eth',
+                                                        currency_code: 'eth',
                                                         to_address: '0x6d6cabaa7232d7f45b143b445114f7e92350a2aa',
                                                         hash: '0xab6ada9608f4cebf799ee8be20fe3fb84b0d08efcdb0d962df45d6fce70cb017',
                                                         status: 'pending',
@@ -204,15 +204,15 @@ describe OWHDWallet::WalletETH do
     end
 
     let(:eth) do
-      BlockchainCurrency.find_by(currency_id: :eth)
+      BlockchainCurrency.find_by(currency_code: :eth)
     end
 
     let(:trst) do
-      BlockchainCurrency.find_by(currency_id: :trst)
+      BlockchainCurrency.find_by(currency_code: :trst)
     end
 
     let(:btc) do
-      BlockchainCurrency.find_by(currency_id: :btc)
+      BlockchainCurrency.find_by(currency_code: :btc)
     end
 
     let(:deposit_wallet_eth) { Wallet.joins(:currencies).find_by(currencies: { id: :eth }, kind: :deposit) }
@@ -339,11 +339,11 @@ describe OWHDWallet::WalletETH do
     end
 
     let(:eth) do
-      BlockchainCurrency.find_by(currency_id: :eth)
+      BlockchainCurrency.find_by(currency_code: :eth)
     end
 
     let(:trst) do
-      BlockchainCurrency.find_by(currency_id: :trst)
+      BlockchainCurrency.find_by(currency_code: :trst)
     end
 
     context 'eth load_balance' do

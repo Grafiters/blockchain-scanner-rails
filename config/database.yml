@@ -11,7 +11,7 @@ default: &default
 
 development:
   <<: *default
-  database: exchange_production
+  database: <%= ENV.fetch('DATABASE_NAME', 'exchange_production') %>
 
 test:
   <<: *default

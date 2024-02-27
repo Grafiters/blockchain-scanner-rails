@@ -61,7 +61,7 @@ module Zilliqa
                       to_address:     to_address,
                       txout:          1,
                       block_number:   height,
-                      currency_id:    currency.fetch(:id),
+                      currency_code:    currency.fetch(:id),
                       status:         'success')
           end
         end
@@ -84,8 +84,8 @@ module Zilliqa
       raise Peatio::Blockchain::ClientError, e
     end
 
-    def load_balance_of_address!(address, currency_id)
-      currency = settings[:currencies].find { |c| c[:id] == currency_id.to_s }
+    def load_balance_of_address!(address, currency_code)
+      currency = settings[:currencies].find { |c| c[:id] == currency_code.to_s }
       raise UndefinedCurrencyError unless currency
       response = client.rest_api(:post, '/get-balance', {address:address,visible: true })
       balance = response.fetch('balance',0)

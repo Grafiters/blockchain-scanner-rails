@@ -107,8 +107,8 @@ module Ether
         raise Ether::Client::Error, \
               "Withdrawal from #{@wallet.fetch(:address)} to #{transaction.to_address} failed."
       end
-      # Make sure that we return currency_id
-      transaction.currency_id = 'eth' if transaction.currency_id.blank?
+      # Make sure that we return currency_code
+      transaction.currency_code = 'eth' if transaction.currency_code.blank?
       transaction.amount = amount.to_s.length >= @currency.fetch(:base_factor).to_s.length ? convert_from_base_unit(amount) : amount
       transaction.hash = hash
       transaction.options = options

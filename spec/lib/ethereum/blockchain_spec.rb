@@ -5,19 +5,19 @@ describe Ethereum::Eth::Blockchain do
   end
 
   let(:eth) do
-    BlockchainCurrency.find_by(currency_id: :eth)
+    BlockchainCurrency.find_by(currency_code: :eth)
   end
 
   let(:trst) do
-    BlockchainCurrency.find_by(currency_id: :trst)
+    BlockchainCurrency.find_by(currency_code: :trst)
   end
 
   let(:ring) do
-    BlockchainCurrency.find_by(currency_id: :ring)
+    BlockchainCurrency.find_by(currency_code: :ring)
   end
 
   let!(:tom) do
-    BlockchainCurrency.find_by(currency_id: :tom)
+    BlockchainCurrency.find_by(currency_code: :tom)
   end
 
   let!(:address_1) { create(:whitelisted_smart_contract, :address_1, address: '0x6c0b51971650d28821ce30b15b02b9826a20b129') }
@@ -186,7 +186,7 @@ describe Ethereum::Eth::Blockchain do
           :txout=>26,
           :block_number=>2621840,
           :status=>"pending",
-          :currency_id=>eth.currency_id}]
+          :currency_code=>eth.currency_code}]
       end
 
       subject { blockchain.fetch_block!(start_block) }
@@ -212,7 +212,7 @@ describe Ethereum::Eth::Blockchain do
           :txout=>13,
           :block_number=>2621842,
           :status=>"pending",
-          :currency_id=>eth.currency_id},
+          :currency_code=>eth.currency_code},
          {:hash=>"0x826555325cec51c4d39b327e563ce3e8ee87e27be5911383f528724a62f0da5d",
           :amount=>2.to_d,
           :to_address=>"0xe3cb6897d83691a8eb8458140a1941ce1d6e6daa",
@@ -220,7 +220,7 @@ describe Ethereum::Eth::Blockchain do
           :txout=>8,
           :block_number=>2621842,
           :status=>"success",
-          :currency_id=>trst.currency_id},
+          :currency_code=>trst.currency_code},
          {:hash=>"0x826555325cec51c4d39b327e563ce3e8ee87e27be5911383f528724a62f0da5d",
           :amount=>2.to_d,
           :to_address=>"0x4b6a630ff1f66604d31952bdce2e4950efc99821",
@@ -228,7 +228,7 @@ describe Ethereum::Eth::Blockchain do
           :txout=>9,
           :block_number=>2621842,
           :status=>"success",
-          :currency_id=>ring.currency_id},
+          :currency_code=>ring.currency_code},
          {:hash=>"0xd5cc0d1d5dd35f4b57572b440fb4ef39a4ab8035657a21692d1871353bfbceea",
           :amount=>2.to_d,
           :to_address=>"0xe3cb6897d83691a8eb8458140a1941ce1d6e6dac",
@@ -236,7 +236,7 @@ describe Ethereum::Eth::Blockchain do
           :txout=>9,
           :block_number=>2621842,
           :status=>"failed",
-          :currency_id=>trst.currency_id},
+          :currency_code=>trst.currency_code},
          {:hash=>"0x5ab0f1a1f29da4e4ddb021c28e2383ec6bde03fb04a8e25c49a1ae5ae34b6f58",
           :amount=>0.039082.to_d,
           :to_address=>"0x40968978cf4e6b53ca161c5ba6918a926a8d5ac2",
@@ -244,12 +244,12 @@ describe Ethereum::Eth::Blockchain do
           :txout=>131,
           :block_number=>8292243,
           :status=>"pending",
-          :currency_id=>eth.currency_id},
+          :currency_code=>eth.currency_code},
          {:hash=>"0xeb92797eb91f53ce7bb68abaf3fd3198980d971dd42f9fcb6eb1272ef3ef2a0e",
           :to_address=>"0xbbd602bb278edff65cbc967b9b62095ad5be23a3",
           :from_addresses=>["0x095273adb73e55a8710e448c49eaee16fe115527"],
           :amount=>2436832050000.to_d,
-          :currency_id=>tom.currency_id,
+          :currency_code=>tom.currency_code,
           :block_number=>11684206,
           :status=>"success",
           :txout=>3}
@@ -295,7 +295,7 @@ describe Ethereum::Eth::Blockchain do
             :txout=>39,
             :block_number=>2621840,
             :status=>"success",
-            :currency_id=>trst.currency_id
+            :currency_code=>trst.currency_code
           },
           {
             :hash=>"0xb60e22c6eed3dc8cd7bc5c7e38c50aa355c55debddbff5c1c4837b995b8ee96d",
@@ -305,7 +305,7 @@ describe Ethereum::Eth::Blockchain do
             :txout=>26,
             :block_number=>2621840,
             :status=>"pending",
-            :currency_id=>eth.currency_id
+            :currency_code=>eth.currency_code
           }
         ]
       end
@@ -332,7 +332,7 @@ describe Ethereum::Eth::Blockchain do
           :txout=>26,
           :block_number=>2621840,
           :status=>"pending",
-          :currency_id=>eth.currency_id}]
+          :currency_code=>eth.currency_code}]
       end
 
       subject { blockchain.fetch_block!(start_block) }
@@ -363,7 +363,7 @@ describe Ethereum::Eth::Blockchain do
           :txout=>26,
           :amount=>1.to_d,
           :block_number=>2621840,
-          :currency_id=>eth.currency_id,
+          :currency_code=>eth.currency_code,
           :status=>'pending'}]
       end
 
@@ -387,7 +387,7 @@ describe Ethereum::Eth::Blockchain do
           :to_address=>"0xe3cb6897d83691a8eb8458140a1941ce1d6e6daa",
           :from_addresses=>["0x4de22dd63afb3bec965dbb734c15fba58800c923"],
           :amount=>2.to_d,
-          :currency_id=>trst.currency_id,
+          :currency_code=>trst.currency_code,
           :block_number=>2621842,
           :status=>"success",
           :txout=>8},
@@ -395,7 +395,7 @@ describe Ethereum::Eth::Blockchain do
           :to_address=>"0x4b6a630ff1f66604d31952bdce2e4950efc99821",
           :from_addresses=>["0x4de22dd63afb3bec965dbb734c15fba58800c923"],
           :amount=>2.to_d,
-          :currency_id=>ring.currency_id,
+          :currency_code=>ring.currency_code,
           :block_number=>2621842,
           :status=>"success",
           :txout=>9}]
@@ -438,7 +438,7 @@ describe Ethereum::Eth::Blockchain do
           :to_address=>"0xbbd602bb278edff65cbc967b9b62095ad5be23a3",
           :from_addresses=>["0x095273adb73e55a8710e448c49eaee16fe115527"],
           :amount=>2436832050000.to_d,
-          :currency_id=>tom.currency_id,
+          :currency_code=>tom.currency_code,
           :block_number=>11684206,
           :status=>"success",
           :txout=>3}

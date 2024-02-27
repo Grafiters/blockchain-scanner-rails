@@ -42,7 +42,7 @@ describe API::V2::Public::Webhooks, type: :request do
         context 'transactions exist' do
           let(:transaction) do
             Peatio::Transaction.new(
-              currency_id: :eth,
+              currency_code: :eth,
               hash: '0xa049b0202ba078caa723c6b59594247b0c9f33e24878950f8537cedff9ea20ac',
               amount: 0.5,
               to_address: '0x1ef338196bd0207ba4852ba7a6847eed59331b84',
@@ -68,7 +68,7 @@ describe API::V2::Public::Webhooks, type: :request do
             context 'there is payment address' do
               before do
                 # disable first deposit wallet for eth to have ability to use opendax cloud deposit wallet
-                Wallet.deposit_wallets(transaction.currency_id)[0].update(status: 'disabled') if Wallet.deposit_wallets(transaction.currency_id)[0].gateway == 'geth'
+                Wallet.deposit_wallets(transaction.currency_code)[0].update(status: 'disabled') if Wallet.deposit_wallets(transaction.currency_code)[0].gateway == 'geth'
                 PaymentAddress.create(member: member, wallet: deposit_wallet, address: '0x1ef338196bd0207ba4852ba7a6847eed59331b84')
               end
 
@@ -84,7 +84,7 @@ describe API::V2::Public::Webhooks, type: :request do
             context 'tid options' do
               let(:transaction) do
                 Peatio::Transaction.new(
-                  currency_id: :eth,
+                  currency_code: :eth,
                   hash: '0xa049b0202ba078caa723c6b59594247b0c9f33e24878950f8537cedff9ea20ac',
                   amount: 0.5,
                   to_address: '0x1ef338196bd0207ba4852ba7a6847eed59331b84',
@@ -99,7 +99,7 @@ describe API::V2::Public::Webhooks, type: :request do
 
               before do
                 # disable first deposit wallet for eth to have ability to use opendax cloud deposit wallet
-                Wallet.deposit_wallets(transaction.currency_id)[0].update(status: 'disabled') if Wallet.deposit_wallets(transaction.currency_id)[0].gateway == 'geth'
+                Wallet.deposit_wallets(transaction.currency_code)[0].update(status: 'disabled') if Wallet.deposit_wallets(transaction.currency_code)[0].gateway == 'geth'
                 PaymentAddress.create(member: member, wallet: deposit_wallet, address: '0x1ef338196bd0207ba4852ba7a6847eed59331b84')
                 WalletService.any_instance.stubs(:trigger_webhook_event).returns([transaction])
               end
@@ -149,7 +149,7 @@ describe API::V2::Public::Webhooks, type: :request do
           context 'without options' do
             let(:transaction) do
               Peatio::Transaction.new(
-                currency_id: :eth,
+                currency_code: :eth,
                 hash: '0xa049b0202ba078caa723c6b59594247b0c9f33e24878950f8537cedff9ea20ac',
                 amount: 0.5,
                 to_address: '0x1ef338196bd0207ba4852ba7a6847eed59331b84',
@@ -192,7 +192,7 @@ describe API::V2::Public::Webhooks, type: :request do
             context 'failed transaction' do
               let(:transaction) do
                 Peatio::Transaction.new(
-                  currency_id: :eth,
+                  currency_code: :eth,
                   hash: '0xa049b0202ba078caa723c6b59594247b0c9f33e24878950f8537cedff9ea20ac',
                   amount: 0.5,
                   to_address: '0x1ef338196bd0207ba4852ba7a6847eed59331b84',
@@ -243,7 +243,7 @@ describe API::V2::Public::Webhooks, type: :request do
           let(:event) do
             {
               address: 'Address',
-              currency_id: 'eth',
+              currency_code: 'eth',
               address_id: 12,
             }
           end
@@ -296,7 +296,7 @@ describe API::V2::Public::Webhooks, type: :request do
           context 'transactions exist' do
             let(:transaction) do
               Peatio::Transaction.new(
-                currency_id: :eth,
+                currency_code: :eth,
                 hash: '0xa049b0202ba078caa723c6b59594247b0c9f33e24878950f8537cedff9ea20ac',
                 amount: 0.5,
                 to_address: '0x1ef338196bd0207ba4852ba7a6847eed59331b84',
@@ -322,7 +322,7 @@ describe API::V2::Public::Webhooks, type: :request do
               context 'there is payment address' do
                 before do
                   # disable first deposit wallet for eth to have ability to use opendax cloud deposit wallet
-                  Wallet.deposit_wallets(transaction.currency_id)[0].update(status: 'disabled') if Wallet.deposit_wallets(transaction.currency_id)[0].gateway == 'geth'
+                  Wallet.deposit_wallets(transaction.currency_code)[0].update(status: 'disabled') if Wallet.deposit_wallets(transaction.currency_code)[0].gateway == 'geth'
                   PaymentAddress.create(member: member, wallet: deposit_wallet, address: '0x1ef338196bd0207ba4852ba7a6847eed59331b84')
                 end
 
@@ -338,7 +338,7 @@ describe API::V2::Public::Webhooks, type: :request do
               context 'remote_id options' do
                 let(:transaction) do
                   Peatio::Transaction.new(
-                    currency_id: :eth,
+                    currency_code: :eth,
                     hash: nil,
                     amount: 0.5,
                     to_address: '0x1ef338196bd0207ba4852ba7a6847eed59331b84',
@@ -353,7 +353,7 @@ describe API::V2::Public::Webhooks, type: :request do
 
                 before do
                   # disable first deposit wallet for eth to have ability to use opendax cloud deposit wallet
-                  Wallet.deposit_wallets(transaction.currency_id)[0].update(status: 'disabled') if Wallet.deposit_wallets(transaction.currency_id)[0].gateway == 'geth'
+                  Wallet.deposit_wallets(transaction.currency_code)[0].update(status: 'disabled') if Wallet.deposit_wallets(transaction.currency_code)[0].gateway == 'geth'
                   PaymentAddress.create(member: member, wallet: deposit_wallet, address: '0x1ef338196bd0207ba4852ba7a6847eed59331b84')
                   WalletService.any_instance.stubs(:trigger_webhook_event).returns([transaction])
                 end
@@ -372,7 +372,7 @@ describe API::V2::Public::Webhooks, type: :request do
           context 'transaction exists' do
             let(:transaction) do
               Peatio::Transaction.new(
-                currency_id: :eth,
+                currency_code: :eth,
                 hash: '0xa049b0202ba078caa723c6b59594247b0c9f33e24878950f8537cedff9ea20ac',
                 amount: 0.5,
                 to_address: '0x1ef338196bd0207ba4852ba7a6847eed59331b84',

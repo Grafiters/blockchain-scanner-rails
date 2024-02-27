@@ -67,7 +67,7 @@ class P2pOrder < ApplicationRecord
 
         account = Account.new({
             member_id: member[:id],
-            currency_id: currency,
+            currency_code: currency,
             p2p_locked: amount,
         }) unless wallet.present?
 
@@ -80,7 +80,7 @@ class P2pOrder < ApplicationRecord
         
         account = Account.new({
             member_id: member[:id],
-            currency_id: currency
+            currency_code: currency
         }) unless wallet.present?
 
         return wallet.present? ? wallet : account
@@ -89,7 +89,7 @@ class P2pOrder < ApplicationRecord
     def locked_fund_account(amount)
         p2p_locked = taker_data[:p2p_locked] + amount
         p2p_balance = taker_data[:p2p_balance] - amount
-        account_member = Account.find_by(member_id: taker_data[:member_id], currency_id: currency)
+        account_member = Account.find_by(member_id: taker_data[:member_id], currency_code: currency)
         account_member.update({
             p2p_locked: p2p_locked,
             p2p_balance: p2p_balance
@@ -99,7 +99,7 @@ class P2pOrder < ApplicationRecord
     def unlock_fund_cancel(amount)
         p2p_locked = taker_data[:p2p_locked] - amount
         p2p_balance = taker_data[:p2p_balance] + amount
-        account_member = Account.find_by(member_id: taker_data[:member_id], currency_id: currency)
+        account_member = Account.find_by(member_id: taker_data[:member_id], currency_code: currency)
         account_member.update({
             p2p_locked: p2p_locked,
             p2p_balance: p2p_balance
@@ -108,7 +108,7 @@ class P2pOrder < ApplicationRecord
 
     def unlock_fund_accepted(amount)
         p2p_locked = taker_data[:p2p_locked] - amount
-        account_member = Account.find_by(member_id: taker_data[:member_id], currency_id: currency)
+        account_member = Account.find_by(member_id: taker_data[:member_id], currency_code: currency)
         account_member.update({
             p2p_locked: p2p_locked
         }) unless account_member.blank?
@@ -118,7 +118,7 @@ class P2pOrder < ApplicationRecord
         fee_maker = maker_fee != nil ? amount - maker_fee : amount
         maker_balance = maker_data[:p2p_balance] + fee_maker
 
-        account_member = Account.find_or_create_by(member_id: maker_data[:member_id], currency_id: currency)
+        account_member = Account.find_or_create_by(member_id: maker_data[:member_id], currency_code: currency)
         account_member.update({
             p2p_balance: maker_balance
         }) unless maker_balance.blank?

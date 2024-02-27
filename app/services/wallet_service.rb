@@ -7,7 +7,7 @@ class WalletService
   end
 
   def create_address!(uid, pa_details)
-    blockchain_currency = BlockchainCurrency.find_by(currency_id: @wallet.currencies.map(&:id),
+    blockchain_currency = BlockchainCurrency.find_by(currency_code: @wallet.currencies.map(&:id),
                                                      blockchain_key: @wallet.blockchain_key)
 
     @adapter.configure(wallet:   @wallet.to_wallet_api_settings,
@@ -23,7 +23,7 @@ class WalletService
                        currency: blockchain_currency.to_blockchain_api_settings)
     transaction = Peatio::Transaction.new(to_address: withdrawal.rid,
                                           amount:     withdrawal.amount,
-                                          currency_id: withdrawal.currency_id,
+                                          currency_code: withdrawal.currency_code,
                                           options: { tid: withdrawal.tid })
     transaction = @adapter.create_transaction!(transaction)
     save_transaction(transaction.as_json.merge(from_address: @wallet.address), withdrawal) if transaction.present?
@@ -38,7 +38,7 @@ class WalletService
 
     destination_wallets =
       Wallet.active.withdraw.ordered
-        .joins(:currencies).where(currencies: { id: deposit.currency_id }, blockchain_key: @wallet.blockchain_key)
+        .joins(:currencies).where(currencies: { id: deposit.currency_code }, blockchain_key: @wallet.blockchain_key)
         .map do |w|
         # NOTE: Consider min_collection_amount is defined per wallet.
         #       For now min_collection_amount is currency config.
@@ -220,7 +220,7 @@ class WalletService
 
     refund_transaction = Peatio::Transaction.new(to_address: refund.address,
                                                  amount: refund.deposit.amount,
-                                                 currency_id: refund.deposit.currency_id)
+                                                 currency_code: refund.deposit.currency_code)
     @adapter.create_transaction!(refund_transaction, subtract_fee: true)
   end
 
@@ -245,7 +245,7 @@ class WalletService
 
   def trigger_webhook_event(event)
     # If there are erc20 currencies system should configure parent currency here
-    blockchain_currency = BlockchainCurrency.find_by(currency_id: @wallet.currencies.map(&:id),
+    blockchain_currency = BlockchainCurrency.find_by(currency_code: @wallet.currencies.map(&:id),
                                                      blockchain_key: @wallet.blockchain_key,
                                                      parent_id: nil)
     @adapter.configure(wallet:   @wallet.to_wallet_api_settings,
@@ -291,7 +291,7 @@ class WalletService
 
       transaction_params = { to_address:  dw[:address],
                              amount: amount_for_wallet.to_d,
-                             currency_id: deposit.currency_id,
+                             currency_code: deposit.currency_code,
                              options:     dw[:plain_settings]
                            }.compact
 

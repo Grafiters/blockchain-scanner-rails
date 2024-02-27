@@ -566,7 +566,7 @@
                     },
                     {
                         "in": "formData",
-                        "name": "currency_id",
+                        "name": "currency_code",
                         "description": "Adjustment currency ID.",
                         "type": "string",
                         "enum": [

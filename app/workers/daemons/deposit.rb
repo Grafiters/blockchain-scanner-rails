@@ -12,7 +12,7 @@ module Workers
 
           wallet = PaymentAddress.find_by(address: deposit.address).wallet
           unless wallet
-            Rails.logger.warn { "Can't find active deposit wallet for currency with code: #{deposit.currency_id}."}
+            Rails.logger.warn { "Can't find active deposit wallet for currency with code: #{deposit.currency_code}."}
             next
           end
 
@@ -83,7 +83,7 @@ module Workers
 
         fee_wallet = Wallet.active.fee.find_by(blockchain_key: deposit.blockchain_key)
         unless fee_wallet
-          Rails.logger.warn { "Can't find active fee wallet for currency with code: #{deposit.currency_id}."}
+          Rails.logger.warn { "Can't find active fee wallet for currency with code: #{deposit.currency_code}."}
           return
         end
 

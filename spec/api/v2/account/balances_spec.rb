@@ -234,7 +234,7 @@ describe API::V2::Account::Balances, type: :request do
 
     context 'currency code with dot' do
       let!(:currency) { create(:currency, :xagm_cx) }
-      let!(:account) { ::Account.create(currency_id: 'xagm.cx', member_id: member.id)}
+      let!(:account) { ::Account.create(currency_code: 'xagm.cx', member_id: member.id)}
 
       it 'returns current user balance by currency' do
         api_get "/api/v2/account/balances/#{currency.code}", token: token

@@ -6,7 +6,7 @@ module Peatio
       Transfer.transaction do
         CSV.parse(params[:file][:tempfile], headers: true, quote_empty: false).each do |row|
           row = row.to_h.compact.symbolize_keys!
-          currency = Currency.find(row[:currency_id])
+          currency = Currency.find(row[:currency_code])
           amount = row[:amount]
           credited_user = Member.find_by_uid(row[:uid])
           next if credited_user.blank?
@@ -30,7 +30,7 @@ module Peatio
           Transfer.create!(
             key: "#{credited_user.uid}_#{currency.id}_#{Time.now.to_i}",
             category: 'airdrop',
-            description: "Transfer from #{src_user.uid} to #{credited_user.uid} currency_id: #{currency.id}, amount: #{amount}",
+            description: "Transfer from #{src_user.uid} to #{credited_user.uid} currency_code: #{currency.id}, amount: #{amount}",
             liabilities: liabilities
           )
         end

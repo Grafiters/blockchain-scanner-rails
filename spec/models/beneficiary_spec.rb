@@ -18,7 +18,7 @@ describe Beneficiary, 'Relationships' do
   end
 
   context 'belongs to currency' do
-    context 'null currency_id' do
+    context 'null currency_code' do
       subject { build(:beneficiary, currency: nil) }
       it { expect(subject.valid?).to be_falsey }
     end
@@ -81,12 +81,12 @@ describe Beneficiary, 'Validations' do
       let(:coin) { Currency.find(:btc)}
 
       context 'blank address' do
-        subject { build(:beneficiary, currency_id: coin).tap { |b| b.data.delete('address') } }
+        subject { build(:beneficiary, currency_code: coin).tap { |b| b.data.delete('address') } }
         it { expect(subject.valid?).to be_falsey }
       end
 
       context 'blank blockchain key' do
-        subject { build(:beneficiary, currency_id: coin).tap { |b| b.data.delete('blockchain_key') } }
+        subject { build(:beneficiary, currency_code: coin).tap { |b| b.data.delete('blockchain_key') } }
         it { expect(subject.valid?).to be_falsey }
       end
     end
@@ -138,7 +138,7 @@ describe Beneficiary, 'Instance Methods' do
       it do
         expect(subject.rid).to include(*full_name.downcase.split)
         expect(subject.rid).to include(subject.id.to_s)
-        expect(subject.rid).to include(subject.currency_id)
+        expect(subject.rid).to include(subject.currency_code)
       end
     end
 

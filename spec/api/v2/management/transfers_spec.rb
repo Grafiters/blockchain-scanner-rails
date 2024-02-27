@@ -212,9 +212,9 @@ describe API::V2::Management::Transfers, type: :request do
 
       before do
         # Credit Revenue accounts.
-        create(:revenue, currency_id: base_unit,
+        create(:revenue, currency_code: base_unit,
                code: coin_revenues_code, credit: 10)
-        create(:revenue, currency_id: quote_unit,
+        create(:revenue, currency_code: quote_unit,
                code: fiat_revenues_code, credit: 100)
       end
 
@@ -396,9 +396,9 @@ describe API::V2::Management::Transfers, type: :request do
         #   1. Credit main Assets account.
         #   2. Credit token-distribution Liabilities account.
         # So we keep Balance Sheet equal Income Statement.
-        create(:asset, currency_id: coin,
+        create(:asset, currency_code: coin,
                code: coin_assets_code, credit: 1000)
-        create(:liability, currency_id: coin,
+        create(:liability, currency_code: coin,
                code: coin_distribution_account_code, credit: 1000, member_id: nil)
       end
 

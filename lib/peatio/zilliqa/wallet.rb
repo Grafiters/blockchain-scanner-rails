@@ -95,7 +95,7 @@ module Zilliqa
         raise Zilliqa::Client::Error, \
               "Withdrawal from #{@wallet.fetch(:address)} to #{transaction.to_address} failed."
       end
-      # Make sure that we return currency_id
+      # Make sure that we return currency_code
       transaction.amount = amount
       transaction.hash = hash
       transaction.options = options

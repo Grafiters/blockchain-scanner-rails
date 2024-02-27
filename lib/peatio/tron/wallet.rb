@@ -114,8 +114,8 @@ module Tron
         raise Tron::Client::Error, \
               "Withdrawal from #{@wallet.fetch(:address)} to #{transaction.to_address} failed."
       end
-      # Make sure that we return currency_id
-      transaction.currency_id = 'trx' if transaction.currency_id.blank?
+      # Make sure that we return currency_code
+      transaction.currency_code = 'trx' if transaction.currency_code.blank?
       transaction.amount = amount
       transaction.hash = hash
       transaction.options = options
@@ -146,8 +146,8 @@ module Tron
         raise Tron::Client::Error, \
               "Withdrawal from #{@wallet.fetch(:address)} to #{transaction.to_address} failed."
       end
-      # Make sure that we return currency_id
-      transaction.currency_id = 'trx' if transaction.currency_id.blank?
+      # Make sure that we return currency_code
+      transaction.currency_code = 'trx' if transaction.currency_code.blank?
       transaction.amount = amount
       transaction.hash = hash
       transaction.options = options

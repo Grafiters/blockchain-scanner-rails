@@ -2,7 +2,7 @@
 
 class WithdrawLimit < ApplicationRecord
 
-  # Default value for kyc_level, group name and currency_id in WithdrawLimit table;
+  # Default value for kyc_level, group name and currency_code in WithdrawLimit table;
   ANY = 'any'
 
     # == Attributes ===========================================================

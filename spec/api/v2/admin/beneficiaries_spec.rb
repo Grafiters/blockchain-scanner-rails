@@ -66,14 +66,14 @@ describe API::V2::Admin::Beneficiaries, type: :request do
         it 'by crypto currency' do
           api_get url, token: token, params: { currency: ['eth', 'btc'] }
 
-          expect(response_body.count).to eq(Beneficiary.where(currency_id: ['eth', 'btc']).count)
+          expect(response_body.count).to eq(Beneficiary.where(currency_code: ['eth', 'btc']).count)
         end
 
         it 'by fiat currency' do
           api_get url, token: token, params: { currency: 'usd' }
 
-          expect(response_body.count).to eq(Beneficiary.where(currency_id: 'usd').count)
-          expect(response_body.first['data']).to eq Beneficiary.where(currency_id: 'usd').last.data
+          expect(response_body.count).to eq(Beneficiary.where(currency_code: 'usd').count)
+          expect(response_body.first['data']).to eq Beneficiary.where(currency_code: 'usd').last.data
         end
       end
     end

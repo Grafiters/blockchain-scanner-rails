@@ -3,10 +3,10 @@
 Submit and cancel order processes create 4 records in the liabilities table (classic bots behaviour).
 Because of those processes liabilities table can grow to significant sizes.
 
-Compaction job will process liabilities for the previous week (by default) group them by code, currency_id, and date:
+Compaction job will process liabilities for the previous week (by default) group them by code, currency_code, and date:
 
 ```sql
-GROUP BY code, currency_id, member_id, DATE(`created_at`)
+GROUP BY code, currency_code, member_id, DATE(`created_at`)
 ```
 
 Due to the size of the liabilities table, it is recommended to run this job every day.

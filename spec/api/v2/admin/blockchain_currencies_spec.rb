@@ -82,11 +82,11 @@ describe API::V2::Admin::BlockchainCurrencies, type: :request do
     end
 
     it 'returns blockchain currencies by ascending order' do
-      api_get '/api/v2/admin/blockchain_currencies', params: { ordering: 'asc', order_by: 'currency_id'}, token: token
+      api_get '/api/v2/admin/blockchain_currencies', params: { ordering: 'asc', order_by: 'currency_code'}, token: token
       result = JSON.parse(response.body)
 
       expect(response).to be_successful
-      expect(result.first['currency_id']).to eq 'btc'
+      expect(result.first['currency_code']).to eq 'btc'
     end
 
 		it 'returns paginated blockchain currencies' do
@@ -97,7 +97,7 @@ describe API::V2::Admin::BlockchainCurrencies, type: :request do
 
       expect(response.headers.fetch('Total')).to eq '6'
       expect(result.size).to eq 3
-      expect(result.first['currency_id']).to eq 'ring'
+      expect(result.first['currency_code']).to eq 'ring'
 
       api_get '/api/v2/admin/blockchain_currencies', params: { limit: 3, page: 2 }, token: token
       result = JSON.parse(response.body)
@@ -106,7 +106,7 @@ describe API::V2::Admin::BlockchainCurrencies, type: :request do
 
       expect(response.headers.fetch('Total')).to eq '6'
       expect(result.size).to eq 3
-      expect(result.first['currency_id']).to eq 'btc'
+      expect(result.first['currency_code']).to eq 'btc'
     end
 
     it 'return error in case of not permitted ability' do
@@ -137,7 +137,7 @@ describe API::V2::Admin::BlockchainCurrencies, type: :request do
 			expect(result['status']).to eq blockchain_currency.status
 			expect(result['min_collection_amount']).to eq blockchain_currency.min_collection_amount.to_s
 			expect(result['options']).to eq blockchain_currency.options
-			expect(result['currency_id']).to eq blockchain_currency.currency_id
+			expect(result['currency_code']).to eq blockchain_currency.currency_code
 			expect(result['blockchain_key']).to eq blockchain_currency.blockchain_key
     end
 
@@ -158,83 +158,83 @@ describe API::V2::Admin::BlockchainCurrencies, type: :request do
 
 	describe 'POST blockchain_currencies/new' do
 		it 'create blockchain currency' do
-      api_post '/api/v2/admin/blockchain_currencies/new', params: { currency_id: 'eth', blockchain_key: 'btc-testnet', protocol: 'BTC_T', auto_update_fees_enabled: false }, token: token
+      api_post '/api/v2/admin/blockchain_currencies/new', params: { currency_code: 'eth', blockchain_key: 'btc-testnet', protocol: 'BTC_T', auto_update_fees_enabled: false }, token: token
       result = JSON.parse(response.body)
 
       expect(response).to be_successful
-      expect(result['currency_id']).to eq 'eth'
+      expect(result['currency_code']).to eq 'eth'
 			expect(result['blockchain_key']).to eq 'btc-testnet'
       expect(result['auto_update_fees_enabled']).to eq false
     end
 
     it 'create blockchain currency with parent_id' do
-      api_post '/api/v2/admin/blockchain_currencies/new', params: { currency_id: 'trst', parent_id: 'eth', blockchain_key: 'btc-testnet', protocol: 'BTC_T', auto_update_fees_enabled: false }, token: token
+      api_post '/api/v2/admin/blockchain_currencies/new', params: { currency_code: 'trst', parent_id: 'eth', blockchain_key: 'btc-testnet', protocol: 'BTC_T', auto_update_fees_enabled: false }, token: token
       result = JSON.parse(response.body)
 
       expect(response).to be_successful
-      expect(result['currency_id']).to eq 'trst'
+      expect(result['currency_code']).to eq 'trst'
       expect(result['parent_id']).to eq 'eth'
 			expect(result['blockchain_key']).to eq 'btc-testnet'
       expect(result['auto_update_fees_enabled']).to eq false
     end
 
     it 'validate parent_id param' do
-      api_post '/api/v2/admin/blockchain_currencies/new', params: { currency_id: 'trst', blockchain_key: 'btc-testnet', parent_id: 'eur'}, token: token
+      api_post '/api/v2/admin/blockchain_currencies/new', params: { currency_code: 'trst', blockchain_key: 'btc-testnet', parent_id: 'eur'}, token: token
 
       expect(response).to have_http_status 422
       expect(response).to include_api_error('admin.blockchain_currency.parent_id_doesnt_exist')
     end
 
 		it 'validate blockchain_key param' do
-      api_post '/api/v2/admin/blockchain_currencies/new', params: { currency_id: 'eth', blockchain_key: 'test' }, token: token
+      api_post '/api/v2/admin/blockchain_currencies/new', params: { currency_code: 'eth', blockchain_key: 'test' }, token: token
       expect(response).to have_http_status 422
       expect(response).to include_api_error('admin.blockchain_currency.blockchain_key_doesnt_exist')
     end
 
 		it 'validate visible param' do
-      api_post '/api/v2/admin/blockchain_currencies/new', params: { currency_id: 'eth', blockchain_key: 'btc-testnet', status: '123'}, token: token
+      api_post '/api/v2/admin/blockchain_currencies/new', params: { currency_code: 'eth', blockchain_key: 'btc-testnet', status: '123'}, token: token
 
       expect(response).to have_http_status 422
       expect(response).to include_api_error('admin.blockchain_currency.invalid_status')
     end
 
 		it 'validate deposit_enabled param' do
-      api_post '/api/v2/admin/blockchain_currencies/new', params: { currency_id: 'eth', blockchain_key: 'btc-testnet', deposit_enabled: '123' }, token: token
+      api_post '/api/v2/admin/blockchain_currencies/new', params: { currency_code: 'eth', blockchain_key: 'btc-testnet', deposit_enabled: '123' }, token: token
 
       expect(response).to have_http_status 422
       expect(response).to include_api_error('admin.blockchain_currency.non_boolean_deposit_enabled')
     end
 
     it 'validate withdrawal_enabled param' do
-      api_post '/api/v2/admin/blockchain_currencies/new', params: { currency_id: 'eth', blockchain_key: 'btc-testnet', withdrawal_enabled: '123' }, token: token
+      api_post '/api/v2/admin/blockchain_currencies/new', params: { currency_code: 'eth', blockchain_key: 'btc-testnet', withdrawal_enabled: '123' }, token: token
 
       expect(response).to have_http_status 422
       expect(response).to include_api_error('admin.blockchain_currency.non_boolean_withdrawal_enabled')
     end
 
 		it 'validate options param' do
-      api_post '/api/v2/admin/blockchain_currencies/new', params: { currency_id: 'eth', blockchain_key: 'btc-testnet', options: 'test'}, token: token
+      api_post '/api/v2/admin/blockchain_currencies/new', params: { currency_code: 'eth', blockchain_key: 'btc-testnet', options: 'test'}, token: token
 
       expect(response).to have_http_status 422
       expect(response).to include_api_error('admin.blockchain_currency.non_json_options')
     end
 
     it 'verifies subunits >= 0' do
-      api_post '/api/v2/admin/blockchain_currencies/new', params: { currency_id: 'eth', blockchain_key: 'btc-testnet', subunits: -1 }, token: token
+      api_post '/api/v2/admin/blockchain_currencies/new', params: { currency_code: 'eth', blockchain_key: 'btc-testnet', subunits: -1 }, token: token
 
       expect(response).to include_api_error 'admin.blockchain_currency.invalid_subunits'
       expect(response).not_to be_successful
     end
 
     it 'verifies subunits <= 18' do
-      api_post '/api/v2/admin/blockchain_currencies/new', params: { currency_id: 'eth', blockchain_key: 'btc-testnet', subunits: 19 }, token: token
+      api_post '/api/v2/admin/blockchain_currencies/new', params: { currency_code: 'eth', blockchain_key: 'btc-testnet', subunits: 19 }, token: token
 
       expect(response).to include_api_error 'admin.blockchain_currency.invalid_subunits'
       expect(response).not_to be_successful
     end
 
     it 'creates 1_000_000_000_000_000_000 base_factor' do
-      api_post '/api/v2/admin/blockchain_currencies/new', params: { currency_id: 'eth', blockchain_key: 'btc-testnet', subunits: 18 }, token: token
+      api_post '/api/v2/admin/blockchain_currencies/new', params: { currency_code: 'eth', blockchain_key: 'btc-testnet', subunits: 18 }, token: token
 
       result = JSON.parse(response.body)
       expect(response).to be_successful
@@ -243,7 +243,7 @@ describe API::V2::Admin::BlockchainCurrencies, type: :request do
     end
 
 		it 'return error while putting base_factor and subunit params' do
-      api_post '/api/v2/admin/blockchain_currencies/new', params: { currency_id: 'eth', blockchain_key: 'btc-testnet', subunits: 18, base_factor: 1 }, token: token
+      api_post '/api/v2/admin/blockchain_currencies/new', params: { currency_code: 'eth', blockchain_key: 'btc-testnet', subunits: 18, base_factor: 1 }, token: token
 
       result = JSON.parse(response.body)
 
@@ -252,7 +252,7 @@ describe API::V2::Admin::BlockchainCurrencies, type: :request do
     end
 
     it 'creates currency with 1000 base_factor' do
-      api_post '/api/v2/admin/blockchain_currencies/new', params: { currency_id: 'eth', protocol: 'ERC20', blockchain_key: 'btc-testnet', base_factor: 1000 }, token: token
+      api_post '/api/v2/admin/blockchain_currencies/new', params: { currency_code: 'eth', protocol: 'ERC20', blockchain_key: 'btc-testnet', base_factor: 1000 }, token: token
       result = JSON.parse(response.body)
 
       expect(response).to be_successful
@@ -264,11 +264,11 @@ describe API::V2::Admin::BlockchainCurrencies, type: :request do
       api_post '/api/v2/admin/blockchain_currencies/new', params: { }, token: token
 
       expect(response).to have_http_status 422
-      expect(response).to include_api_error('admin.blockchaincurrency.missing_currency_id')
+      expect(response).to include_api_error('admin.blockchaincurrency.missing_currency_code')
     end
 
     it 'return error in case of not permitted ability' do
-      api_post '/api/v2/admin/blockchain_currencies/new', params: { currency_id: 'eur', protocol: 'ERC20', blockchain_key: 'btc-testnet' }, token: level_3_member_token
+      api_post '/api/v2/admin/blockchain_currencies/new', params: { currency_code: 'eur', protocol: 'ERC20', blockchain_key: 'btc-testnet' }, token: level_3_member_token
 
       expect(response.code).to eq '403'
       expect(response).to include_api_error('admin.ability.not_permitted')
@@ -335,7 +335,7 @@ describe API::V2::Admin::BlockchainCurrencies, type: :request do
         expect(response).to be_successful
         result = JSON.parse(response.body)
         expect(result['id']).to eq blockchain_currency.id
-        expect(result['currency_id']).to eq blockchain_currency.currency_id
+        expect(result['currency_code']).to eq blockchain_currency.currency_code
         expect(result['blockchain_key']).to eq blockchain_currency.blockchain_key
       end
     end

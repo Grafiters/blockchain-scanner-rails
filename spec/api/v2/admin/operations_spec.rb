@@ -48,7 +48,7 @@ describe API::V2::Admin::Operations, type: :request do
       it 'filters by currency' do
         api_get '/api/v2/admin/assets', token: token, params: { currency: 'usd' }
         result = JSON.parse(response.body)
-        expected = assets.select { |a| a.currency_id == 'usd' }
+        expected = assets.select { |a| a.currency_code == 'usd' }
 
         expect(result.map { |a| a['id'] }).to match_array expected.map { |e| e.id }
       end

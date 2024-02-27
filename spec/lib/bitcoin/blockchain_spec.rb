@@ -274,17 +274,17 @@ describe Bitcoin::Blockchain do
         :to_address=>"mg4KVGerD3rYricWC8CoBaayDp1YCKMfvL",
         :amount=>0.325e0,
         :status=>"success",
-        :currency_id=>blockchain_currency.currency_id},
+        :currency_code=>blockchain_currency.currency_code},
        {:hash=>"1858591d8ce638c37d5fcd92b9b33ee96be1b950e593cf0cbf45e6bfb1ad8a22",
         :txout=>1,
         :to_address=>"mqaBwWDjJCE2Egsf6pfysgD5ZBrfsP7NkA",
         :amount=>0.1964466932e2,
         :status=>"success",
-        :currency_id=>blockchain_currency.currency_id}]
+        :currency_code=>blockchain_currency.currency_code}]
     end
 
     let(:blockchain_currency) do
-      BlockchainCurrency.find_by(currency_id: :btc)
+      BlockchainCurrency.find_by(currency_code: :btc)
     end
 
     let(:blockchain) do
@@ -302,33 +302,33 @@ describe Bitcoin::Blockchain do
           :to_address=>"mg4KVGerD3rYricWC8CoBaayDp1YCKMfvL",
           :amount=>0.325e0,
           :status=>"success",
-          :currency_id=>blockchain_currency1.currency_id},
+          :currency_code=>blockchain_currency1.currency_code},
          {:hash=>"1858591d8ce638c37d5fcd92b9b33ee96be1b950e593cf0cbf45e6bfb1ad8a22",
           :txout=>1,
           :to_address=>"mqaBwWDjJCE2Egsf6pfysgD5ZBrfsP7NkA",
           :amount=>0.1964466932e2,
           :status=>"success",
-          :currency_id=>blockchain_currency1.currency_id},
+          :currency_code=>blockchain_currency1.currency_code},
          {:hash=>"1858591d8ce638c37d5fcd92b9b33ee96be1b950e593cf0cbf45e6bfb1ad8a22",
           :txout=>0,
           :to_address=>"mg4KVGerD3rYricWC8CoBaayDp1YCKMfvL",
           :amount=>0.325e0,
           :status=>"success",
-          :currency_id=>blockchain_currency2.currency_id},
+          :currency_code=>blockchain_currency2.currency_code},
          {:hash=>"1858591d8ce638c37d5fcd92b9b33ee96be1b950e593cf0cbf45e6bfb1ad8a22",
           :txout=>1,
           :to_address=>"mqaBwWDjJCE2Egsf6pfysgD5ZBrfsP7NkA",
           :amount=>0.1964466932e2,
           :status=>"success",
-          :currency_id=>blockchain_currency2.currency_id}]
+          :currency_code=>blockchain_currency2.currency_code}]
       end
 
       let(:blockchain_currency1) do
-        BlockchainCurrency.find_by(currency_id: :btc)
+        BlockchainCurrency.find_by(currency_code: :btc)
       end
 
       let(:blockchain_currency2) do
-        BlockchainCurrency.find_by(currency_id: :btc)
+        BlockchainCurrency.find_by(currency_code: :btc)
       end
 
       let(:blockchain) do
@@ -351,19 +351,19 @@ describe Bitcoin::Blockchain do
           :to_address=>"2N5WyM3QT1Kb6fvkSZj3Xvcx2at7Ydm5VmL",
           :amount=>0.1e0,
           :status=>"success",
-          :currency_id=>"btc"},
+          :currency_code=>"btc"},
          {:hash=>"1da5cd163a9aaf830093115ac3ac44355e0bcd15afb59af78f84ad4084973ad0",
           :txout=>1,
           :to_address=>"2MzDFuDK9ZEEiRsuCDFkPdeHQLGvwbC9ufG",
           :amount=>0.2e0,
           :status=>"success",
-          :currency_id=>"btc"},
+          :currency_code=>"btc"},
          {:hash=>"1da5cd163a9aaf830093115ac3ac44355e0bcd15afb59af78f84ad4084973ad0",
           :txout=>2,
           :to_address=>"2MuvCKKi1MzGtvZqvcbqn5twjA2v5XLaTWe",
           :amount=>0.11749604e0,
           :status=>"success",
-          :currency_id=>"btc"}]
+          :currency_code=>"btc"}]
       end
 
       it 'builds formatted transactions for each vout' do

@@ -38,7 +38,7 @@ module OpendaxCloud
 
     def create_address!(_options = {})
       response = client.rest_api(:post, '/address/new', {
-                                   currency_id: currency_id
+                                   currency_code: currency_code
                                  })
 
       { address: response['address'], details: response.except('address') }
@@ -48,7 +48,7 @@ module OpendaxCloud
 
     def create_transaction!(transaction)
       response = client.rest_api(:post, '/tx/send', {
-                    currency_id: currency_id,
+                    currency_code: currency_code,
                     to_address: transaction.to_address,
                     amount: transaction.amount,
                     tid: transaction.options.try(:[], :tid)
@@ -61,7 +61,7 @@ module OpendaxCloud
 
     def load_balance!
       response = client.rest_api(:post, '/address/balance', {
-        currency_id: currency_id
+        currency_code: currency_code
       }.compact).fetch('balance')
 
       response.to_d
@@ -77,7 +77,7 @@ module OpendaxCloud
 
       [
         Peatio::Transaction.new(
-          currency_id: params[:currency],
+          currency_code: params[:currency],
           amount: params[:amount].to_d,
           hash: params[:blockchain_txid],
           # If there is no rid field, it means we have deposit in payload
@@ -107,7 +107,7 @@ module OpendaxCloud
       value.to_d / @currency.fetch(:base_factor).to_d
     end
 
-    def currency_id
+    def currency_code
       @currency.fetch(:id)
     end
 

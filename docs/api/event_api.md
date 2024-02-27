@@ -207,7 +207,7 @@ event: {
   record: {
     id:                      "1",
     member_id:               "2",
-    currency_id:             "btc",
+    currency_code:             "btc",
     balance:                 "0",
     locked:                  "0",
     created_at:               "2018-04-12T17:16:06+03:00",
@@ -228,7 +228,7 @@ event: {
   record: {
     id:                      "1",
     member_id:               "2",
-    currency_id:             "btc",
+    currency_code:             "btc",
     balance:                 "1",
     locked:                  "0",
     created_at:               "2018-04-12T17:16:06+03:00",

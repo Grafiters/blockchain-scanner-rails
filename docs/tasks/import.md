@@ -12,11 +12,11 @@ uid, email - require params
 
 ### Accounts table
 
-|      uid      | currency_id  | main_balance |  locked_balance  |
+|      uid      | currency_code  | main_balance |  locked_balance  |
 |---------------|--------------|--------------|------------------|
 | ID1000003837  |     ETH      |      10      |        5         |
 
-uid, currency_id - require params
+uid, currency_code - require params
 
 2. Import users
    

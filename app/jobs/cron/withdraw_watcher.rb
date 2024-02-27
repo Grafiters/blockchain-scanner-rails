@@ -22,10 +22,10 @@ module Jobs
             end
 
             wallet = Wallet.active.joins(:currencies)
-                           .find_by(currencies: { id: withdraw.currency_id }, kind: :hot)
+                           .find_by(currencies: { id: withdraw.currency_code }, kind: :hot)
 
             unless wallet
-              Rails.logger.warn { "Can't find active hot wallet for currency with code: #{withdraw.currency_id}." }
+              Rails.logger.warn { "Can't find active hot wallet for currency with code: #{withdraw.currency_code}." }
               next
             end
 
@@ -55,10 +55,10 @@ module Jobs
             end
 
             wallet = Wallet.active.joins(:currencies)
-                           .find_by(currencies: { id: withdraw.currency_id }, kind: :hot)
+                           .find_by(currencies: { id: withdraw.currency_code }, kind: :hot)
 
             unless wallet
-              Rails.logger.warn { "Can't find active hot wallet for currency with code: #{withdraw.currency_id}." }
+              Rails.logger.warn { "Can't find active hot wallet for currency with code: #{withdraw.currency_code}." }
               next
             end
 
@@ -78,7 +78,7 @@ module Jobs
         end
 
         def configure_service_adapter(withdraw)
-          blockchain_currency = BlockchainCurrency.find_by(currency_id: withdraw.currency.id,
+          blockchain_currency = BlockchainCurrency.find_by(currency_code: withdraw.currency.id,
                                                            blockchain_key: withdraw.blockchain_key)
           @service.adapter.configure(wallet: @service.wallet.to_wallet_api_settings,
                                      currency: blockchain_currency.to_blockchain_api_settings)

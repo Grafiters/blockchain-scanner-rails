@@ -44,6 +44,16 @@ module Ether
       blocks = []
       block_json = client.rest_api(:post, '/fetch-block', {height: block_number})
       transactions = block_json.fetch('transactions')
+      Rails.logger.warn "==============================="
+      Rails.logger.warn "TRANSACTION BLOCKCHAIN"
+      Rails.logger.warn "==============================="
+      Rails.logger.warn transactions.as_json
+
+      Rails.logger.warn "==============================="
+      Rails.logger.warn "CONFIGURATION CURRENCIES"
+      Rails.logger.warn "==============================="
+      Rails.logger.warn @eth.as_json
+      Rails.logger.warn @erc20.as_json
       transactions.each_with_object([]) do |txs, txs_arr|
         height = block_number
         type = txs.fetch('type')
@@ -64,7 +74,7 @@ module Ether
                       to_address:     to_address,
                       txout:          1,
                       block_number:   height,
-                      currency_id:    currency.fetch(:id),
+                      currency_code:    currency.fetch(:id).upcase,
                       status:         'success')
           end
         else
@@ -78,7 +88,7 @@ module Ether
                         to_address:     to_address,
                         txout:          1,
                         block_number:   height,
-                        currency_id:    currency.fetch(:id),
+                        currency_code:    currency.fetch(:id).upcase,
                         status:         'success')
             end
           end
@@ -102,8 +112,8 @@ module Ether
       raise Peatio::Blockchain::ClientError, e
     end
 
-    def load_balance_of_address!(address, currency_id)
-      currency = settings[:currencies].find { |c| c[:id] == currency_id.to_s }
+    def load_balance_of_address!(address, currency_code)
+      currency = settings[:currencies].find { |c| c[:id] == currency_code.to_s }
       raise UndefinedCurrencyError unless currency
 
       if currency.dig(:options, :erc20_contract_address).present?

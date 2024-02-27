@@ -1,4 +1,4 @@
-uid,currency_id,amount
+uid,currency_code,amount
 UID120,btc,100
 UID121,btc,100
 UID122,btc,100

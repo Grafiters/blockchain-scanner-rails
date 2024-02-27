@@ -1,6 +1,6 @@
 module Ethereum::Bsc
   module Params
-    def native_currency_id
+    def native_currency_code
       'bnb'
     end
 

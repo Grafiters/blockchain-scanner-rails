@@ -5,13 +5,13 @@ module Peatio
     class << self
       attr_accessor :adapter
 
-      def check!(address, currency_id, uid)
-        adapter.check!(address, currency_id, uid)
+      def check!(address, currency_code, uid)
+        adapter.check!(address, currency_code, uid)
       end
     end
 
     class Abstract
-      def check!(_address, _currency_id, _uid)
+      def check!(_address, _currency_code, _uid)
         method_not_implemented
       end
     end

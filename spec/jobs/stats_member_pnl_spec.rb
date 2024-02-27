@@ -63,8 +63,8 @@ describe Jobs::Cron::StatsMemberPnl do
     it 'when there is no trades' do
       market = Market.spot.find_by(base_unit: 'btc', quote_unit: 'usd')
       expect do
-        Jobs::Cron::StatsMemberPnl.price_at(coin_deposit.currency_id, market.quote_unit, liability.created_at)
-      end.to raise_error("There is no trades on market #{coin_deposit.currency_id}#{market.quote_unit}")
+        Jobs::Cron::StatsMemberPnl.price_at(coin_deposit.currency_code, market.quote_unit, liability.created_at)
+      end.to raise_error("There is no trades on market #{coin_deposit.currency_code}#{market.quote_unit}")
     end
 
     context 'when trade exist' do
@@ -75,12 +75,12 @@ describe Jobs::Cron::StatsMemberPnl do
       end
 
       it 'return trade price' do
-        res = Jobs::Cron::StatsMemberPnl.price_at(coin_deposit.currency_id, trade.market.quote_unit, trade.created_at + 3.hours)
+        res = Jobs::Cron::StatsMemberPnl.price_at(coin_deposit.currency_code, trade.market.quote_unit, trade.created_at + 3.hours)
         expect(res).to eq trade.price
       end
 
       it 'when pnl currency id equal to currency id' do
-        res = Jobs::Cron::StatsMemberPnl.price_at(coin_deposit.currency_id, coin_deposit.currency_id, trade.created_at + 3.hours)
+        res = Jobs::Cron::StatsMemberPnl.price_at(coin_deposit.currency_code, coin_deposit.currency_code, trade.created_at + 3.hours)
         expect(res).to eq 1.0
       end
     end
@@ -113,8 +113,8 @@ describe Jobs::Cron::StatsMemberPnl do
           expect { Jobs::Cron::StatsMemberPnl.process() }.to change { StatsMemberPnl.count }.by(1)
 
           expect(StatsMemberPnl.last.member_id).to eq coin_withdraw.member_id
-          expect(StatsMemberPnl.last.currency_id).to eq coin_withdraw.currency_id
-          expect(StatsMemberPnl.last.pnl_currency_id).to eq 'eth'
+          expect(StatsMemberPnl.last.currency_code).to eq coin_withdraw.currency_code
+          expect(StatsMemberPnl.last.pnl_currency_code).to eq 'eth'
           expect(StatsMemberPnl.last.total_credit).to eq 0
           expect(StatsMemberPnl.last.total_debit).to eq coin_withdraw.amount
           expect(StatsMemberPnl.last.total_debit_value).to eq((coin_withdraw.amount + coin_withdraw.fee) * 123)
@@ -129,12 +129,12 @@ describe Jobs::Cron::StatsMemberPnl do
       context 'calculation on existing pnl' do
         let!(:coin_withdraw) { create(:btc_withdraw, amount: 0.2.to_d, aasm_state: 'succeed', member: member) }
         let!(:pnl) do
-          create(:stats_member_pnl, currency_id: coin_withdraw.currency_id, pnl_currency_id: 'eth', total_debit: 0.1,
+          create(:stats_member_pnl, currency_code: coin_withdraw.currency_code, pnl_currency_code: 'eth', total_debit: 0.1,
                              total_debit_fees: 0.01, total_debit_value: 0.3,
                              member_id: coin_withdraw.member_id)
         end
         let!(:liability) do
-          create(:liability, id: 2, member_id: coin_withdraw.member_id, currency_id: coin_withdraw.currency_id,
+          create(:liability, id: 2, member_id: coin_withdraw.member_id, currency_code: coin_withdraw.currency_code,
                              debit: 0.3, reference_type: 'Withdraw', code: 212, reference_id: coin_withdraw.id)
         end
 
@@ -147,8 +147,8 @@ describe Jobs::Cron::StatsMemberPnl do
           expect { Jobs::Cron::StatsMemberPnl.process }.to change { StatsMemberPnl.count }.by(0)
 
           expect(StatsMemberPnl.last.member_id).to eq coin_withdraw.member_id
-          expect(StatsMemberPnl.last.currency_id).to eq coin_withdraw.currency_id
-          expect(StatsMemberPnl.last.pnl_currency_id).to eq 'eth'
+          expect(StatsMemberPnl.last.currency_code).to eq coin_withdraw.currency_code
+          expect(StatsMemberPnl.last.pnl_currency_code).to eq 'eth'
           expect(StatsMemberPnl.last.total_credit).to eq 0
           expect(StatsMemberPnl.last.total_debit).to eq coin_withdraw.amount + pnl.total_debit
           expect(StatsMemberPnl.last.total_debit_value).to eq (coin_withdraw.amount + coin_withdraw.fee) * 1.0 + pnl.total_debit_value
@@ -164,8 +164,8 @@ describe Jobs::Cron::StatsMemberPnl do
     context 'reference type adjustments' do
       context 'creates one pnl with positive adjustment' do
         let!(:member) { create(:member) }
-        let!(:adjustment) { create(:adjustment, currency_id: 'btc', amount: 1.0, receiving_account_number: "btc-202-#{member.uid}") }
-        let!(:adjustment_maker) { create(:adjustment, currency_id: 'btc', amount: 1.0, receiving_account_number: "btc-202-#{maker.uid}") }
+        let!(:adjustment) { create(:adjustment, currency_code: 'btc', amount: 1.0, receiving_account_number: "btc-202-#{member.uid}") }
+        let!(:adjustment_maker) { create(:adjustment, currency_code: 'btc', amount: 1.0, receiving_account_number: "btc-202-#{maker.uid}") }
         let(:btceth_price) { 100.0 }
 
         before do
@@ -178,8 +178,8 @@ describe Jobs::Cron::StatsMemberPnl do
         it do
           expect { Jobs::Cron::StatsMemberPnl.process }.to change { StatsMemberPnl.count }.by(1)
           expect(StatsMemberPnl.last.member_id).to eq member.id
-          expect(StatsMemberPnl.last.currency_id).to eq adjustment.currency_id
-          expect(StatsMemberPnl.last.pnl_currency_id).to eq 'eth'
+          expect(StatsMemberPnl.last.currency_code).to eq adjustment.currency_code
+          expect(StatsMemberPnl.last.pnl_currency_code).to eq 'eth'
           expect(StatsMemberPnl.last.total_credit).to eq adjustment.amount
           expect(StatsMemberPnl.last.total_debit).to eq 0
           expect(StatsMemberPnl.last.total_debit_value).to eq 0
@@ -193,7 +193,7 @@ describe Jobs::Cron::StatsMemberPnl do
 
       context 'creates one pnl with positive and negative adjustments' do
         let(:member) { create(:member) }
-        let(:adjustment) { create(:adjustment, currency_id: 'btc', amount: 1.0, receiving_account_number: "btc-202-#{member.uid}") }
+        let(:adjustment) { create(:adjustment, currency_code: 'btc', amount: 1.0, receiving_account_number: "btc-202-#{member.uid}") }
         let(:btceth_price) { 100.0 }
 
         before do
@@ -205,8 +205,8 @@ describe Jobs::Cron::StatsMemberPnl do
         it do
           expect { Jobs::Cron::StatsMemberPnl.process }.to change { StatsMemberPnl.count }.by(1)
           expect(StatsMemberPnl.last.member_id).to eq member.id
-          expect(StatsMemberPnl.last.currency_id).to eq adjustment.currency_id
-          expect(StatsMemberPnl.last.pnl_currency_id).to eq 'eth'
+          expect(StatsMemberPnl.last.currency_code).to eq adjustment.currency_code
+          expect(StatsMemberPnl.last.pnl_currency_code).to eq 'eth'
           expect(StatsMemberPnl.last.total_credit).to eq adjustment.amount
           expect(StatsMemberPnl.last.total_debit).to eq 0
           expect(StatsMemberPnl.last.total_debit_value).to eq 0
@@ -217,14 +217,14 @@ describe Jobs::Cron::StatsMemberPnl do
           expect(StatsMemberPnl.last.average_balance_price).to eq btceth_price
 
           half = 1.to_d / 2
-          adjustment2 = create(:adjustment, currency_id: 'btc', amount: -half, receiving_account_number: "btc-202-#{member.uid}")
+          adjustment2 = create(:adjustment, currency_code: 'btc', amount: -half, receiving_account_number: "btc-202-#{member.uid}")
           adjustment2.accept!(validator: member)
 
           expect { Jobs::Cron::StatsMemberPnl.process }.to change { StatsMemberPnl.count }.by(0)
 
           expect(StatsMemberPnl.last.member_id).to eq member.id
-          expect(StatsMemberPnl.last.currency_id).to eq adjustment.currency_id
-          expect(StatsMemberPnl.last.pnl_currency_id).to eq 'eth'
+          expect(StatsMemberPnl.last.currency_code).to eq adjustment.currency_code
+          expect(StatsMemberPnl.last.pnl_currency_code).to eq 'eth'
           expect(StatsMemberPnl.last.total_credit).to eq adjustment.amount
           expect(StatsMemberPnl.last.total_debit).to eq 0.5
           expect(StatsMemberPnl.last.total_debit_value).to eq 50
@@ -255,8 +255,8 @@ describe Jobs::Cron::StatsMemberPnl do
         it do
           expect { Jobs::Cron::StatsMemberPnl.process }.to change { StatsMemberPnl.count }.by(1)
           expect(StatsMemberPnl.last.member_id).to eq coin_deposit.member_id
-          expect(StatsMemberPnl.last.currency_id).to eq coin_deposit.currency_id
-          expect(StatsMemberPnl.last.pnl_currency_id).to eq 'eth'
+          expect(StatsMemberPnl.last.currency_code).to eq coin_deposit.currency_code
+          expect(StatsMemberPnl.last.pnl_currency_code).to eq 'eth'
           expect(StatsMemberPnl.last.total_credit).to eq coin_deposit.amount
           expect(StatsMemberPnl.last.total_debit).to eq 0
           expect(StatsMemberPnl.last.total_debit_value).to eq 0
@@ -284,11 +284,11 @@ describe Jobs::Cron::StatsMemberPnl do
         it do
           expect { Jobs::Cron::StatsMemberPnl.process }.to change { StatsMemberPnl.count }.by(2)
 
-          stats_member_pnl_btc = StatsMemberPnl.find_by(currency_id: coin_deposit.currency_id, member: coin_deposit.member)
-          stats_member_pnl_usd = StatsMemberPnl.find_by(currency_id: fiat_deposit.currency_id, member: fiat_deposit.member)
+          stats_member_pnl_btc = StatsMemberPnl.find_by(currency_code: coin_deposit.currency_code, member: coin_deposit.member)
+          stats_member_pnl_usd = StatsMemberPnl.find_by(currency_code: fiat_deposit.currency_code, member: fiat_deposit.member)
           expect(stats_member_pnl_btc.member_id).to eq coin_deposit.member_id
-          expect(stats_member_pnl_btc.pnl_currency_id).to eq 'eth'
-          expect(stats_member_pnl_btc.currency_id).to eq coin_deposit.currency_id
+          expect(stats_member_pnl_btc.pnl_currency_code).to eq 'eth'
+          expect(stats_member_pnl_btc.currency_code).to eq coin_deposit.currency_code
           expect(stats_member_pnl_btc.total_credit).to eq coin_deposit.amount
           expect(stats_member_pnl_btc.total_debit).to eq 0
           expect(stats_member_pnl_btc.total_debit_value).to eq 0
@@ -299,8 +299,8 @@ describe Jobs::Cron::StatsMemberPnl do
           expect(stats_member_pnl_btc.average_balance_price).to eq 1.0
 
           expect(stats_member_pnl_usd.member_id).to eq fiat_deposit.member_id
-          expect(stats_member_pnl_usd.pnl_currency_id).to eq 'eth'
-          expect(stats_member_pnl_usd.currency_id).to eq fiat_deposit.currency_id
+          expect(stats_member_pnl_usd.pnl_currency_code).to eq 'eth'
+          expect(stats_member_pnl_usd.currency_code).to eq fiat_deposit.currency_code
           expect(stats_member_pnl_usd.total_credit).to eq fiat_deposit.amount
           expect(stats_member_pnl_usd.total_debit).to eq 0
           expect(stats_member_pnl_usd.total_debit_value).to eq 0
@@ -315,7 +315,7 @@ describe Jobs::Cron::StatsMemberPnl do
       context 'calculation on existing pnl' do
         let!(:coin_deposit) { create(:deposit, :deposit_btc, amount: '0.1'.to_d) }
         let!(:pnl) do
-          create(:stats_member_pnl, currency_id: coin_deposit.currency_id, pnl_currency_id: 'eth', total_credit: 0.1,
+          create(:stats_member_pnl, currency_code: coin_deposit.currency_code, pnl_currency_code: 'eth', total_credit: 0.1,
                              total_credit_fees: '0.01'.to_d, total_credit_value: '0.3'.to_d, total_balance_value: '0.3'.to_d, member_id: coin_deposit.member_id)
         end
 
@@ -329,8 +329,8 @@ describe Jobs::Cron::StatsMemberPnl do
         it do
           expect { Jobs::Cron::StatsMemberPnl.process }.to change { StatsMemberPnl.count }.by(0)
           expect(StatsMemberPnl.last.member_id).to eq coin_deposit.member_id
-          expect(StatsMemberPnl.last.pnl_currency_id).to eq 'eth'
-          expect(StatsMemberPnl.last.currency_id).to eq coin_deposit.currency_id
+          expect(StatsMemberPnl.last.pnl_currency_code).to eq 'eth'
+          expect(StatsMemberPnl.last.currency_code).to eq coin_deposit.currency_code
           expect(StatsMemberPnl.last.total_credit).to eq(coin_deposit.amount + pnl.total_credit)
           expect(StatsMemberPnl.last.total_credit_fees).to eq(coin_deposit.fee + pnl.total_credit_fees)
           expect(StatsMemberPnl.last.total_credit_value).to eq(pnl.total_credit_value + coin_deposit.amount * 1.0)
@@ -349,27 +349,27 @@ describe Jobs::Cron::StatsMemberPnl do
         let(:btceth_price) { 123 }
 
         let!(:pnl1) do
-          create(:stats_member_pnl, pnl_currency_id: 'eth', currency_id: 'btc',
+          create(:stats_member_pnl, pnl_currency_code: 'eth', currency_code: 'btc',
                              total_credit: 2.0, total_credit_fees: 0.2, total_credit_value: 11.0, total_balance_value: 11.0, total_debit: 0.02,
                              average_balance_price: 5.5,
                              total_debit_value: 1.0, member_id: trade.maker_order.member.id)
         end
 
         let!(:pnl2) do
-          create(:stats_member_pnl, pnl_currency_id: 'eth', currency_id: 'usd',
+          create(:stats_member_pnl, pnl_currency_code: 'eth', currency_code: 'usd',
                              total_credit: 0.1, total_credit_fees: 0.01, total_credit_value: 0.3, total_debit: 0.2,
                              total_debit_value: 10.0, member_id: trade.maker_order.member.id)
         end
 
         let!(:pnl3) do
-          create(:stats_member_pnl, pnl_currency_id: 'eth', currency_id: 'usd',
+          create(:stats_member_pnl, pnl_currency_code: 'eth', currency_code: 'usd',
                              total_credit: 0.4, total_credit_fees: 0.01, total_credit_value: 0.3, total_debit: 0.2,
                              average_balance_price: 0.1,
                              total_debit_value: 10.0, member_id: trade.taker_order.member.id)
         end
 
         let!(:pnl4) do
-          create(:stats_member_pnl, pnl_currency_id: 'eth', currency_id: 'btc',
+          create(:stats_member_pnl, pnl_currency_code: 'eth', currency_code: 'btc',
                              total_credit: 0.4, total_credit_fees: 0.01, total_credit_value: 0.3,
                              total_debit: 0.2, total_debit_value: 10.0, member_id: trade.taker_order.member.id)
         end
@@ -384,8 +384,8 @@ describe Jobs::Cron::StatsMemberPnl do
 
           total_fees = trade.total * trade.order_fee(trade.maker_order)
           expect(StatsMemberPnl.all[0].member_id).to eq trade.maker_order.member.id
-          expect(StatsMemberPnl.all[0].pnl_currency_id).to eq 'eth'
-          expect(StatsMemberPnl.all[0].currency_id).to eq pnl1.currency_id
+          expect(StatsMemberPnl.all[0].pnl_currency_code).to eq 'eth'
+          expect(StatsMemberPnl.all[0].currency_code).to eq pnl1.currency_code
           expect(StatsMemberPnl.all[0].total_credit).to eq pnl1.total_credit
           expect(StatsMemberPnl.all[0].total_credit_fees).to eq pnl1.total_credit_fees
           expect(StatsMemberPnl.all[0].total_debit).to eq trade.amount + pnl1.total_debit
@@ -394,8 +394,8 @@ describe Jobs::Cron::StatsMemberPnl do
           expect(StatsMemberPnl.all[0].total_balance_value).to eq(pnl1.total_balance_value - trade.amount * pnl1.average_balance_price)
 
           expect(StatsMemberPnl.all[1].member_id).to eq trade.maker_order.member.id
-          expect(StatsMemberPnl.all[1].pnl_currency_id).to eq 'eth'
-          expect(StatsMemberPnl.all[1].currency_id).to eq pnl2.currency_id
+          expect(StatsMemberPnl.all[1].pnl_currency_code).to eq 'eth'
+          expect(StatsMemberPnl.all[1].currency_code).to eq pnl2.currency_code
           expect(StatsMemberPnl.all[1].total_credit).to eq trade.total - total_fees + pnl2.total_credit
           expect(StatsMemberPnl.all[1].total_credit_fees).to eq total_fees + + pnl2.total_credit_fees
           expect(StatsMemberPnl.all[1].total_debit).to eq pnl2.total_debit
@@ -405,8 +405,8 @@ describe Jobs::Cron::StatsMemberPnl do
 
           total_fees = trade.amount * trade.order_fee(trade.taker_order)
           expect(StatsMemberPnl.all[2].member_id).to eq trade.taker_order.member.id
-          expect(StatsMemberPnl.all[2].pnl_currency_id).to eq 'eth'
-          expect(StatsMemberPnl.all[2].currency_id).to eq pnl3.currency_id
+          expect(StatsMemberPnl.all[2].pnl_currency_code).to eq 'eth'
+          expect(StatsMemberPnl.all[2].currency_code).to eq pnl3.currency_code
           expect(StatsMemberPnl.all[2].total_credit).to eq pnl3.total_credit
           expect(StatsMemberPnl.all[2].total_debit).to eq trade.total + pnl3.total_debit
           expect(StatsMemberPnl.all[2].total_debit_value).to eq trade.total * btceth_price + pnl3.total_debit_value
@@ -415,8 +415,8 @@ describe Jobs::Cron::StatsMemberPnl do
           expect(StatsMemberPnl.all[2].total_balance_value).to eq(0)
 
           expect(StatsMemberPnl.all[3].member_id).to eq trade.taker_order.member.id
-          expect(StatsMemberPnl.all[3].pnl_currency_id).to eq 'eth'
-          expect(StatsMemberPnl.all[3].currency_id).to eq pnl4.currency_id
+          expect(StatsMemberPnl.all[3].pnl_currency_code).to eq 'eth'
+          expect(StatsMemberPnl.all[3].currency_code).to eq pnl4.currency_code
           expect(StatsMemberPnl.all[3].total_credit).to eq trade.amount - total_fees + pnl4.total_credit
           expect(StatsMemberPnl.all[3].total_debit).to eq pnl4.total_debit
           expect(StatsMemberPnl.all[3].total_debit_value).to eq pnl4.total_debit_value
@@ -439,14 +439,14 @@ describe Jobs::Cron::StatsMemberPnl do
           expect { Jobs::Cron::StatsMemberPnl.process }.to change { StatsMemberPnl.count }.by(4)
           total_fees = trade.total * trade.order_fee(trade.maker_order)
 
-          pnl1 = StatsMemberPnl.find_by(member_id: trade.maker_order.member.id, currency_id: trade.maker_order.income_currency.id, pnl_currency_id: 'eth')
+          pnl1 = StatsMemberPnl.find_by(member_id: trade.maker_order.member.id, currency_code: trade.maker_order.income_currency.id, pnl_currency_code: 'eth')
           expect(pnl1.total_credit).to eq trade.total - total_fees
           expect(pnl1.total_debit).to eq 0
           expect(pnl1.total_debit_value).to eq 0
           expect(pnl1.total_credit_fees).to eq total_fees
           expect(pnl1.total_credit_value).to eq (trade.total - total_fees) * 1.0
 
-          pnl2 = StatsMemberPnl.find_by(member_id: trade.maker_order.member.id, currency_id: trade.maker_order.outcome_currency.id, pnl_currency_id: 'eth')
+          pnl2 = StatsMemberPnl.find_by(member_id: trade.maker_order.member.id, currency_code: trade.maker_order.outcome_currency.id, pnl_currency_code: 'eth')
           expect(pnl2.total_credit).to eq 0
           expect(pnl2.total_debit).to eq trade.amount
           expect(pnl2.total_debit_value).to eq trade.amount * 1.0
@@ -454,14 +454,14 @@ describe Jobs::Cron::StatsMemberPnl do
           expect(pnl2.total_credit_value).to eq 0
 
           total_fees = trade.amount * trade.order_fee(trade.taker_order)
-          pnl3 = StatsMemberPnl.find_by(member_id: trade.taker_order.member.id, currency_id: trade.taker_order.income_currency.id, pnl_currency_id: 'eth')
+          pnl3 = StatsMemberPnl.find_by(member_id: trade.taker_order.member.id, currency_code: trade.taker_order.income_currency.id, pnl_currency_code: 'eth')
           expect(pnl3.total_credit).to eq trade.amount - total_fees
           expect(pnl3.total_debit).to eq 0
           expect(pnl3.total_debit_value).to eq 0
           expect(pnl3.total_credit_fees).to eq total_fees
           expect(pnl3.total_credit_value).to eq (trade.amount - total_fees) * 1.0
 
-          pnl4 = StatsMemberPnl.find_by(member_id: trade.taker_order.member.id, currency_id: trade.taker_order.outcome_currency.id, pnl_currency_id: 'eth')
+          pnl4 = StatsMemberPnl.find_by(member_id: trade.taker_order.member.id, currency_code: trade.taker_order.outcome_currency.id, pnl_currency_code: 'eth')
           expect(pnl4.total_credit).to eq 0
           expect(pnl4.total_debit).to eq trade.total
           expect(pnl4.total_debit_value).to eq trade.total * 1.0
@@ -526,8 +526,8 @@ describe Jobs::Cron::StatsMemberPnl do
         expect { Jobs::Cron::StatsMemberPnl.process }.to change { StatsMemberPnl.count }.by(2)
 
         expect(StatsMemberPnl.second.member_id).to eq coin_deposit.member_id
-        expect(StatsMemberPnl.second.currency_id).to eq coin_deposit.currency_id
-        expect(StatsMemberPnl.second.pnl_currency_id).to eq Market.first.quote_unit
+        expect(StatsMemberPnl.second.currency_code).to eq coin_deposit.currency_code
+        expect(StatsMemberPnl.second.pnl_currency_code).to eq Market.first.quote_unit
         expect(StatsMemberPnl.second.total_credit).to eq coin_deposit.amount
         expect(StatsMemberPnl.second.total_debit).to eq 0
         expect(StatsMemberPnl.second.total_debit_value).to eq 0
@@ -536,8 +536,8 @@ describe Jobs::Cron::StatsMemberPnl do
         expect(StatsMemberPnl.second.total_credit_value).to eq coin_deposit.amount * 1.0
 
         expect(StatsMemberPnl.last.member_id).to eq coin_deposit.member_id
-        expect(StatsMemberPnl.last.currency_id).to eq coin_deposit.currency_id
-        expect(StatsMemberPnl.last.pnl_currency_id).to eq Market.second.quote_unit
+        expect(StatsMemberPnl.last.currency_code).to eq coin_deposit.currency_code
+        expect(StatsMemberPnl.last.pnl_currency_code).to eq Market.second.quote_unit
         expect(StatsMemberPnl.last.total_credit).to eq coin_deposit.amount
         expect(StatsMemberPnl.last.total_debit).to eq 0
         expect(StatsMemberPnl.last.total_debit_value).to eq 0
@@ -673,7 +673,7 @@ describe Jobs::Cron::StatsMemberPnl do
       Jobs::Cron::StatsMemberPnl.process
       expect(StatsMemberPnl.count).to eq(4)
 
-      musd = StatsMemberPnl.find_by(member_id: member.id, pnl_currency_id: 'usd', currency_id: 'usd')
+      musd = StatsMemberPnl.find_by(member_id: member.id, pnl_currency_code: 'usd', currency_code: 'usd')
       expect(musd.total_credit).to eq(100)
       expect(musd.total_credit_fees).to eq(0)
       expect(musd.total_debit_fees).to eq(1)
@@ -683,7 +683,7 @@ describe Jobs::Cron::StatsMemberPnl do
       expect(musd.total_balance_value).to eq(10)
       expect(musd.average_balance_price).to eq(1)
 
-      mbtc = StatsMemberPnl.find_by(member_id: member.id, pnl_currency_id: 'usd', currency_id: 'btc')
+      mbtc = StatsMemberPnl.find_by(member_id: member.id, pnl_currency_code: 'usd', currency_code: 'btc')
       expect(mbtc.total_credit).to eq(0.09)
       expect(mbtc.total_credit_fees).to eq(0)
       expect(mbtc.total_debit_fees).to eq(0)
@@ -780,7 +780,7 @@ describe Jobs::Cron::StatsMemberPnl do
       Jobs::Cron::StatsMemberPnl.process
 
       expect(StatsMemberPnl.count).to eq(4)
-      musd = StatsMemberPnl.find_by(member_id: member.id, pnl_currency_id: 'usd', currency_id: 'usd')
+      musd = StatsMemberPnl.find_by(member_id: member.id, pnl_currency_code: 'usd', currency_code: 'usd')
       expect(musd.total_credit).to eq(100)
       expect(musd.total_credit_fees).to eq(0)
       expect(musd.total_debit_fees).to eq(1)
@@ -790,7 +790,7 @@ describe Jobs::Cron::StatsMemberPnl do
       expect(musd.total_balance_value).to eq(0)
       expect(musd.average_balance_price).to eq(1)
 
-      mbtc = StatsMemberPnl.find_by(member_id: member.id, pnl_currency_id: 'usd', currency_id: 'btc')
+      mbtc = StatsMemberPnl.find_by(member_id: member.id, pnl_currency_code: 'usd', currency_code: 'btc')
       expect(mbtc.total_credit).to eq(0.09)
       expect(mbtc.total_credit_fees).to eq(0)
       expect(mbtc.total_debit_fees).to eq(0)

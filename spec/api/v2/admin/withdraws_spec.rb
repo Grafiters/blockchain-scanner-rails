@@ -35,7 +35,7 @@ describe API::V2::Admin::Withdraws, type: :request do
       expect(actual.length).to eq expected.length
       expect(actual.map { |a| a['state'] }).to match_array expected.map(&:aasm_state)
       expect(actual.map { |a| a['id'] }).to match_array expected.map(&:id)
-      expect(actual.map { |a| a['currency'] }).to match_array expected.map(&:currency_id)
+      expect(actual.map { |a| a['currency'] }).to match_array expected.map(&:currency_code)
       expect(actual.map { |a| a['member'] }).to match_array expected.map(&:member_id)
       expect(actual.map { |a| a['blockchain_key'] }).to match_array expected.map(&:blockchain_key)
       expect(actual.map { |a| a['type'] }).to match_array(expected.map { |d| d.currency.coin? ? 'coin' : 'fiat' })
@@ -82,7 +82,7 @@ describe API::V2::Admin::Withdraws, type: :request do
         expect(actual.length).to eq expected.length
         expect(actual.map { |a| a['state'] }).to match_array expected.map(&:aasm_state)
         expect(actual.map { |a| a['id'] }).to match_array expected.map(&:id)
-        expect(actual.map { |a| a['currency'] }).to match_array expected.map(&:currency_id)
+        expect(actual.map { |a| a['currency'] }).to match_array expected.map(&:currency_code)
         expect(actual.map { |a| a['member'] }).to all eq level_3_member.id
         expect(actual.map { |a| a['blockchain_key'] }).to match_array expected.map(&:blockchain_key)
         expect(actual.map { |a| a['type'] }).to match_array(expected.map { |d| d.currency.coin? ? 'coin' : 'fiat' })
@@ -125,7 +125,7 @@ describe API::V2::Admin::Withdraws, type: :request do
         expect(actual.length).to eq expected.length
         expect(actual.map { |a| a['state'] }).to match_array expected.map(&:aasm_state)
         expect(actual.map { |a| a['id'] }).to match_array expected.map(&:id)
-        expect(actual.map { |a| a['currency'] }).to match_array expected.map(&:currency_id)
+        expect(actual.map { |a| a['currency'] }).to match_array expected.map(&:currency_code)
         expect(actual.map { |a| a['blockchain_key'] }).to match_array expected.map(&:blockchain_key)
         expect(actual.map { |a| a['member'] }).to match_array expected.map(&:member_id)
         expect(actual.map { |a| a['type'] }).to all eq 'coin'
@@ -140,7 +140,7 @@ describe API::V2::Admin::Withdraws, type: :request do
         expect(actual.length).to eq 1
         expect(actual.first['state']).to eq expected.aasm_state
         expect(actual.first['id']).to eq expected.id
-        expect(actual.first['currency']).to eq expected.currency_id
+        expect(actual.first['currency']).to eq expected.currency_code
         expect(actual.first['blockchain_key']).to eq expected.blockchain_key
         expect(actual.first['member']).to eq expected.member_id
         expect(actual.first['type']).to eq 'coin'
@@ -155,7 +155,7 @@ describe API::V2::Admin::Withdraws, type: :request do
         expect(actual.length).to eq expected.length
         expect(actual.map { |a| a['state'] }).to match_array expected.map(&:aasm_state)
         expect(actual.map { |a| a['id'] }).to match_array expected.map(&:id)
-        expect(actual.map { |a| a['currency'] }).to match_array expected.map(&:currency_id)
+        expect(actual.map { |a| a['currency'] }).to match_array expected.map(&:currency_code)
         expect(actual.map { |a| a['blockchain_key'] }).to match_array expected.map(&:blockchain_key)
         expect(actual.map { |a| a['member'] }).to match_array expected.map(&:member_id)
         expect(actual.map { |a| a['type'] }).to all eq 'coin'
@@ -163,7 +163,7 @@ describe API::V2::Admin::Withdraws, type: :request do
 
       it 'by wallet_type' do
         wallet_type = Wallet.joins(:currencies)
-                            .find_by(currencies: { id: Withdraw.find_by(type: 'Withdraws::Coin').currency_id })
+                            .find_by(currencies: { id: Withdraw.find_by(type: 'Withdraws::Coin').currency_code })
                             .gateway
         api_get url, token: token, params: { wallet_type: wallet_type }
 

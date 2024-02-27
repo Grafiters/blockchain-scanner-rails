@@ -5,7 +5,7 @@ class CurrencyWallet < ApplicationRecord
 
   belongs_to :currency
   belongs_to :wallet
-  validates :currency_id, uniqueness: { scope: :wallet_id }
+  validates :currency_code, uniqueness: { scope: :wallet_id }
 end
 
 # == Schema Information
@@ -13,12 +13,12 @@ end
 #
 # Table name: currencies_wallets
 #
-#  currency_id :string(255)
+#  currency_code :string(255)
 #  wallet_id   :bigint
 #
 # Indexes
 #
-#  index_currencies_wallets_on_currency_id                (currency_id)
-#  index_currencies_wallets_on_currency_id_and_wallet_id  (currency_id,wallet_id) UNIQUE
+#  index_currencies_wallets_on_currency_code                (currency_code)
+#  index_currencies_wallets_on_currency_code_and_wallet_id  (currency_code,wallet_id) UNIQUE
 #  index_currencies_wallets_on_wallet_id                  (wallet_id)
 #

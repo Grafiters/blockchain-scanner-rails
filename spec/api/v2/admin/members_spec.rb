@@ -127,7 +127,7 @@ describe API::V2::Admin::Members, type: :request do
         expect(result['accounts'][0]['currency']).to eq(member.accounts[0].currency.id)
         expect(result['accounts'][0]['balance']).to eq(member.accounts[0].balance.to_s)
         expect(result['accounts'][0]['locked']).to eq(member.accounts[0].locked.to_s)
-        expect(result['beneficiaries'][0]['currency']).to eq(member.beneficiaries[0].currency_id)
+        expect(result['beneficiaries'][0]['currency']).to eq(member.beneficiaries[0].currency_code)
         expect(result['beneficiaries'][0]['data']['address']).to eq(member.beneficiaries[0].data['address'])
       end
 
@@ -152,7 +152,7 @@ describe API::V2::Admin::Members, type: :request do
           expect(result['accounts'][0]['currency']).to eq(member.accounts[0].currency.id)
           expect(result['accounts'][0]['balance']).to eq(member.accounts[0].balance.to_s)
           expect(result['accounts'][0]['locked']).to eq(member.accounts[0].locked.to_s)
-          expect(result['beneficiaries'][0]['currency']).to eq(member.beneficiaries[0].currency_id)
+          expect(result['beneficiaries'][0]['currency']).to eq(member.beneficiaries[0].currency_code)
           expect(result['beneficiaries'][0]['data']['address']).to eq(member.beneficiaries[0].data['address'])
           expect(result['beneficiaries'][0]['data']['account_number']).to eq(member.beneficiaries[0].data['account_number'])
         end

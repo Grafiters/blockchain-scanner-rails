@@ -105,12 +105,12 @@ describe API::V2::Management::BlockchainCurrencies, type: :request do
     end
 
     it 'returns blockchain currencies by ascending order' do
-      blockchain_currency_data.merge!(ordering: 'asc', order_by: 'currency_id')
+      blockchain_currency_data.merge!(ordering: 'asc', order_by: 'currency_code')
       request
       result = JSON.parse(response.body)
 
       expect(response).to be_successful
-      expect(result.first['currency_id']).to eq 'btc'
+      expect(result.first['currency_code']).to eq 'btc'
     end
 
     it 'returns paginated blockchain currencies' do
@@ -122,7 +122,7 @@ describe API::V2::Management::BlockchainCurrencies, type: :request do
 
       expect(response.headers.fetch('Total')).to eq '6'
       expect(result.size).to eq 3
-      expect(result.first['currency_id']).to eq 'usd'
+      expect(result.first['currency_code']).to eq 'usd'
 
       blockchain_currency_data.merge!(limit: 3, page: 2)
       request
@@ -132,7 +132,7 @@ describe API::V2::Management::BlockchainCurrencies, type: :request do
 
       expect(response.headers.fetch('Total')).to eq '6'
       expect(result.size).to eq 3
-      expect(result.first['currency_id']).to eq 'eth'
+      expect(result.first['currency_code']).to eq 'eth'
     end
   end
 
@@ -161,7 +161,7 @@ describe API::V2::Management::BlockchainCurrencies, type: :request do
       expect(result['status']).to eq blockchain_currency.status
       expect(result['min_collection_amount']).to eq blockchain_currency.min_collection_amount.to_s
       expect(result['options']).to eq blockchain_currency.options
-      expect(result['currency_id']).to eq blockchain_currency.currency_id
+      expect(result['currency_code']).to eq blockchain_currency.currency_code
       expect(result['blockchain_key']).to eq blockchain_currency.blockchain_key
     end
   end
@@ -178,28 +178,28 @@ describe API::V2::Management::BlockchainCurrencies, type: :request do
     end
 
     it 'create blockchain currency' do
-      blockchain_currency_data.merge!(currency_id: 'eth', blockchain_key: 'btc-testnet')
+      blockchain_currency_data.merge!(currency_code: 'eth', blockchain_key: 'btc-testnet')
       request
       result = JSON.parse(response.body)
 
       expect(response).to be_successful
-      expect(result['currency_id']).to eq 'eth'
+      expect(result['currency_code']).to eq 'eth'
       expect(result['blockchain_key']).to eq 'btc-testnet'
     end
 
     it 'create blockchain currency with parent' do
-      blockchain_currency_data.merge!(currency_id: 'trst', blockchain_key: 'btc-testnet', parent_id: 'eth')
+      blockchain_currency_data.merge!(currency_code: 'trst', blockchain_key: 'btc-testnet', parent_id: 'eth')
       request
       result = JSON.parse(response.body)
 
       expect(response).to be_successful
-      expect(result['currency_id']).to eq 'trst'
+      expect(result['currency_code']).to eq 'trst'
       expect(result['parent_id']).to eq 'eth'
       expect(result['blockchain_key']).to eq 'btc-testnet'
     end
 
     it 'validate parent_id param' do
-      blockchain_currency_data.merge!(currency_id: 'trst', blockchain_key: 'btc-testnet', parent_id: 'eur')
+      blockchain_currency_data.merge!(currency_code: 'trst', blockchain_key: 'btc-testnet', parent_id: 'eur')
       request
 
       expect(response).to have_http_status 422
@@ -207,14 +207,14 @@ describe API::V2::Management::BlockchainCurrencies, type: :request do
     end
 
     it 'validate blockchain_key param' do
-      blockchain_currency_data.merge!(currency_id: 'eth', blockchain_key: 'test')
+      blockchain_currency_data.merge!(currency_code: 'eth', blockchain_key: 'test')
       request
       expect(response).to have_http_status 422
       expect(response.body).to match(/management.blockchain_currency.blockchain_key_doesnt_exist/i)
     end
 
     it 'validate visible param' do
-      blockchain_currency_data.merge!(currency_id: 'eth', blockchain_key: 'btc-testnet', status: '123')
+      blockchain_currency_data.merge!(currency_code: 'eth', blockchain_key: 'btc-testnet', status: '123')
       request
 
       expect(response).to have_http_status 422
@@ -222,7 +222,7 @@ describe API::V2::Management::BlockchainCurrencies, type: :request do
     end
 
     it 'validate deposit_enabled param' do
-      blockchain_currency_data.merge!(currency_id: 'eth', blockchain_key: 'btc-testnet', deposit_enabled: '123')
+      blockchain_currency_data.merge!(currency_code: 'eth', blockchain_key: 'btc-testnet', deposit_enabled: '123')
       request
 
       expect(response).to have_http_status 422
@@ -230,7 +230,7 @@ describe API::V2::Management::BlockchainCurrencies, type: :request do
     end
 
     it 'validate withdrawal_enabled param' do
-      blockchain_currency_data.merge!(currency_id: 'eth', blockchain_key: 'btc-testnet', withdrawal_enabled: '123')
+      blockchain_currency_data.merge!(currency_code: 'eth', blockchain_key: 'btc-testnet', withdrawal_enabled: '123')
       request
 
       expect(response).to have_http_status 422
@@ -238,7 +238,7 @@ describe API::V2::Management::BlockchainCurrencies, type: :request do
     end
 
     it 'validate options param' do
-      blockchain_currency_data.merge!(currency_id: 'eth', blockchain_key: 'btc-testnet', options: 'test')
+      blockchain_currency_data.merge!(currency_code: 'eth', blockchain_key: 'btc-testnet', options: 'test')
       request
 
       expect(response).to have_http_status 422
@@ -246,7 +246,7 @@ describe API::V2::Management::BlockchainCurrencies, type: :request do
     end
 
     it 'verifies subunits >= 0' do
-      blockchain_currency_data.merge!(currency_id: 'eth', blockchain_key: 'btc-testnet', subunits: -1)
+      blockchain_currency_data.merge!(currency_code: 'eth', blockchain_key: 'btc-testnet', subunits: -1)
       request
 
       expect(response.body).to match(/management.blockchain_currency.invalid_subunits/i)
@@ -254,7 +254,7 @@ describe API::V2::Management::BlockchainCurrencies, type: :request do
     end
 
     it 'verifies subunits <= 18' do
-      blockchain_currency_data.merge!(currency_id: 'eth', blockchain_key: 'btc-testnet', subunits: 19)
+      blockchain_currency_data.merge!(currency_code: 'eth', blockchain_key: 'btc-testnet', subunits: 19)
       request
 
       expect(response.body).to match(/management.blockchain_currency.invalid_subunits/i)
@@ -262,7 +262,7 @@ describe API::V2::Management::BlockchainCurrencies, type: :request do
     end
 
     it 'creates 1_000_000_000_000_000_000 base_factor' do
-      blockchain_currency_data.merge!(currency_id: 'eth', blockchain_key: 'btc-testnet', subunits: 18)
+      blockchain_currency_data.merge!(currency_code: 'eth', blockchain_key: 'btc-testnet', subunits: 18)
       request
 
       result = JSON.parse(response.body)
@@ -272,7 +272,7 @@ describe API::V2::Management::BlockchainCurrencies, type: :request do
     end
 
     it 'return error while putting base_factor and subunit params' do
-      blockchain_currency_data.merge!(currency_id: 'eth', blockchain_key: 'btc-testnet', subunits: 18, base_factor: 1)
+      blockchain_currency_data.merge!(currency_code: 'eth', blockchain_key: 'btc-testnet', subunits: 18, base_factor: 1)
       request
 
       expect(response.code).to eq '422'
@@ -280,7 +280,7 @@ describe API::V2::Management::BlockchainCurrencies, type: :request do
     end
 
     it 'creates currency with 1000 base_factor' do
-      blockchain_currency_data.merge!(currency_id: 'eth', blockchain_key: 'btc-testnet', base_factor: 1000)
+      blockchain_currency_data.merge!(currency_code: 'eth', blockchain_key: 'btc-testnet', base_factor: 1000)
       request
       result = JSON.parse(response.body)
 
@@ -293,7 +293,7 @@ describe API::V2::Management::BlockchainCurrencies, type: :request do
       request
 
       expect(response).to have_http_status 422
-      expect(response.body).to match(/currency_id is missing/i)
+      expect(response.body).to match(/currency_code is missing/i)
     end
   end
 

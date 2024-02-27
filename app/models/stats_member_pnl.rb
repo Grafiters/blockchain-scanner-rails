@@ -12,8 +12,8 @@ class StatsMemberPnl < ApplicationRecord
 
   # == Relationships ========================================================
 
-  belongs_to :currency, required: true, foreign_key: :currency_id
-  belongs_to :currency, required: true, foreign_key: :pnl_currency_id
+  belongs_to :currency, required: true, foreign_key: :currency_code
+  belongs_to :currency, required: true, foreign_key: :pnl_currency_code
   belongs_to :member, required: true
 
   # == Validations ==========================================================
@@ -39,8 +39,8 @@ end
 #
 #  id                    :bigint           not null, primary key
 #  member_id             :bigint           not null
-#  pnl_currency_id       :string(10)       not null
-#  currency_id           :string(10)       not null
+#  pnl_currency_code       :string(10)       not null
+#  currency_code           :string(10)       not null
 #  total_credit          :decimal(48, 16)  default(0.0)
 #  total_credit_fees     :decimal(48, 16)  default(0.0)
 #  total_debit_fees      :decimal(48, 16)  default(0.0)
@@ -54,5 +54,5 @@ end
 #
 # Indexes
 #
-#  index_currency_ids_and_member_id  (pnl_currency_id,currency_id,member_id) UNIQUE
+#  index_currency_codes_and_member_id  (pnl_currency_code,currency_code,member_id) UNIQUE
 #

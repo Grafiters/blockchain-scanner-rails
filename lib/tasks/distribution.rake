@@ -6,7 +6,7 @@ namespace :distribution do
   # Detailed instruction https://github.com/rubykube/peatio/blob/master/docs/tasks/distribution.md
   # Required fields for distribution:
   # - uid
-  # - currency_id
+  # - currency_code
   # - amount
   #
   # Usage:
@@ -20,10 +20,10 @@ namespace :distribution do
     CSV.parse(csv_table, headers: true, quote_empty: false).each do |row|
       row = row.to_h.compact.symbolize_keys!
       uid = row[:uid]
-      currency_id = row[:currency_id]
+      currency_code = row[:currency_code]
       amount = row[:amount].to_d
       member = Member.find_by_uid!(uid)
-      currency = Currency.find(currency_id)
+      currency = Currency.find(currency_code)
       account = member.get_account(currency)
 
       ActiveRecord::Base.transaction do

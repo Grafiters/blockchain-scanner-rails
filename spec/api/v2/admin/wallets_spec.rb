@@ -16,7 +16,7 @@ describe API::V2::Admin::Wallets, type: :request do
 
       result = JSON.parse(response.body)
       expect(result.fetch('id')).to eq wallet.id
-      expect(result.fetch('currencies')).to eq wallet.currency_ids
+      expect(result.fetch('currencies')).to eq wallet.currency_codes
       expect(result.fetch('address')).to eq wallet.address
     end
 
@@ -147,7 +147,7 @@ describe API::V2::Admin::Wallets, type: :request do
 
       before do
         Currency.active.where.not(id: currency.id).map { |c| c.update(status: :disabled) }
-        BlockchainCurrency.active.where.not(currency_id: currency.id).map { |c| c.update(status: :disabled) }
+        BlockchainCurrency.active.where.not(currency_code: currency.id).map { |c| c.update(status: :disabled) }
       end
 
       let(:expected_zero_result) {
@@ -340,7 +340,7 @@ describe API::V2::Admin::Wallets, type: :request do
       expect(response).to include_api_error('admin.wallet.invalid_kind')
     end
 
-    it 'validate currency_id' do
+    it 'validate currency_code' do
       api_post '/api/v2/admin/wallets/update', params: { id: 1, name: 'Test', kind: 'deposit', address: 'blank', blockchain_key: 'btc-testnet', gateway: 'geth', plain_settings: {external_wallet_id: 1}, settings: { uri: 'http://127.0.0.1:18332'}, currencies: 'test' }, token: token
 
       expect(response.code).to eq '422'
@@ -457,7 +457,7 @@ describe API::V2::Admin::Wallets, type: :request do
       expect(response).to include_api_error('admin.wallet.invalid_kind')
     end
 
-    it 'validate currency_id' do
+    it 'validate currency_code' do
       api_post '/api/v2/admin/wallets/update', params: { id: Wallet.first.id, currencies: 'test ' }, token: token
 
       expect(response.code).to eq '422'

@@ -40,10 +40,10 @@ describe API::V2::Management::Operations, type: :request do
             operations = "operations/#{op_type}"
                             .camelize
                             .constantize
-                            .where(currency_id: :btc)
+                            .where(currency_code: :btc)
             expect(JSON.parse(response.body).count).to eq operations.count
             expect(JSON.parse(response.body).map { |h| h['currency'] }).to\
-              eq operations.pluck(:currency_id)
+              eq operations.pluck(:currency_code)
           end
         end
 
@@ -87,10 +87,10 @@ describe API::V2::Management::Operations, type: :request do
             operations = "operations/#{op_type}"
                            .camelize
                            .constantize
-                           .where(currency_id: :btc)
+                           .where(currency_code: :btc)
             expect(JSON.parse(response.body).count).to eq operations.count
             expect(JSON.parse(response.body).map { |h| h['currency'] }).to\
-              eq operations.pluck(:currency_id)
+              eq operations.pluck(:currency_code)
           end
         end
 
@@ -302,8 +302,8 @@ describe API::V2::Management::Operations, type: :request do
           end
 
           it 'updates legacy balance' do
-            currency_id = JSON.parse(response.body)['currency']
-            expect(member.get_account(currency_id).balance).to \
+            currency_code = JSON.parse(response.body)['currency']
+            expect(member.get_account(currency_code).balance).to \
               eq JSON.parse(response.body)['credit'].to_d
           end
 
@@ -350,8 +350,8 @@ describe API::V2::Management::Operations, type: :request do
           end
 
           it 'updates legacy balance' do
-            currency_id = JSON.parse(response.body)['currency']
-            expect(member.get_account(currency_id).balance).to \
+            currency_code = JSON.parse(response.body)['currency']
+            expect(member.get_account(currency_code).balance).to \
               eq 0.to_d
           end
         end

@@ -3,7 +3,7 @@
 
 describe Adjustment do
   let!(:member) { create(:member) }
-  subject { create(:adjustment, currency_id: 'btc', receiving_account_number: "btc-202-#{member.uid}") }
+  subject { create(:adjustment, currency_code: 'btc', receiving_account_number: "btc-202-#{member.uid}") }
 
   context 'on create' do
     it 'does not insert liability' do
@@ -48,8 +48,8 @@ describe Adjustment do
                 liability: liability)
         end
 
-        let(:asset) { build(:asset, credit: 1, currency_id: :btc) }
-        let(:liability) { build(:liability, :with_member, credit: 5, currency_id: :btc) }
+        let(:asset) { build(:asset, credit: 1, currency_code: :btc) }
+        let(:liability) { build(:liability, :with_member, credit: 5, currency_code: :btc) }
 
         before do
           subject.stubs(:fetch_operations).returns([asset, liability])
@@ -68,8 +68,8 @@ describe Adjustment do
                 liability: liability)
         end
 
-        let(:asset) { build(:asset, credit: 1, currency_id: :btc) }
-        let(:liability) { build(:liability, :with_member, credit: 1, currency_id: :btc) }
+        let(:asset) { build(:asset, credit: 1, currency_code: :btc) }
+        let(:liability) { build(:liability, :with_member, credit: 1, currency_code: :btc) }
 
         it 'invalidates transfer' do
           expect(subject.valid?).to be_truthy
@@ -82,7 +82,7 @@ describe Adjustment do
     subject { adjustment.prebuild_operations }
 
     context 'asset and liability' do
-      let!(:adjustment) { create(:adjustment, currency_id: 'btc', receiving_account_number: "btc-202-#{member.uid}", amount: 1) }
+      let!(:adjustment) { create(:adjustment, currency_code: 'btc', receiving_account_number: "btc-202-#{member.uid}", amount: 1) }
 
       it do
         expect(subject.first.is_a?(Operations::Asset)).to be_truthy
@@ -92,7 +92,7 @@ describe Adjustment do
       end
 
       context 'negative amount' do
-        let!(:adjustment) { create(:adjustment, currency_id: 'btc', receiving_account_number: "btc-202-#{member.uid}", amount: -1) }
+        let!(:adjustment) { create(:adjustment, currency_code: 'btc', receiving_account_number: "btc-202-#{member.uid}", amount: -1) }
 
         it do
           expect(subject.first.debit).to eq(1)
@@ -102,7 +102,7 @@ describe Adjustment do
     end
 
     context 'asset and revenue' do
-      let!(:adjustment) { create(:adjustment, currency_id: 'btc', receiving_account_number: "btc-302", amount: 1) }
+      let!(:adjustment) { create(:adjustment, currency_code: 'btc', receiving_account_number: "btc-302", amount: 1) }
 
       it do
         expect(subject.first.is_a?(Operations::Asset)).to be_truthy
@@ -112,7 +112,7 @@ describe Adjustment do
       end
 
       context 'negative amount' do
-        let!(:adjustment) { create(:adjustment, currency_id: 'btc', receiving_account_number: "btc-302", amount: -1) }
+        let!(:adjustment) { create(:adjustment, currency_code: 'btc', receiving_account_number: "btc-302", amount: -1) }
 
         it do
           expect(subject.first.debit).to eq(1)
@@ -122,7 +122,7 @@ describe Adjustment do
     end
 
     context 'asset and expense' do
-      let!(:adjustment) { create(:adjustment, currency_id: 'btc', receiving_account_number: "btc-402", amount: 1) }
+      let!(:adjustment) { create(:adjustment, currency_code: 'btc', receiving_account_number: "btc-402", amount: 1) }
 
       it do
         expect(subject.first.is_a?(Operations::Asset)).to be_truthy
@@ -132,7 +132,7 @@ describe Adjustment do
       end
 
       context 'negative amount' do
-        let!(:adjustment) { create(:adjustment, currency_id: 'btc', receiving_account_number: "btc-402", amount: -1) }
+        let!(:adjustment) { create(:adjustment, currency_code: 'btc', receiving_account_number: "btc-402", amount: -1) }
 
         it do
           expect(subject.first.debit).to eq(1)
@@ -161,7 +161,7 @@ describe Adjustment do
     end
 
     context 'updates legacy balances (debit for locked account)' do
-      subject { create(:adjustment, currency_id: 'btc', amount: -1, receiving_account_number: "btc-212-#{member.uid}") }
+      subject { create(:adjustment, currency_code: 'btc', amount: -1, receiving_account_number: "btc-212-#{member.uid}") }
 
       before do
         member.get_account(:btc).update!(locked: 1)
@@ -227,7 +227,7 @@ describe Adjustment do
       end
 
       it do
-        expect(member.accounts.find_by(currency_id: 'btc').present?).to be_truthy
+        expect(member.accounts.find_by(currency_code: 'btc').present?).to be_truthy
       end
     end
   end

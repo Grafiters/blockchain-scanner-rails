@@ -2,7 +2,7 @@
 
 describe BlockchainCurrency do
   context 'validations' do
-    let(:blockchain_currency) { BlockchainCurrency.find_by(currency_id: :btc) }
+    let(:blockchain_currency) { BlockchainCurrency.find_by(currency_code: :btc) }
 
     it 'validates blockchain_key' do
       blockchain_currency.blockchain_key = 'an-nonexistent-key'
@@ -15,9 +15,9 @@ describe BlockchainCurrency do
     end
 
     context 'token' do
-      let!(:blockchain_currency) { BlockchainCurrency.find_by(currency_id: :ring) }
-      let!(:blockchain_trst_currency) { BlockchainCurrency.find_by(currency_id: :trst) }
-      let!(:blockchain_fiat_currency) { BlockchainCurrency.find_by(currency_id: :eur) }
+      let!(:blockchain_currency) { BlockchainCurrency.find_by(currency_code: :ring) }
+      let!(:blockchain_trst_currency) { BlockchainCurrency.find_by(currency_code: :trst) }
+      let!(:blockchain_fiat_currency) { BlockchainCurrency.find_by(currency_code: :eur) }
   
       # coin configuration
       it 'validate parent_id presence' do
@@ -43,15 +43,15 @@ describe BlockchainCurrency do
       let(:coin) { 'eth' }
       let(:erc20_coin) { 'trst' }
       let(:blockchain_key) { 'btc-testnet' }
-      let!(:blockchain_currency) { BlockchainCurrency.find_by(currency_id: :eth) }
+      let!(:blockchain_currency) { BlockchainCurrency.find_by(currency_code: :eth) }
 
       context 'without parent id' do
         it 'should not create currency wallet' do
           wallet = Wallet.find_by(blockchain_key: blockchain_key)
           expect(wallet).not_to eq nil
-          currency = BlockchainCurrency.create(currency_id: coin, blockchain_key: blockchain_key)
+          currency = BlockchainCurrency.create(currency_code: coin, blockchain_key: blockchain_key)
           
-          expect(CurrencyWallet.find_by(currency_id: currency.id, wallet_id: wallet.id)).to eq nil
+          expect(CurrencyWallet.find_by(currency_code: currency.id, wallet_id: wallet.id)).to eq nil
         end
       end
 
@@ -59,19 +59,19 @@ describe BlockchainCurrency do
         it 'should create currency wallet' do
           wallet = Wallet.find_by(blockchain_key: blockchain_key)
           # create links for parent currency before
-          CurrencyWallet.create(currency_id: coin, wallet_id: wallet.id)
-          currency = BlockchainCurrency.create(currency_id: erc20_coin, blockchain_key: blockchain_key, parent_id: coin)
-          c_w = CurrencyWallet.find_by(currency_id: erc20_coin, wallet_id: wallet.id)
+          CurrencyWallet.create(currency_code: coin, wallet_id: wallet.id)
+          currency = BlockchainCurrency.create(currency_code: erc20_coin, blockchain_key: blockchain_key, parent_id: coin)
+          c_w = CurrencyWallet.find_by(currency_code: erc20_coin, wallet_id: wallet.id)
 
           expect(c_w.present?).to eq true
-          expect(c_w.currency_id).to eq erc20_coin
+          expect(c_w.currency_code).to eq erc20_coin
         end
       end
     end
   end
 
   context 'scopes' do
-    let(:blockchain_currency) { BlockchainCurrency.find_by(currency_id: :btc) }
+    let(:blockchain_currency) { BlockchainCurrency.find_by(currency_code: :btc) }
 
     context 'visible' do
       it 'changes visible scope count' do
@@ -99,7 +99,7 @@ describe BlockchainCurrency do
   end
 
   context 'subunits=' do
-    let(:blockchain_currency) { BlockchainCurrency.find_by(currency_id: :btc) }
+    let(:blockchain_currency) { BlockchainCurrency.find_by(currency_code: :btc) }
 
     it 'updates base_factor' do
       expect { blockchain_currency.subunits = 4 }.to change { blockchain_currency.base_factor }.to 10_000
@@ -107,7 +107,7 @@ describe BlockchainCurrency do
   end
 
   context 'read only attributes' do
-    let(:blockchain_currency) { BlockchainCurrency.find_by(currency_id: :btc) }
+    let(:blockchain_currency) { BlockchainCurrency.find_by(currency_code: :btc) }
 
     it 'should not update the base factor' do
       blockchain_currency.update_attributes :base_factor => 8
@@ -116,7 +116,7 @@ describe BlockchainCurrency do
   end
 
   context 'subunits' do
-    let(:blockchain_currency) { BlockchainCurrency.find_by(currency_id: :ring) }
+    let(:blockchain_currency) { BlockchainCurrency.find_by(currency_code: :ring) }
 
     it 'return currency subunits' do
       expect(blockchain_currency.subunits).to eq(6)
@@ -124,7 +124,7 @@ describe BlockchainCurrency do
   end
 
   context 'serialization' do
-    let!(:blockchain_currency) { BlockchainCurrency.find_by(currency_id: :ring) }
+    let!(:blockchain_currency) { BlockchainCurrency.find_by(currency_code: :ring) }
 
     let(:options) { { "gas_price" => "standard", "erc20_contract_address" => "0x022e292b44b5a146f2e8ee36ff44d3dd863c915c", "gas_limit" => "100000" } }
 
@@ -140,7 +140,7 @@ describe BlockchainCurrency do
         let(:blockchain) { Blockchain.find_by(key: 'btc-testnet') }
         context 'auto_update_fees_enabled false' do
           it 'creates blockchain currency with specific fees' do
-            blockchain_currency = BlockchainCurrency.create(currency_id: 'eth', blockchain_key: blockchain.key, auto_update_fees_enabled: false, min_deposit_amount: 0.12)
+            blockchain_currency = BlockchainCurrency.create(currency_code: 'eth', blockchain_key: blockchain.key, auto_update_fees_enabled: false, min_deposit_amount: 0.12)
             expect(blockchain_currency.min_deposit_amount).to eq 0.12
           end
         end
@@ -148,7 +148,7 @@ describe BlockchainCurrency do
         context 'auto_update_fees_enabled true' do
           let!(:currency) { create(:currency, :eth, id: 'usdt')}
           let(:min_deposit_amount) { 12 }
-          let(:b_currency) { BlockchainCurrency.find_by(currency_id: 'eth', blockchain_key: 'eth-rinkeby')}
+          let(:b_currency) { BlockchainCurrency.find_by(currency_code: 'eth', blockchain_key: 'eth-rinkeby')}
 
           before do
             Blockchain.any_instance.stubs(:min_deposit_amount).returns(min_deposit_amount.to_d)
@@ -157,7 +157,7 @@ describe BlockchainCurrency do
           end
 
           it 'creates blockchain currency with auto update fees' do
-            b_currency = BlockchainCurrency.create(currency_id: 'eth', blockchain_key: blockchain.key, auto_update_fees_enabled: true, min_deposit_amount: 2)
+            b_currency = BlockchainCurrency.create(currency_code: 'eth', blockchain_key: blockchain.key, auto_update_fees_enabled: true, min_deposit_amount: 2)
             expect(b_currency.min_deposit_amount).not_to eq 2
             expect(b_currency.min_deposit_amount).to eq min_deposit_amount/currency.price
           end
@@ -169,14 +169,14 @@ describe BlockchainCurrency do
 
         context 'auto_update_fees_enabled true' do
           it 'creates blockchain currency with specific fees' do
-            blockchain_currency = BlockchainCurrency.create(currency_id: fiat.id, auto_update_fees_enabled: true, min_deposit_amount: 0.12)
+            blockchain_currency = BlockchainCurrency.create(currency_code: fiat.id, auto_update_fees_enabled: true, min_deposit_amount: 0.12)
             expect(blockchain_currency.min_deposit_amount).to eq 0.12
           end
         end
 
         context 'auto_update_fees_enabled false' do
           it 'creates blockchain currency with specific fees' do
-            blockchain_currency = BlockchainCurrency.create(currency_id: fiat.id, auto_update_fees_enabled: false, min_deposit_amount: 0.12)
+            blockchain_currency = BlockchainCurrency.create(currency_code: fiat.id, auto_update_fees_enabled: false, min_deposit_amount: 0.12)
             expect(blockchain_currency.min_deposit_amount).to eq 0.12
           end
         end
@@ -188,7 +188,7 @@ describe BlockchainCurrency do
     context 'update fees' do
       let!(:currency) { create(:currency, :eth, id: 'usdt')}
       let(:min_deposit_amount) { 12 }
-      let(:b_currency) { BlockchainCurrency.find_by(currency_id: 'eth', blockchain_key: 'eth-rinkeby')}
+      let(:b_currency) { BlockchainCurrency.find_by(currency_code: 'eth', blockchain_key: 'eth-rinkeby')}
 
       before do
         Blockchain.any_instance.stubs(:min_deposit_amount).returns(min_deposit_amount.to_d)
@@ -208,7 +208,7 @@ describe BlockchainCurrency do
   end
 
   context 'to_blockchain_api_settings' do
-    let(:blockchain_currency) { BlockchainCurrency.find_by(currency_id: 'eth') }
+    let(:blockchain_currency) { BlockchainCurrency.find_by(currency_code: 'eth') }
 
     before do
       Blockchain.any_instance.stubs(:collection_gas_speed).returns('fast')

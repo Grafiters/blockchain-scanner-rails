@@ -62,10 +62,10 @@ module Peatio
           if hash['networks'].present?
             ::BlockchainCurrency.transaction do
               hash['networks'].each do |network|
-                next if BlockchainCurrency.exists?(currency_id: hash.fetch('id'), blockchain_key: network.fetch('blockchain_key'))
+                next if BlockchainCurrency.exists?(currency_code: hash.fetch('id'), blockchain_key: network.fetch('blockchain_key'))
                 
-                BlockchainCurrency.create!(network.merge(currency_id: hash.fetch('id')))
-                Kernel.puts "Created blockchain currency with currency_id #{hash.fetch('id')} and #{network.fetch('blockchain_key')} blockchain"
+                BlockchainCurrency.create!(network.merge(currency_code: hash.fetch('id')))
+                Kernel.puts "Created blockchain currency with currency_code #{hash.fetch('id')} and #{network.fetch('blockchain_key')} blockchain"
               end
             end
           end
@@ -81,8 +81,8 @@ module Peatio
         @data['wallets'].each do |hash|
           next if ::Wallet.exists?(name: hash.fetch('name'))
 
-          if hash['currency_ids'].is_a?(String)
-            hash['currency_ids'] = hash['currency_ids'].split(',')
+          if hash['currency_codes'].is_a?(String)
+            hash['currency_codes'] = hash['currency_codes'].split(',')
           end
 
           ::Wallet.create!(hash)

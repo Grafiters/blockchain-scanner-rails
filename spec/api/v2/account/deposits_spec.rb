@@ -273,7 +273,7 @@ describe API::V2::Account::Deposits, type: :request do
     context 'disabled deposit for currency' do
       let(:currency) { :btc }
 
-      before { BlockchainCurrency.find_by(currency_id: currency).update!(deposit_enabled: false) }
+      before { BlockchainCurrency.find_by(currency_code: currency).update!(deposit_enabled: false) }
 
       it 'returns error' do
         api_get "/api/v2/account/deposit_address/#{currency}", params: { blockchain_key: 'btc-testnet' }, token: token

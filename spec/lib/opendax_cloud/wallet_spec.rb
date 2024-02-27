@@ -31,7 +31,7 @@ describe OpendaxCloud::Wallet do
     end
 
     let(:eth) do
-      BlockchainCurrency.find_by(currency_id: :eth)
+      BlockchainCurrency.find_by(currency_code: :eth)
     end
 
     let(:uri) { 'http://127.0.0.1:8000' }
@@ -49,7 +49,7 @@ describe OpendaxCloud::Wallet do
     let(:uri_result) do
       {
         address: '0xa57e810B5f96b049F9030AfE1f1004630818EC72',
-        currency_id: 'eth',
+        currency_code: 'eth',
       }
     end
 
@@ -59,7 +59,7 @@ describe OpendaxCloud::Wallet do
 
     it 'should create an address' do
       stub_request(:post, uri + '/address/new')
-        .with(body: {currency_id: 'eth'}.to_json)
+        .with(body: {currency_code: 'eth'}.to_json)
         .to_return(body: uri_result.to_json)
 
       result = wallet.create_address!(uid: 'UID123')
@@ -77,7 +77,7 @@ describe OpendaxCloud::Wallet do
     end
 
     let(:eth) do
-      BlockchainCurrency.find_by(currency_id: :eth)
+      BlockchainCurrency.find_by(currency_code: :eth)
     end
 
     let(:deposit_wallet_eth) { Wallet.joins(:currencies).find_by(currencies: { id: :eth }, kind: :deposit) }
@@ -112,7 +112,7 @@ describe OpendaxCloud::Wallet do
 
       let(:request_params) do
         {
-          currency_id: 'eth',
+          currency_code: 'eth',
           to_address:  transaction.to_address,
           amount:      transaction.amount.to_d,
         }
@@ -140,7 +140,7 @@ describe OpendaxCloud::Wallet do
     end
 
     let(:eth) do
-      BlockchainCurrency.find_by(currency_id: :eth)
+      BlockchainCurrency.find_by(currency_code: :eth)
     end
 
     let(:uri) { 'http://127.0.0.1:8000' }
@@ -167,7 +167,7 @@ describe OpendaxCloud::Wallet do
 
       let(:request_params) do
         {
-          currency_id: 'eth',
+          currency_code: 'eth',
         }
       end
 
@@ -198,7 +198,7 @@ describe OpendaxCloud::Wallet do
     }
 
     let(:eth) do
-      BlockchainCurrency.find_by(currency_id: :eth)
+      BlockchainCurrency.find_by(currency_code: :eth)
     end
 
     let(:uri) { 'http://127.0.0.1:8000' }
@@ -229,7 +229,7 @@ describe OpendaxCloud::Wallet do
           res = wallet.trigger_webhook_event(OpenStruct.new({'body': StringIO.new(jwt_token), 'params': {'event': 'deposit'}}))
 
           expect(res[0].amount).to eq payload[:amount].to_d
-          expect(res[0].currency_id).to eq payload[:currency]
+          expect(res[0].currency_code).to eq payload[:currency]
           expect(res[0].hash).to eq payload[:blockchain_txid]
           expect(res[0].status).to eq 'pending'
           expect(res[0].options[:tid]).to eq payload[:tid]
@@ -241,7 +241,7 @@ describe OpendaxCloud::Wallet do
           res = wallet.trigger_webhook_event(OpenStruct.new({'body': StringIO.new(jwt_token), 'params': {'event': 'withdraw'}}))
 
           expect(res[0].amount).to eq payload[:amount].to_d
-          expect(res[0].currency_id).to eq payload[:currency]
+          expect(res[0].currency_code).to eq payload[:currency]
           expect(res[0].hash).to eq payload[:blockchain_txid]
           expect(res[0].status).to eq 'success'
           expect(res[0].options[:tid]).to eq payload[:tid]

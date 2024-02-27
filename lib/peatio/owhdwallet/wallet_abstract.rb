@@ -75,7 +75,7 @@ module OWHDWallet
         passphrase: wallet_secret
       })
 
-      transaction.currency_id = native_currency_id if transaction.currency_id.blank?
+      transaction.currency_code = native_currency_code if transaction.currency_code.blank?
       transaction.hash = response['tx']
       transaction.options = {}
       transaction.options[:gas_limit] = gas_limit
@@ -130,7 +130,7 @@ module OWHDWallet
     end
 
     def coin_type
-      currency_id
+      currency_code
     end
 
     def eth_like?
@@ -175,7 +175,7 @@ module OWHDWallet
       GAS_SPEEDS.include?(@wallet[:gas_speed]) ? @wallet[:gas_speed] : 'standard'
     end
 
-    def currency_id
+    def currency_code
       @currency.fetch(:id)
     end
 

@@ -557,7 +557,7 @@ describe Withdraw do
     subject { build(:btc_withdraw, sum: 0.1, member: member) }
 
     before do
-      BlockchainCurrency.find_by(currency_id: 'btc').update(min_withdraw_amount: 0.5.to_d)
+      BlockchainCurrency.find_by(currency_code: 'btc').update(min_withdraw_amount: 0.5.to_d)
     end
 
     it { expect(subject).not_to be_valid }

@@ -51,6 +51,8 @@ class Wallet < ApplicationRecord
 
   validates :max_balance, numericality: { greater_than_or_equal_to: 0 }
 
+  scope :usd_wallet, -> { where(currency_code: 'USD') }
+
   scope :active,   -> { where(status: :active) }
   scope :active_retired, -> { where(status: %w[active retired]) }
   scope :deposit,  -> { where(kind: kinds(deposit: true, values: true)) }
@@ -123,25 +125,25 @@ class Wallet < ApplicationRecord
     end
 
     # Returns active/retired deposit wallets per network
-    def deposit_wallets(currency_id, blockchain_key=nil)
+    def deposit_wallets(currency_code, blockchain_key=nil)
       if blockchain_key
-        Wallet.active_retired.deposit.joins(:currencies).where(currencies: { id: currency_id }, blockchain_key: blockchain_key)
+        Wallet.active_retired.deposit.joins(:currencies).where(currencies: { id: currency_code }, blockchain_key: blockchain_key)
       else
-        Wallet.active_retired.deposit.joins(:currencies).where(currencies: { id: currency_id })
+        Wallet.active_retired.deposit.joins(:currencies).where(currencies: { id: currency_code })
       end
     end
 
     # Returns active deposit wallets
-    def active_deposit_wallets(currency_id)
-      Wallet.active.deposit.joins(:currencies).where(currencies: { id: currency_id })
+    def active_deposit_wallets(currency_code)
+      Wallet.active.deposit.joins(:currencies).where(currencies: { id: currency_code })
     end
 
     # Returns current active deposit wallet per network
-    def active_deposit_wallet(currency_id, blockchain_key=nil)
+    def active_deposit_wallet(currency_code, blockchain_key=nil)
       if blockchain_key
-        Wallet.active.deposit.joins(:currencies).find_by(currencies: { id: currency_id }, blockchain_key: blockchain_key)
+        Wallet.active.deposit.joins(:currencies).find_by(currencies: { id: currency_code }, blockchain_key: blockchain_key)
       else
-        Wallet.active.deposit.joins(:currencies).find_by(currencies: { id: currency_id })
+        Wallet.active.deposit.joins(:currencies).find_by(currencies: { id: currency_code })
       end
     end
 
@@ -224,6 +226,6 @@ end
 # Indexes
 #
 #  index_wallets_on_kind                             (kind)
-#  index_wallets_on_kind_and_currency_id_and_status  (kind,status)
+#  index_wallets_on_kind_and_currency_code_and_status  (kind,status)
 #  index_wallets_on_status                           (status)
 #

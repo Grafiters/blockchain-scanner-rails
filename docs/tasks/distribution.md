@@ -4,11 +4,11 @@
 
 ### Distribution table
 
-  |      uid      | currency_id | amount |
+  |      uid      | currency_code | amount |
   |---------------|-------------|--------|
   | ID1000003837  | usdt        |  100   |
 
-  uid, currency_id, amount - required params
+  uid, currency_code, amount - required params
 
 2. For process distribution
    

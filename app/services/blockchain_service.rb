@@ -2,32 +2,31 @@ class BlockchainService
   Error = Class.new(StandardError)
   BalanceLoadError = Class.new(StandardError)
 
-  attr_reader :blockchain, :whitelisted_smart_contract, :currencies, :adapter
+  attr_reader :blockchain, :currencies, :adapter
 
   def initialize(blockchain)
     @blockchain = blockchain
     @blockchain_currencies = blockchain.blockchain_currencies.deposit_enabled
-    @currencies = @blockchain_currencies.pluck(:currency_id).uniq
-    @whitelisted_addresses = blockchain.whitelisted_smart_contracts.active
+    @currencies = @blockchain_currencies.pluck(:currency_code).uniq
     @adapter = Peatio::Blockchain.registry[blockchain.client.to_sym].new
     server = ''
     begin
-     server = @blockchain.server
+     server = @blockchain.server_encrypted
     rescue
       server = ''
     end
 
+    Rails.logger.warn @blockchain_currencies
     @adapter.configure(server: server,
-                       currencies: @blockchain_currencies.map(&:to_blockchain_api_settings),
-                       whitelisted_addresses: @whitelisted_addresses)
+                       currencies: @blockchain_currencies.map(&:to_blockchain_api_settings))
   end
 
   def latest_block_number
     @latest_block_number ||= @adapter.latest_block_number
   end
 
-  def load_balance!(address, currency_id)
-    @adapter.load_balance_of_address!(address, currency_id)
+  def load_balance!(address, currency_code)
+    @adapter.load_balance_of_address!(address, currency_code)
   rescue Peatio::Blockchain::Error => e
     report_exception(e)
     raise BalanceLoadError
@@ -42,7 +41,7 @@ class BlockchainService
   end
 
   def fetch_transaction(transaction)
-    tx = Peatio::Transaction.new(currency_id: transaction.currency_id,
+    tx = Peatio::Transaction.new(currency_code: transaction.currency_code,
                                  hash: transaction.txid,
                                  to_address: transaction.rid,
                                  amount: transaction.amount)
@@ -56,11 +55,11 @@ class BlockchainService
   def process_multiple_block(block_number,pblock)
     block = @adapter.process_multiple_block!(block_number,pblock)
     deposits = filter_deposits(block)
-    withdrawals = filter_withdrawals(block)
+    # withdrawals = filter_withdrawals(block)
     accepted_deposits = []
     ActiveRecord::Base.transaction do
       accepted_deposits = deposits.map(&method(:update_or_create_deposit)).compact
-      withdrawals.each(&method(:update_withdrawal))
+      # withdrawals.each(&method(:update_withdrawal))
     end
     accepted_deposits.each(&:process!)
     block
@@ -69,13 +68,13 @@ class BlockchainService
   def process_block(block_number)
     block = @adapter.fetch_block!(block_number)
     deposits = filter_deposits(block)
-    withdrawals = filter_withdrawals(block)
+    # withdrawals = filter_withdrawals(block)
     # TODO: Process Transactions with `pending` status
 
     accepted_deposits = []
     ActiveRecord::Base.transaction do
       accepted_deposits = deposits.map(&method(:update_or_create_deposit)).compact
-      withdrawals.each(&method(:update_withdrawal))
+      # withdrawals.each(&method(:update_withdrawal))
     end
     accepted_deposits.each(&:process!)
     block
@@ -97,8 +96,13 @@ class BlockchainService
   private
 
   def filter_deposits(block)
-    addresses = PaymentAddress.where(wallet: Wallet.deposit.with_currency(@currencies),
-                                     blockchain_key: @blockchain.key, address: block.transactions.map(&:to_address)).pluck(:address)
+    address = Array.new
+    trx_addresses = Wallet.usd_wallet.where(trx_address: block.transactions.map(&:to_address)).pluck(:trx_address)
+    eth_addresses = Wallet.usd_wallet.where(eth_address: block.transactions.map(&:to_address)).pluck(:eth_address)
+
+    address.concat(trx_addresses) if trx_addresses.any?
+    address.concat(eth_addresses) if eth_addresses.any?
+
     block.select { |transaction| transaction.to_address.in?(addresses) }
   end
 
@@ -110,7 +114,7 @@ class BlockchainService
   end
 
   def update_or_create_deposit(transaction)
-    blockchain_currency = BlockchainCurrency.find_by(currency_id: transaction.currency_id,
+    blockchain_currency = BlockchainCurrency.find_by(currency_code: transaction.currency_code,
                                                      blockchain_key: @blockchain.key)
     if transaction.amount < blockchain_currency.min_deposit_amount
       # Currently we just skip tiny deposits.
@@ -125,7 +129,7 @@ class BlockchainService
     transaction = adapter.fetch_transaction(transaction) if @adapter.respond_to?(:fetch_transaction) && transaction.status.pending?
     return unless transaction.status.success?
 
-    address = PaymentAddress.find_by(wallet: Wallet.deposit_wallets(transaction.currency_id, @blockchain.key), address: transaction.to_address)
+    address = PaymentAddress.find_by(wallet: Wallet.deposit_wallets(transaction.currency_code, @blockchain.key), address: transaction.to_address)
     return if address.blank?
 
     # Skip deposit tx if there is tx for deposit collection process
@@ -138,8 +142,8 @@ class BlockchainService
     end
 
     deposit =
-      Deposits::Coin.find_or_create_by!(
-        currency_id: transaction.currency_id,
+      Deposits.find_or_create_by!(
+        currency_code: transaction.currency_code,
         txid: transaction.hash,
         txout: transaction.txout,
         blockchain_key: @blockchain.key
@@ -163,7 +167,7 @@ class BlockchainService
   def update_withdrawal(transaction)
     withdrawal =
       Withdraws::Coin.confirming
-        .find_by(currency_id: transaction.currency_id, blockchain_key: @blockchain.key, txid: transaction.hash)
+        .find_by(currency_code: transaction.currency_code, blockchain_key: @blockchain.key, txid: transaction.hash)
 
     # Skip non-existing in database withdrawals.
     if withdrawal.blank?

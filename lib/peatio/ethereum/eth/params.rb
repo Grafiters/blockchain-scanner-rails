@@ -1,6 +1,6 @@
 module Ethereum::Eth
   module Params
-    def native_currency_id
+    def native_currency_code
       'eth'
     end
 

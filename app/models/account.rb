@@ -3,7 +3,7 @@
 class Account < ApplicationRecord
   AccountError = Class.new(StandardError)
 
-  self.primary_keys = :currency_id, :member_id
+  self.primary_keys = :currency_code, :member_id
 
   belongs_to :currency, required: true
   belongs_to :member, required: true
@@ -12,7 +12,7 @@ class Account < ApplicationRecord
 
   ZERO = 0.to_d
 
-  validates :member_id, uniqueness: { scope: :currency_id }
+  validates :member_id, uniqueness: { scope: :currency_code }
   validates :balance, :locked, numericality: { greater_than_or_equal_to: 0.to_d }
 
   scope :visible, -> { joins(:currency).merge(Currency.visible) }
@@ -25,7 +25,7 @@ class Account < ApplicationRecord
   def as_json_for_event_api
     {
       member_id: member_id,
-      currency_id: currency_id,
+      currency_code: currency_code,
       balance: balance,
       locked: locked,
       p2p_balance: p2p_balance,
@@ -47,7 +47,7 @@ class Account < ApplicationRecord
 
   def attributes_after_plus_funds!(amount)
     if amount <= ZERO
-      raise AccountError, "Cannot add funds (member id: #{member_id}, currency id: #{currency_id}, amount: #{amount}, balance: #{balance})."
+      raise AccountError, "Cannot add funds (member id: #{member_id}, currency id: #{currency_code}, amount: #{amount}, balance: #{balance})."
     end
 
     { balance: balance + amount }
@@ -65,7 +65,7 @@ class Account < ApplicationRecord
 
   def attributes_after_plus_locked_funds!(amount)
     if amount <= ZERO
-      raise AccountError, "Cannot add funds (member id: #{member_id}, currency id: #{currency_id}, amount: #{amount}, locked: #{locked})."
+      raise AccountError, "Cannot add funds (member id: #{member_id}, currency id: #{currency_code}, amount: #{amount}, locked: #{locked})."
     end
 
     { locked: locked + amount }
@@ -83,7 +83,7 @@ class Account < ApplicationRecord
 
   def attributes_after_sub_funds!(amount)
     if amount <= ZERO || amount > balance
-      raise AccountError, "Cannot subtract funds (member id: #{member_id}, currency id: #{currency_id}, amount: #{amount}, balance: #{balance})."
+      raise AccountError, "Cannot subtract funds (member id: #{member_id}, currency id: #{currency_code}, amount: #{amount}, balance: #{balance})."
     end
 
     { balance: balance - amount }
@@ -101,7 +101,7 @@ class Account < ApplicationRecord
 
   def attributes_after_lock_funds!(amount)
     if amount <= ZERO || amount > balance
-      raise AccountError, "Cannot lock funds (member id: #{member_id}, currency id: #{currency_id}, amount: #{amount}, balance: #{balance}, locked: #{locked})."
+      raise AccountError, "Cannot lock funds (member id: #{member_id}, currency id: #{currency_code}, amount: #{amount}, balance: #{balance}, locked: #{locked})."
     end
 
     { balance: balance - amount, locked: locked + amount }
@@ -119,7 +119,7 @@ class Account < ApplicationRecord
 
   def attributes_after_unlock_funds!(amount)
     if amount <= ZERO || amount > locked
-      raise AccountError, "Cannot unlock funds (member id: #{member_id}, currency id: #{currency_id}, amount: #{amount}, balance: #{balance} locked: #{locked})."
+      raise AccountError, "Cannot unlock funds (member id: #{member_id}, currency id: #{currency_code}, amount: #{amount}, balance: #{balance} locked: #{locked})."
     end
 
     { balance: balance + amount, locked: locked - amount }
@@ -136,7 +136,7 @@ class Account < ApplicationRecord
 
   def attributes_after_unlock_and_sub_funds!(amount)
     if amount <= ZERO || amount > locked
-      raise AccountError, "Cannot unlock and sub funds (member id: #{member_id}, currency id: #{currency_id}, amount: #{amount}, locked: #{locked})."
+      raise AccountError, "Cannot unlock and sub funds (member id: #{member_id}, currency id: #{currency_code}, amount: #{amount}, locked: #{locked})."
     end
 
     { locked: locked - amount }
@@ -158,7 +158,7 @@ end
 # Table name: accounts
 #
 #  member_id   :bigint           not null, primary key
-#  currency_id :string(10)       not null, primary key
+#  currency_code :string(10)       not null, primary key
 #  balance     :decimal(32, 16)  default(0.0), not null
 #  locked      :decimal(32, 16)  default(0.0), not null
 #  created_at  :datetime         not null
@@ -166,6 +166,6 @@ end
 #
 # Indexes
 #
-#  index_accounts_on_currency_id_and_member_id  (currency_id,member_id) UNIQUE
+#  index_accounts_on_currency_code_and_member_id  (currency_code,member_id) UNIQUE
 #  index_accounts_on_member_id                  (member_id)
 #

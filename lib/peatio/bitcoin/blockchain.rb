@@ -70,7 +70,7 @@ module Bitcoin
       end.compact.uniq
     end
 
-    def load_balance_of_address!(address, _currency_id)
+    def load_balance_of_address!(address, _currency_code)
       address_with_balance = client.json_rpc(:listaddressgroupings)
                                    .flatten(1)
                                    .find { |addr| addr[0] == address }
@@ -100,8 +100,8 @@ module Bitcoin
               status: 'success' }
 
             # Build transaction for each currency belonging to blockchain.
-            settings_fetch(:currencies).pluck(:id).each do |currency_id|
-              formatted_txs << no_currency_tx.merge(currency_id: currency_id)
+            settings_fetch(:currencies).pluck(:id).each do |currency_code|
+              formatted_txs << no_currency_tx.merge(currency_code: currency_code)
             end
         end
     end

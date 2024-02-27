@@ -15,11 +15,11 @@ module Jobs::Cron
 
         query = "
         (SELECT 'Trade', id, updated_at as ts FROM trades WHERE id > #{idx['Trade']} #{filter_trades} ORDER BY ts,id LIMIT #{batch_size}) UNION ALL
-        (SELECT 'Adjustment', id, updated_at as ts FROM adjustments WHERE updated_at > '#{idx['Adjustment']}' AND currency_id = '#{currency.id}' AND state = 2 ORDER BY ts,id LIMIT #{batch_size}) UNION ALL
+        (SELECT 'Adjustment', id, updated_at as ts FROM adjustments WHERE updated_at > '#{idx['Adjustment']}' AND currency_code = '#{currency.id}' AND state = 2 ORDER BY ts,id LIMIT #{batch_size}) UNION ALL
         (SELECT 'Transfer', id, updated_at as ts FROM transfers WHERE id > #{idx['Transfer']} ORDER BY ts,id LIMIT #{batch_size}) UNION ALL
-        (SELECT 'Withdraw', id, completed_at as ts FROM withdraws WHERE completed_at > '#{idx['Withdraw']}' AND currency_id = '#{currency.id}' AND aasm_state = 'succeed' ORDER BY ts,id LIMIT #{batch_size}) UNION ALL
-        (SELECT 'Deposit', id, created_at as ts FROM deposits WHERE created_at > '#{idx['DepositCoin']}' AND currency_id = '#{currency.id}' AND type = 'Deposits::Coin' ORDER BY ts,id LIMIT #{batch_size}) UNION ALL
-        (SELECT 'Deposit', id, completed_at as ts FROM deposits WHERE completed_at > '#{idx['DepositFiat']}' AND currency_id = '#{currency.id}' AND type = 'Deposits::Fiat' AND aasm_state = 'accepted' ORDER BY ts,id LIMIT #{batch_size})
+        (SELECT 'Withdraw', id, completed_at as ts FROM withdraws WHERE completed_at > '#{idx['Withdraw']}' AND currency_code = '#{currency.id}' AND aasm_state = 'succeed' ORDER BY ts,id LIMIT #{batch_size}) UNION ALL
+        (SELECT 'Deposit', id, created_at as ts FROM deposits WHERE created_at > '#{idx['DepositCoin']}' AND currency_code = '#{currency.id}' AND type = 'Deposits::Coin' ORDER BY ts,id LIMIT #{batch_size}) UNION ALL
+        (SELECT 'Deposit', id, completed_at as ts FROM deposits WHERE completed_at > '#{idx['DepositFiat']}' AND currency_code = '#{currency.id}' AND type = 'Deposits::Fiat' AND aasm_state = 'accepted' ORDER BY ts,id LIMIT #{batch_size})
         ORDER BY ts,id ASC LIMIT #{batch_size};"
 
         trade_idx = adjustment_idx = transfer_idx = withdraw_idx = deposit_fiat_idx = deposit_coin_idx = nil
@@ -71,7 +71,7 @@ module Jobs::Cron
       end
 
       def last_idx(pnl_currency, currency)
-        query = "SELECT reference_type, last_id FROM stats_member_pnl_idx WHERE currency_id = '#{currency.id}' AND pnl_currency_id = '#{pnl_currency.id}'"
+        query = "SELECT reference_type, last_id FROM stats_member_pnl_idx WHERE currency_code = '#{currency.id}' AND pnl_currency_code = '#{pnl_currency.id}'"
         h = {
           "Trade" => 0,
           "DepositFiat" => "1970-01-01 00:00:00.000",
@@ -131,17 +131,17 @@ module Jobs::Cron
         paths
       end
 
-      def conversion_market(currency_id, pnl_currency_id)
-        market = Market.spot.find_by(base_unit: currency_id, quote_unit: pnl_currency_id)
-        raise Error, "There is no market #{currency_id}/#{pnl_currency_id}" unless market.present?
+      def conversion_market(currency_code, pnl_currency_code)
+        market = Market.spot.find_by(base_unit: currency_code, quote_unit: pnl_currency_code)
+        raise Error, "There is no market #{currency_code}/#{pnl_currency_code}" unless market.present?
 
         market.symbol
       end
 
-      def price_at(currency_id, pnl_currency_id, at)
-        return 1.0 if currency_id == pnl_currency_id
+      def price_at(currency_code, pnl_currency_code, at)
+        return 1.0 if currency_code == pnl_currency_code
 
-        if (path = conversion_paths["#{currency_id}/#{pnl_currency_id}"])
+        if (path = conversion_paths["#{currency_code}/#{pnl_currency_code}"])
           return path.reduce(1) do |price, (a, b, reverse)|
             if reverse
               price / price_at(a, b, at)
@@ -151,7 +151,7 @@ module Jobs::Cron
           end
         end
 
-        market = conversion_market(currency_id, pnl_currency_id)
+        market = conversion_market(currency_code, pnl_currency_code)
         nearest_trade = Trade.nearest_trade_from_influx(market, at)
         Rails.logger.debug { "Nearest trade on #{market} trade: #{nearest_trade}" }
         raise Error, "There is no trades on market #{market}" unless nearest_trade.present?
@@ -212,14 +212,14 @@ module Jobs::Cron
         if adjustment.amount < 0
           total_credit = total_credit_value = 0
           total_debit = -adjustment.amount
-          total_debit_value = total_debit * price_at(adjustment.currency_id, pnl_currency.id, adjustment.created_at)
+          total_debit_value = total_debit * price_at(adjustment.currency_code, pnl_currency.id, adjustment.created_at)
         else
           total_debit = total_debit_value = 0
           total_credit = adjustment.amount
-          total_credit_value = total_credit * price_at(adjustment.currency_id, pnl_currency.id, adjustment.created_at)
+          total_credit_value = total_credit * price_at(adjustment.currency_code, pnl_currency.id, adjustment.created_at)
         end
         [
-          build_query(member.id, pnl_currency, adjustment.currency_id, total_credit, 0.0, total_credit_value, total_debit, total_debit_value, 0),
+          build_query(member.id, pnl_currency, adjustment.currency_code, total_credit, 0.0, total_credit_value, total_debit, total_debit_value, 0),
         ]
       end
 
@@ -229,9 +229,9 @@ module Jobs::Cron
 
         total_credit = deposit.amount
         total_credit_fees = deposit.fee
-        total_credit_value = total_credit * price_at(deposit.currency_id, pnl_currency.id, deposit.created_at)
+        total_credit_value = total_credit * price_at(deposit.currency_code, pnl_currency.id, deposit.created_at)
 
-        [build_query(deposit.member_id, pnl_currency, deposit.currency_id, total_credit, total_credit_fees, total_credit_value, 0, 0, 0)]
+        [build_query(deposit.member_id, pnl_currency, deposit.currency_code, total_credit, total_credit_fees, total_credit_value, 0, 0, 0)]
       end
 
       def process_withdraw(pnl_currency, withdraw)
@@ -240,10 +240,10 @@ module Jobs::Cron
 
         total_debit = withdraw.amount
         total_debit_fees = withdraw.fee
-        total_debit_value = (total_debit + total_debit_fees) * price_at(withdraw.currency_id, pnl_currency.id, withdraw.created_at)
+        total_debit_value = (total_debit + total_debit_fees) * price_at(withdraw.currency_code, pnl_currency.id, withdraw.created_at)
 
         [
-          build_query(withdraw.member_id, pnl_currency, withdraw.currency_id, 0, 0, 0, total_debit, total_debit_value, total_debit_fees),
+          build_query(withdraw.member_id, pnl_currency, withdraw.currency_code, 0, 0, 0, total_debit, total_debit_value, total_debit_fees),
         ]
       end
 
@@ -251,14 +251,14 @@ module Jobs::Cron
         transfer = {}
         queries = []
 
-        q = "SELECT currency_id, member_id, reference_type, reference_id, SUM(credit-debit) as total FROM liabilities " \
+        q = "SELECT currency_code, member_id, reference_type, reference_id, SUM(credit-debit) as total FROM liabilities " \
         "WHERE reference_type = 'Transfer' AND reference_id = #{reference_id} " \
-        "GROUP BY currency_id, member_id, reference_type, reference_id"
+        "GROUP BY currency_code, member_id, reference_type, reference_id"
         liabilities = ActiveRecord::Base.connection.select_all(q)
         liabilities.each do |l|
           next if (l['total'] = l['total'].to_d).zero?
 
-          cid = l['currency_id']
+          cid = l['currency_code']
           transfer[cid] ||= {
             type: nil,
             liabilities: []
@@ -287,7 +287,7 @@ module Jobs::Cron
           end
 
           transfer.each do |cid, infos|
-            Operations::Revenue.where(reference_type: 'Transfer', reference_id: reference_id, currency_id: cid).each do |fee|
+            Operations::Revenue.where(reference_type: 'Transfer', reference_id: reference_id, currency_code: cid).each do |fee|
               store[fee.member_id][cid][:total_debit_fees] += fee.credit
               store[fee.member_id][cid][:total_debit] -= fee.credit
               # We don't support fees payed on credit, they are all considered debit fees
@@ -366,21 +366,21 @@ module Jobs::Cron
         sleep 3 if l_count == 0
       end
 
-      def build_query_idx(pnl_currency, currency_id, reference_type, idx)
+      def build_query_idx(pnl_currency, currency_code, reference_type, idx)
         if Rails.configuration.database_adapter.downcase == 'PostgreSQL'.downcase
-          'INSERT INTO stats_member_pnl_idx (pnl_currency_id, currency_id, reference_type, last_id) ' \
-          "VALUES ('#{pnl_currency.id}','#{currency_id}','#{reference_type}',#{idx}) " \
-          'ON CONFLICT (pnl_currency_id, currency_id, reference_type) DO UPDATE SET ' \
+          'INSERT INTO stats_member_pnl_idx (pnl_currency_code, currency_code, reference_type, last_id) ' \
+          "VALUES ('#{pnl_currency.id}','#{currency_code}','#{reference_type}',#{idx}) " \
+          'ON CONFLICT (pnl_currency_code, currency_code, reference_type) DO UPDATE SET ' \
           "last_id='#{idx}'"
         else
-          'REPLACE INTO stats_member_pnl_idx (pnl_currency_id, currency_id, reference_type, last_id) ' \
-          "VALUES ('#{pnl_currency.id}','#{currency_id}','#{reference_type}',#{idx})"
+          'REPLACE INTO stats_member_pnl_idx (pnl_currency_code, currency_code, reference_type, last_id) ' \
+          "VALUES ('#{pnl_currency.id}','#{currency_code}','#{reference_type}',#{idx})"
         end
       end
 
-      def build_query(member_id, pnl_currency, currency_id, total_credit, total_credit_fees, total_credit_value, total_debit, total_debit_value, total_debit_fees)
+      def build_query(member_id, pnl_currency, currency_code, total_credit, total_credit_fees, total_credit_value, total_debit, total_debit_value, total_debit_fees)
         total_balance_formula = 'GREATEST(0, stats_member_pnl.total_balance_value + EXCLUDED.total_balance_value - (CASE WHEN EXCLUDED.total_debit = 0 THEN 0 ELSE (EXCLUDED.total_debit + EXCLUDED.total_debit_fees) * stats_member_pnl.average_balance_price END))'
-        if pnl_currency.id == currency_id
+        if pnl_currency.id == currency_code
           average_balance_price = 1
           avg_balance_formula = '1'
         else
@@ -395,9 +395,9 @@ module Jobs::Cron
         end
 
         if Rails.configuration.database_adapter.downcase == 'PostgreSQL'.downcase
-          'INSERT INTO stats_member_pnl (member_id, pnl_currency_id, currency_id, total_credit, total_credit_fees, total_credit_value, total_debit, total_debit_value, total_debit_fees, total_balance_value, average_balance_price) ' \
-          "VALUES ('#{member_id}','#{pnl_currency.id}','#{currency_id}',#{total_credit},#{total_credit_fees},#{total_credit_value},#{total_debit},#{total_debit_value},#{total_debit_fees},#{total_credit_value},#{average_balance_price}) " \
-          'ON CONFLICT (pnl_currency_id, currency_id, member_id) DO UPDATE SET ' \
+          'INSERT INTO stats_member_pnl (member_id, pnl_currency_code, currency_code, total_credit, total_credit_fees, total_credit_value, total_debit, total_debit_value, total_debit_fees, total_balance_value, average_balance_price) ' \
+          "VALUES ('#{member_id}','#{pnl_currency.id}','#{currency_code}',#{total_credit},#{total_credit_fees},#{total_credit_value},#{total_debit},#{total_debit_value},#{total_debit_fees},#{total_credit_value},#{average_balance_price}) " \
+          'ON CONFLICT (pnl_currency_code, currency_code, member_id) DO UPDATE SET ' \
           "total_balance_value = #{total_balance_formula}, " \
           "average_balance_price = #{avg_balance_formula}, " \
           'total_credit = stats_member_pnl.total_credit + EXCLUDED.total_credit, ' \
@@ -408,8 +408,8 @@ module Jobs::Cron
           'total_debit = stats_member_pnl.total_debit + EXCLUDED.total_debit, ' \
           'updated_at = NOW()'
         else
-          'INSERT INTO stats_member_pnl (member_id, pnl_currency_id, currency_id, total_credit, total_credit_fees, total_credit_value, total_debit, total_debit_value, total_debit_fees, total_balance_value, average_balance_price) ' \
-          "VALUES (#{member_id},'#{pnl_currency.id}','#{currency_id}',#{total_credit},#{total_credit_fees},#{total_credit_value},#{total_debit},#{total_debit_value},#{total_debit_fees},#{total_credit_value},#{average_balance_price}) " \
+          'INSERT INTO stats_member_pnl (member_id, pnl_currency_code, currency_code, total_credit, total_credit_fees, total_credit_value, total_debit, total_debit_value, total_debit_fees, total_balance_value, average_balance_price) ' \
+          "VALUES (#{member_id},'#{pnl_currency.id}','#{currency_code}',#{total_credit},#{total_credit_fees},#{total_credit_value},#{total_debit},#{total_debit_value},#{total_debit_fees},#{total_credit_value},#{average_balance_price}) " \
           'ON DUPLICATE KEY UPDATE ' \
           'total_balance_value = GREATEST(0, total_balance_value + VALUES(total_balance_value) - IF(VALUES(total_debit) = 0, 0, (VALUES(total_debit) + VALUES(total_debit_fees)) * average_balance_price)), ' \
           "average_balance_price = #{avg_balance_formula}, " \

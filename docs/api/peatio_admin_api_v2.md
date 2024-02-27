@@ -197,7 +197,7 @@ Create new adjustment.
 | description | formData | Adjustment description. | Yes | string |
 | category | formData | Adjustment category | Yes | string |
 | amount | formData | Adjustment amount. | Yes | double |
-| currency_id | formData | Adjustment currency ID. | Yes | string |
+| currency_code | formData | Adjustment currency ID. | Yes | string |
 | asset_account_code | formData | Adjustment asset account code. | Yes | integer |
 | receiving_account_code | formData | Adjustment receiving account code. | Yes | integer |
 | receiving_member_uid | formData | Adjustment receiving account code. | No | string |
