@@ -12,8 +12,7 @@ module FeeChargeable
     if self <= Deposit
 
       before_validation on: :create do
-        next unless currency
-        next unless blockchain_currency
+        next unless blockchain_currency.present?
 
         self.fee  ||= blockchain_currency.deposit_fee
         self.amount = amount.to_d - fee
@@ -26,7 +25,7 @@ module FeeChargeable
       attr_readonly :sum
 
       before_validation on: :create do
-        next unless currency
+
         next unless blockchain_currency
 
         self.sum  ||= 0.to_d

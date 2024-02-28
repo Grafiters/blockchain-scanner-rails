@@ -7,10 +7,6 @@ class Wallet < ApplicationRecord
   serialize :balance, JSON unless Rails.configuration.database_support_json
   serialize :plain_settings, JSON unless Rails.configuration.database_support_json
 
-  include Vault::EncryptedModel
-
-  vault_lazy_decrypt!
-
   # We use this attribute values rules for wallet kinds:
   # 1** - for deposit wallets.
   # 2** - for fee wallets.
@@ -35,8 +31,6 @@ class Wallet < ApplicationRecord
   end
 
   NOT_AVAILABLE = 'N/A'.freeze
-
-  vault_attribute :settings, serialize: :json, default: {}
 
   belongs_to :blockchain, foreign_key: :blockchain_key, primary_key: :key
   has_and_belongs_to_many :currencies

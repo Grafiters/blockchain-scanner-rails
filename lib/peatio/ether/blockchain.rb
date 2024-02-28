@@ -44,16 +44,7 @@ module Ether
       blocks = []
       block_json = client.rest_api(:post, '/fetch-block', {height: block_number})
       transactions = block_json.fetch('transactions')
-      Rails.logger.warn "==============================="
-      Rails.logger.warn "TRANSACTION BLOCKCHAIN"
-      Rails.logger.warn "==============================="
       Rails.logger.warn transactions.as_json
-
-      Rails.logger.warn "==============================="
-      Rails.logger.warn "CONFIGURATION CURRENCIES"
-      Rails.logger.warn "==============================="
-      Rails.logger.warn @eth.as_json
-      Rails.logger.warn @erc20.as_json
       transactions.each_with_object([]) do |txs, txs_arr|
         height = block_number
         type = txs.fetch('type')
@@ -74,7 +65,7 @@ module Ether
                       to_address:     to_address,
                       txout:          1,
                       block_number:   height,
-                      currency_code:    currency.fetch(:id).upcase,
+                      currency_id:    currency.fetch(:id).upcase,
                       status:         'success')
           end
         else
@@ -88,7 +79,7 @@ module Ether
                         to_address:     to_address,
                         txout:          1,
                         block_number:   height,
-                        currency_code:    currency.fetch(:id).upcase,
+                        currency_id:    currency.fetch(:id).upcase,
                         status:         'success')
             end
           end
@@ -101,7 +92,7 @@ module Ether
     end
 
     def convert_from_base_unit(value, currency)
-      value.to_d / currency.fetch(:base_factor).to_d
+      value.to_d / 10**currency.fetch(:base_factor).to_d
     end
 
 

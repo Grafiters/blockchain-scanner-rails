@@ -75,6 +75,8 @@ module Workers
 
         while running
           begin
+            Rails.logger.warn @runner_pool.keys
+            Rails.logger.warn ::Blockchain.where(blockchain_group: ENV.fetch('GROUP_ID')).active.pluck(:key)
             # Stop disabled blockchains runners first.
             (@runner_pool.keys - ::Blockchain.where(blockchain_group: ENV.fetch('GROUP_ID')).active.pluck(:key)).each do |b_key|
               logger.warn { "Stopping the runner for #{b_key} (blockchain is not active anymore)" }
@@ -89,7 +91,7 @@ module Workers
               if @runner_pool[b.key].blank?
                 logger.warn { "Starting the new runner for #{b.key} (no runner found in pool)" }
                 @runner_pool[b.key] = Runner.new(b, max_ts).tap(&:start)
-              elsif @runner_pool[b.key].ts <= max_ts
+              elsif @runner_pool[b.key].ts < max_ts
                 logger.warn { "Recreating a runner for #{b.key} (#{Time.at(@runner_pool[b.key].ts)} < #{Time.at(max_ts)})" }
                 @runner_pool.delete(b.key).stop
                 @runner_pool[b.key] = Runner.new(b, max_ts).tap(&:start)

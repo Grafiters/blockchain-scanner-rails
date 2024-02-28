@@ -65,7 +65,7 @@ module Tron
                         to_address:     to_address,
                         txout:          1,
                         block_number:   height,
-                        currency_code:    currency.fetch(:id),
+                        currency_id:    currency.fetch(:id),
                         status:         'success')
             end
           else
@@ -80,7 +80,7 @@ module Tron
                           to_address:     to_address,
                           txout:          1,
                           block_number:   height,
-                          currency_code:    currency.fetch(:id),
+                          currency_id:    currency.fetch(:id),
                           status:         'success')
               end
             end

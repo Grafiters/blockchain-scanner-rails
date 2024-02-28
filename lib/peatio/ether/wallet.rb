@@ -1,8 +1,8 @@
 module Ether
   class Wallet < Peatio::Wallet::Abstract
 
-    DEFAULT_ETH_FEE = { gas_limit: 21_000, gas_price: :standard }.freeze
-    DEFAULT_ERC20_FEE = { gas_limit: 90_000, gas_price: :standard }.freeze
+    DEFAULT_ETH_FEE = { gas_limit: 21_000, gas_price: 75_000 }.freeze
+    DEFAULT_ERC20_FEE = { gas_limit: 90_000, gas_price: 75_000 }.freeze
     DEFAULT_FEATURES = { skip_deposit_collection: false }.freeze
     GAS_PRICE_THRESHOLDS = { standard: 1, safelow: 0.9, fast: 1.1 }.freeze
 
@@ -108,7 +108,7 @@ module Ether
               "Withdrawal from #{@wallet.fetch(:address)} to #{transaction.to_address} failed."
       end
       # Make sure that we return currency_code
-      transaction.currency_code = 'eth' if transaction.currency_code.blank?
+      transaction.currency_id = 'eth' if transaction.currency_id.blank?
       transaction.amount = amount.to_s.length >= @currency.fetch(:base_factor).to_s.length ? convert_from_base_unit(amount) : amount
       transaction.hash = hash
       transaction.options = options
@@ -176,11 +176,11 @@ module Ether
     end
 
     def convert_from_base_unit(value)
-      value.to_d / @currency.fetch(:base_factor)
+      value.to_d / 10**@currency.fetch(:base_factor)
     end
 
     def convert_to_base_unit(value)
-      x = value.to_d * @currency.fetch(:base_factor)
+      x = value.to_d * 10**@currency.fetch(:base_factor)
       unless (x % 1).zero?
         raise Peatio::WalletClient::Error,
             "Failed to convert value to base (smallest) unit because it exceeds the maximum precision: " \

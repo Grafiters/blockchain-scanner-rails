@@ -16,7 +16,6 @@ class BlockchainService
       server = ''
     end
 
-    Rails.logger.warn @blockchain_currencies
     @adapter.configure(server: server,
                        currencies: @blockchain_currencies.map(&:to_blockchain_api_settings))
   end
@@ -103,7 +102,7 @@ class BlockchainService
     address.concat(trx_addresses) if trx_addresses.any?
     address.concat(eth_addresses) if eth_addresses.any?
 
-    block.select { |transaction| transaction.to_address.in?(addresses) }
+    block.select { |transaction| transaction.to_address.in?(address) }
   end
 
   def filter_withdrawals(block)
@@ -114,7 +113,7 @@ class BlockchainService
   end
 
   def update_or_create_deposit(transaction)
-    blockchain_currency = BlockchainCurrency.find_by(currency_code: transaction.currency_code,
+    blockchain_currency = BlockchainCurrency.find_by(currency_code: transaction.currency_id,
                                                      blockchain_key: @blockchain.key)
     if transaction.amount < blockchain_currency.min_deposit_amount
       # Currently we just skip tiny deposits.
@@ -129,32 +128,36 @@ class BlockchainService
     transaction = adapter.fetch_transaction(transaction) if @adapter.respond_to?(:fetch_transaction) && transaction.status.pending?
     return unless transaction.status.success?
 
-    address = PaymentAddress.find_by(wallet: Wallet.deposit_wallets(transaction.currency_code, @blockchain.key), address: transaction.to_address)
+    address = Wallet.where("trx_address = ? OR eth_address = ?", transaction.to_address, transaction.to_address).first
     return if address.blank?
 
-    # Skip deposit tx if there is tx for deposit collection process
-    # TODO: select only pending transactions
-    tx_collect = Transaction.where(txid: transaction.hash, reference_type: 'Deposit')
-    return if tx_collect.present?
+    # # Skip deposit tx if there is tx for deposit collection process
+    # # TODO: select only pending transactions
+    # tx_collect = D.where(txid: transaction.hash, reference_type: 'Deposit')
+    # return if tx_collect.present?
 
-    if transaction.from_addresses.blank? && adapter.respond_to?(:transaction_sources)
-      transaction.from_addresses = adapter.transaction_sources(transaction)
-    end
-
+    # if transaction.from_addresses.blank? && adapter.respond_to?(:transaction_sources)
+    #   transaction.from_addresses = adapter.transaction_sources(transaction)
+    # end
+    Rails.logger.warn transaction.as_json
+    Rails.logger.warn transaction.to_address
     deposit =
-      Deposits.find_or_create_by!(
-        currency_code: transaction.currency_code,
+      Deposits::Coin.find_or_create_by!(
+        currency_code: transaction.currency_id,
         txid: transaction.hash,
         txout: transaction.txout,
         blockchain_key: @blockchain.key
       ) do |d|
-        d.address = transaction.to_address
-        d.amount = transaction.amount
-        d.member = address.member
-        d.from_addresses = transaction.from_addresses
+        d.address = transaction.to_address,
+        d.amount = transaction.amount.to_d,
+        d.user_uuid = address.user_uuid,
+        d.fee = 0.0,
+        d.transfer_type = 200,
+        d.from_address = transaction.from_addresses,
         d.block_number = transaction.block_number
       end
 
+    Rails.logger.warn deposit.as_json
     deposit.update_column(:block_number, transaction.block_number) if deposit.block_number != transaction.block_number
     # Manually calculating deposit confirmations, because blockchain height is not updated yet.
     if latest_block_number - deposit.block_number >= @blockchain.min_confirmations && deposit.accept!
