@@ -1,2 +1,0 @@
-class VirtualAccount < ApplicationRecord
-end

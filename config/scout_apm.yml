@@ -15,9 +15,6 @@ common: &defaults
 
   log_file_path: stdout
 
-  # Application name in APM Web UI.
-  name: <%= ENV['SCOUT_APP_NAME'].presence || "#{ENV.fetch('URL_HOST')} (#{Rails.env})" %>
-
   # Enable Scout APM or not.
   monitor: <%= Rails.env.in?(ENV['SCOUT_ENV'].to_s.split(',').map(&:squish)) %>
 

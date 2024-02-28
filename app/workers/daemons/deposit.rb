@@ -104,7 +104,7 @@ module Workers
 
       def hot_wallet(deposit)
         deposit_cat = deposit.blockchain_key.include?('tron') ? 'HOT_WALLET_TRX_ADDRESS' : 'HOT_WALLET_ETH_ADDRESS'
-        Setting.find_by(name: 'PAYER_FEE_WALLET_KEY')
+        Setting.find_by(name: deposit_cat)
       end
     end
   end

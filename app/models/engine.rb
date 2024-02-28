@@ -3,21 +3,13 @@
 class Engine < ApplicationRecord
   # == Constants ============================================================
 
-  include Vault::EncryptedModel
-
-  vault_lazy_decrypt!
-
   extend Enumerize
   STATES = { online: 1, offline: 0 }.freeze
   PEATIO_ENGINE_DRIVERS = %w[peatio].freeze
   enumerize :state, in: STATES, scope: true
 
   # == Attributes ===========================================================
-
-  vault_attribute :key
-  vault_attribute :secret
-  vault_attribute :data, serialize: :json, default: {}
-
+  
   # == Extensions ===========================================================
 
   # == Relationships ========================================================

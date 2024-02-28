@@ -38,9 +38,10 @@ class WalletService
                                                      blockchain_key: @blockchain_currency[:blockchain_key])
     @adapter.configure(wallet: {
       address: @wallet,
-      secret: '0x0fe37776d577a16af8e2b39af1a61c985bc3652e58bc5ab7b298fdf018320d2a'
+      secret: @secret
     },
-                       currency: blockchain_currency.to_blockchain_api_settings)
+      currency: blockchain_currency.to_blockchain_api_settings
+    )
 
     # destination_wallets =
     #   Wallet.active.withdraw.ordered

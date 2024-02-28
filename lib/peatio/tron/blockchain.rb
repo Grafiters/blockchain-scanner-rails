@@ -42,7 +42,8 @@ module Tron
     def fetch_block!(block_number,endblock = block_number +1)
       txss = []
       blocks = []
-      block_json = client.rest_api(:post, '/getBlockRange', {from: block_number,to:endblock})
+      block_json = client.rest_api(:post, '/get-block-range', {from: block_number,to:endblock})
+      Rails.logger.warn block_json.as_json
       block_json.each_with_object([]) do |block, block_arr|
         height = block.fetch('height')
         transactions = block.fetch('txs',[])
@@ -94,11 +95,11 @@ module Tron
     end
 
     def convert_from_base_unit(value, currency)
-      value.to_d / currency.fetch(:base_factor).to_d
+      value.to_d / 10**currency.fetch(:base_factor).to_d
     end
 
     def latest_block_number
-      response = client.rest_api(:post, '/getHeight', {})
+      response = client.rest_api(:get, '/get-height', {})
       height = response['height']
     rescue Tron::Client::Error => e
       raise Peatio::Blockchain::ClientError, e

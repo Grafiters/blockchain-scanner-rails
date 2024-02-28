@@ -46,6 +46,15 @@ class Deposit < ApplicationRecord
 
   before_validation on: :create do
     self.address = convert_address_to_legacy
+    publish_to_exchange('deposit_detected')
+  end
+
+  before_validation on: :update do
+    if aasm_state == 'collected'
+      publish_to_exchange('deposit_collected')
+    elsif aasm_state == 'errored'
+      publish_to_exchange('deposit_failed')
+    end
   end
 
   aasm whiny_transitions: false do
@@ -197,8 +206,19 @@ class Deposit < ApplicationRecord
   def spread_between_wallets!
     return false if spread.present?
 
-    spread = WalletService.new({address: hot_wallet_to_collect.value, blockchain: blockchain, blockchain_currency: blockchain_currencies}).spread_deposit(self)
+    spread = WalletService.new({address: hot_wallet_to_collect.value, blockchain: blockchain, blockchain_currency: blockchain_currencies, secret: fee_wallet_address}).spread_deposit(self)
     update!(spread: spread.map(&:as_json))
+  end
+
+  def fee_wallet_address
+    fee_wallet = Setting.find_by(name: 'PAYER_FEE_WALLET_KEY')
+      unless fee_wallet
+        Rails.logger.warn { "Can't find active fee wallet for currency with code: #{deposit.currency_code}."}
+        return
+      end
+
+      priv_key_decrypt = EncryptionService.new(payload: fee_wallet[:value]).decrypt
+      priv_key = blockchain_key.include?('tron') ? priv_key_decrypt[:privateKey].sub(/^0x/, "") : priv_key_decrypt[:privateKey]
   end
 
   def hot_wallet_to_collect
@@ -234,6 +254,10 @@ class Deposit < ApplicationRecord
 
   def convert_address_to_legacy
     JSON.parse(address).first
+  end
+
+  def publish_to_exchange(routing)
+    RabbitmqService.new({exchange_name: 'oeypay.crypto_deposits', routing_key: routing}).handling_publish(JSON.dump({depositUuid: uuid}))
   end
 
   def as_json_for_event_api

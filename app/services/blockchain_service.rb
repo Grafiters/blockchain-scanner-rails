@@ -152,7 +152,6 @@ class BlockchainService
         d.amount = transaction.amount.to_d,
         d.user_uuid = address.user_uuid,
         d.fee = 0.0,
-        d.transfer_type = 200,
         d.from_address = transaction.from_addresses,
         d.block_number = transaction.block_number
       end

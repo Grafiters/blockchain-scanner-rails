@@ -53,9 +53,11 @@ module Tron
       # # Don't prepare for deposit_collection in case of eth deposit.
       return [] if deposit_currency.dig(:options, :erc20_contract_address).blank?
       return [] if deposit_spread.blank?
-      options = DEFAULT_ERC20_FEE.merge(deposit_currency.fetch(:options).slice(:gas_limit, :gas_price))
+      options = DEFAULT_ERC20_FEE.merge(deposit_currency.fetch(:options).slice(:gas_limit))
       fees = convert_from_base_unit(options.fetch(:gas_limit).to_i * options.fetch(:gas_price).to_i)
       toaddress = transaction.to_address
+      Rails.logger.warn options.as_json
+      Rails.logger.warn fees * deposit_spread.size
       transaction.amount = fees * deposit_spread.size
       [create_eth_transaction!(transaction)]
     rescue Tron::Client::Error => e
@@ -101,7 +103,6 @@ module Tron
       # Subtract fees from initial deposit amount in case of deposit collection
       amount -= options.fetch(:gas_limit).to_i * options.fetch(:gas_price).to_i if options.dig(:subtract_fee)
 
-      return transaction if amount <= 0
       params = {
         to: normalize_address(transaction.to_address),
         amount: amount,
@@ -114,8 +115,9 @@ module Tron
         raise Tron::Client::Error, \
               "Withdrawal from #{@wallet.fetch(:address)} to #{transaction.to_address} failed."
       end
+      Rails.logger.warn hash.as_json
       # Make sure that we return currency_code
-      transaction.currency_code = 'trx' if transaction.currency_code.blank?
+      transaction.currency_id= 'trx' if transaction.currency_id.blank?
       transaction.amount = amount
       transaction.hash = hash
       transaction.options = options
@@ -140,14 +142,14 @@ module Tron
         privKey: @wallet.fetch(:secret),
         tokenID: contract_address,
       }
-      response = client.rest_api(:post, '/send-trc10', params)
+      response = client.rest_api(:post, '/send-trc20', params)
       hash = response.fetch('hash')
       unless hash
         raise Tron::Client::Error, \
               "Withdrawal from #{@wallet.fetch(:address)} to #{transaction.to_address} failed."
       end
       # Make sure that we return currency_code
-      transaction.currency_code = 'trx' if transaction.currency_code.blank?
+      transaction.currency_id = 'trx' if transaction.currency_id.blank?
       transaction.amount = amount
       transaction.hash = hash
       transaction.options = options
@@ -203,11 +205,11 @@ module Tron
     end
 
     def convert_from_base_unit(value)
-      value.to_d / @currency.fetch(:base_factor)
+      value.to_d / 10**@currency.fetch(:base_factor)
     end
 
     def convert_to_base_unit(value)
-      x = value.to_d * @currency.fetch(:base_factor)
+      x = value.to_d * 10**@currency.fetch(:base_factor)
       unless (x % 1).zero?
         raise Peatio::WalletClient::Error,
             "Failed to convert value to base (smallest) unit because it exceeds the maximum precision: " \
