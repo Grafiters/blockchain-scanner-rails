@@ -211,14 +211,15 @@ class Deposit < ApplicationRecord
   end
 
   def fee_wallet_address
-    fee_wallet = Setting.find_by(name: 'PAYER_FEE_WALLET_KEY')
+    wallet_source = blockchain_key.include?('tron') ? 'TRX_PAYER_FEE_WALLET_KEY' : 'ETH_PAYER_FEE_WALLET_KEY'
+      fee_wallet = Setting.find_by(name: wallet_source)
       unless fee_wallet
         Rails.logger.warn { "Can't find active fee wallet for currency with code: #{deposit.currency_code}."}
         return
       end
 
       priv_key_decrypt = EncryptionService.new(payload: fee_wallet[:value]).decrypt
-      priv_key = blockchain_key.include?('tron') ? priv_key_decrypt[:privateKey].sub(/^0x/, "") : priv_key_decrypt[:privateKey]
+      priv_key = priv_key_decrypt[:privateKey]
   end
 
   def hot_wallet_to_collect
