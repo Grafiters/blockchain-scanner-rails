@@ -46,10 +46,13 @@ class Deposit < ApplicationRecord
 
   before_validation on: :create do
     self.address = convert_address_to_legacy
+  end
+
+  after_commit on: :create do
     publish_to_exchange('deposit_detected')
   end
 
-  before_validation on: :update do
+  after_commit on: :update do
     if aasm_state == 'collected'
       publish_to_exchange('deposit_collected')
     elsif aasm_state == 'errored'
