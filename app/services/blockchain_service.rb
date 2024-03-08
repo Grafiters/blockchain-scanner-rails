@@ -139,8 +139,6 @@ class BlockchainService
     # if transaction.from_addresses.blank? && adapter.respond_to?(:transaction_sources)
     #   transaction.from_addresses = adapter.transaction_sources(transaction)
     # end
-    Rails.logger.warn transaction.as_json
-    Rails.logger.warn transaction.to_address
     deposit =
       Deposits::Coin.find_or_create_by!(
         currency_code: transaction.currency_id,

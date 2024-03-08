@@ -67,6 +67,7 @@ gem 'fog-aliyun', '~> 0.3.5'
 gem 'fog-aws', '~> 3.5.2'
 # gcp support (google)
 gem 'fog-google', '~> 1.9.1'
+gem 'gli', '~> 2.19.0'
 
 group :development, :test do
   gem 'irb'
