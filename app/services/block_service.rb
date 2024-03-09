@@ -86,13 +86,11 @@ class BlockService
     end
 
     @bunny_channel.ack(delivery_info.delivery_tag)
-  rescue StandardError => e
-    Rails.logger.error { e.inspect }
   end
 
   def process_block(payload)
     blockchain = ::Blockchain.find_by(key: payload[:blockchain_key])
-    bc_service = BlockchainService.new(blockchain[:block])
+    bc_service = BlockchainService.new(blockchain)
 
     bc_service.process_block(payload[:block])
   end

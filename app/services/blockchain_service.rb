@@ -154,7 +154,6 @@ class BlockchainService
         d.block_number = transaction.block_number
       end
 
-    Rails.logger.warn deposit.as_json
     deposit.update_column(:block_number, transaction.block_number) if deposit.block_number != transaction.block_number
     # Manually calculating deposit confirmations, because blockchain height is not updated yet.
     if latest_block_number - deposit.block_number >= @blockchain.min_confirmations && deposit.accept!
