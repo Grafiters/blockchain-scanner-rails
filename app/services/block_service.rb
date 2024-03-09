@@ -75,15 +75,19 @@ class BlockService
     # data = JSON.parse(payload_data)
     if payload_data[:type] == 'tx_id'
       blockNumber = process_tx_id(payload_data)
-      process_block(blockNumber)
-    else
+
+      payload_data[:block] = blockNumber
+
       process_block(payload_data)
+    elsif payload_data[:type] == 'block'
+      process_block(payload_data)
+    else
+      Rails.logger.error { 'Payload tidak sesuai' }
     end
 
     @bunny_channel.ack(delivery_info.delivery_tag)
   rescue StandardError => e
     Rails.logger.error { e.inspect }
-
   end
 
   def process_block(payload)
