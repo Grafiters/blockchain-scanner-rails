@@ -92,7 +92,7 @@ class BlockService
 
   def process_block(payload)
     blockchain = ::Blockchain.find_by(key: payload[:blockchain_key])
-    bc_service = BlockchainService.new(blockchain[:block])
+    bc_service = BlockchainService.new(blockchain)
 
     bc_service.process_block(payload[:block])
   end
