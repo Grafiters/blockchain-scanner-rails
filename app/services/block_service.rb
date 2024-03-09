@@ -86,8 +86,6 @@ class BlockService
     end
 
     @bunny_channel.ack(delivery_info.delivery_tag)
-  rescue StandardError => e
-    Rails.logger.error { e.inspect }
   end
 
   def process_block(payload)
