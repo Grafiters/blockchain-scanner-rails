@@ -161,12 +161,13 @@ module Tron
       options.merge!(DEFAULT_ERC20_FEE, currency_options)
 
       amount = convert_to_base_unit(transaction.amount)
+      amount_str = amount.to_s
 
       params = {
       	contractAddress: options.fetch(:erc20_contract_address),
       	from: @wallet.fetch(:address),
       	to: transaction.to_address,
-      	amount:amount,
+      	amount: amount_str,
       	privKey: @wallet.fetch(:secret),
         feelimit: options.fetch(:gas_limit).to_i
       }
