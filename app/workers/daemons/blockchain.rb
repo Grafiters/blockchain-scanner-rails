@@ -33,7 +33,7 @@ module Workers
 
                 from_block = @blockchain.height || 0
                 latest_block = bc_service.latest_block_number
-                p_block = [latest_block, from_block + 5].min
+                p_block = [latest_block, from_block + 1].min
 
                 if(@blockchain.client === 'tron')
                     if(latest_block - from_block > 3)
