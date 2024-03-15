@@ -66,6 +66,21 @@ class BlockchainService
 
   def process_block(block_number)
     block = @adapter.fetch_block!(block_number)
+
+    is_block_an_array = block.is_a?(Array)
+
+    if is_block_an_array
+      block.each do |block|
+        deposits = filter_deposits(block)
+        accepted_deposits = []
+        ActiveRecord::Base.transaction do
+          accepted_deposits = deposits.map(&method(:update_or_create_deposit)).compact
+        end
+        accepted_deposits.each(&:process!)
+      end
+      return
+    end
+
     deposits = filter_deposits(block)
     # withdrawals = filter_withdrawals(block)
     # TODO: Process Transactions with `pending` status

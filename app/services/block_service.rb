@@ -96,6 +96,28 @@ class BlockService
   end
 
   def process_tx_id(payload)
+    is_tron = payload[:blockchain_key].include?('tron')
+
+    if is_tron
+      server = ENV.fetch("RPC_TRON_NETWORK")
+      url_str = "#{server}/wallet/gettransactioninfobyid"
+      Rails.logger.warn url_str
+      url = URI(url_str)
+      http = Net::HTTP.new(url.host, url.port)
+      http.use_ssl = true
+      request = Net::HTTP::Post.new(url)
+      request["accept"] = 'application/json'
+      request["content-type"] = 'application/json'
+      request.body = JSON.generate({ "value" => payload[:tx_id] })
+      response = http.request(request)
+      # Response Example: {"id": "6845cd84618fea8c1d8b675233121c89b08a46a2a7202a66ece5e170136a2e6b","fee": 5797020,"blockNumber": 45153601,"blockTimeStamp": 1710393204000,"contractResult": ["0000000000000000000000000000000000000000000000000000000000000001"],"contract_address": "412a79bd6dd35adf9d7618c31b3dfedd83f798a217","receipt": {"energy_fee": 5452020,"energy_usage_total": 12981,"net_fee": 345000,"result": "SUCCESS"},"log": [{"address": "2a79bd6dd35adf9d7618c31b3dfedd83f798a217","topics": ["ddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef","0000000000000000000000005a162f9cb5d70f1ce5df8674ea829d9776ffb8b4","000000000000000000000000d021166e52b66868bf8236877e1bdfdb40a919a0"],"data": "0000000000000000000000000000000000000000000000004563918244f40000"}],"packingFee": 5797020}
+      response_body_json = response.read_body
+      response_body = JSON.parse(response_body_json)
+      block_number = response_body["blockNumber"]
+      Rails.logger.warn "Block Number: #{block_number}"
+      return block_number
+    end
+
     tx = payload[:tx_id]
     blockchain = ::Blockchain.find_by(key: payload[:blockchain_key])
     

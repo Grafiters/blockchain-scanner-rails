@@ -120,6 +120,7 @@ module Ether
       options.merge!(DEFAULT_ERC20_FEE, currency_options)
 
       amount = convert_to_base_unit(transaction.amount)
+      amount_str = amount.to_s
 
       data = abi_encode('transfer(address,uint256)',
                         normalize_address(transaction.to_address),
@@ -134,8 +135,8 @@ module Ether
       params = {
         contractAddress:options.fetch(:erc20_contract_address),
         to: transaction.to_address,
-        amount: convert_to_base_unit(transaction.amount),
-        data:data,
+        amount: amount_str,
+        data: data,
         privKey: @wallet.fetch(:secret),
         gasLimit: '0x' + options.fetch(:gas_limit).to_i.to_s(16),
         gasPrice: '0x' + options.fetch(:gas_price).to_i.to_s(16)

@@ -49,7 +49,7 @@ module Workers
           Rails.logger.warn { "The deposit was spreaded in the next way: #{deposit.spread}"}
         end
 
-        wallet_source = deposit.include?('tron') ? 'TRX_PAYER_FEE_WALLET_KEY' : 'ETH_PAYER_FEE_WALLET_KEY'
+        wallet_source = deposit.blockchain_key.include?('tron') ? 'TRX_PAYER_FEE_WALLET_KEY' : 'ETH_PAYER_FEE_WALLET_KEY'
         fee_wallet = Setting.find_by(name: wallet_source)
         unless fee_wallet
           Rails.logger.warn { "Can't find active fee wallet for currency with code: #{deposit.currency_code}."}
