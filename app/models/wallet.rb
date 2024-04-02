@@ -45,8 +45,6 @@ class Wallet < ApplicationRecord
 
   validates :max_balance, numericality: { greater_than_or_equal_to: 0 }
 
-  scope :usd_wallet, -> { where(currency_code: 'USD') }
-
   scope :active,   -> { where(status: :active) }
   scope :active_retired, -> { where(status: %w[active retired]) }
   scope :deposit,  -> { where(kind: kinds(deposit: true, values: true)) }

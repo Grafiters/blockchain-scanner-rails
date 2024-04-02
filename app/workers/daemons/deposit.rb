@@ -10,7 +10,7 @@ module Workers
         ::Deposit.processing.each do |deposit|
           Rails.logger.info { "Starting processing coin deposit with id: #{deposit.id}." }
 
-          wallet = Wallet.where('trx_address = ? OR eth_address = ? ', deposit.address, deposit.address).first
+          wallet = Wallet.find('crypto_currency_code = ?', deposit[:currency_code])
           unless wallet
             Rails.logger.warn { "Can't find active deposit wallet for currency with code: #{deposit.currency_code}."}
             next
@@ -56,7 +56,7 @@ module Workers
           return
         end
 
-        wallet = Wallet.where('trx_address = ? OR eth_address = ? ', deposit.address, deposit.address).first
+        wallet = Wallet.find('crypto_currency_code = ?', deposit[:currency_code])
         priv_key_decrypt = EncryptionService.new({payload: wallet[:encrypted_private_key]}).decrypt
         priv_key = deposit.blockchain_key.include?('tron') ? priv_key_decrypt[:privateKey].sub(/^0x/, "") : priv_key_decrypt[:privateKey]
 

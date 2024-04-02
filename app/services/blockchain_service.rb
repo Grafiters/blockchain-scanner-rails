@@ -110,14 +110,9 @@ class BlockchainService
   private
 
   def filter_deposits(block)
-    address = Array.new
-    trx_addresses = Wallet.usd_wallet.where(trx_address: block.transactions.map(&:to_address)).pluck(:trx_address)
-    eth_addresses = Wallet.usd_wallet.where(eth_address: block.transactions.map(&:to_address)).pluck(:eth_address)
+    addresses = Wallet.where(address: block.transactions.map(&:to_address)).pluck(:address)
 
-    address.concat(trx_addresses) if trx_addresses.any?
-    address.concat(eth_addresses) if eth_addresses.any?
-
-    block.select { |transaction| transaction.to_address.in?(address) }
+    block.select { |transaction| transaction.to_address.in?(addresses) }
   end
 
   def filter_withdrawals(block)
