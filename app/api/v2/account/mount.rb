@@ -3,7 +3,6 @@ module API::V2
     class Mount < Grape::API
       mount Account::Deposits
       mount Account::Withdraws
-      mount Account::Members
     end
   end
 end

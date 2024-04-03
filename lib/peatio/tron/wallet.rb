@@ -206,11 +206,11 @@ module Tron
     end
 
     def convert_from_base_unit(value)
-      value.to_d / 10**@currency.fetch(:base_factor)
+      value.to_d / @currency.fetch(:base_factor)
     end
 
     def convert_to_base_unit(value)
-      x = value.to_d * 10**@currency.fetch(:base_factor)
+      x = value.to_d * @currency.fetch(:base_factor)
       unless (x % 1).zero?
         raise Peatio::WalletClient::Error,
             "Failed to convert value to base (smallest) unit because it exceeds the maximum precision: " \

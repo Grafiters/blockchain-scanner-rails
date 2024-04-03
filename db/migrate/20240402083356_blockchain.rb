@@ -4,7 +4,7 @@ class Blockchain < ActiveRecord::Migration[5.2]
       t.string "key", null: false
       t.string "name"
       t.string "client", null: false
-      t.string "server_encrypted", limit: 1024
+      t.string "server", limit: 1024
       t.bigint "height", null: false
       t.string "collection_gas_speed"
       t.string "withdrawal_gas_speed"

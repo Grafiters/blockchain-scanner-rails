@@ -3,30 +3,20 @@
 require 'yaml'
 
 namespace :seed do
-  desc 'Adds missing accounts to database defined at config/seed/accounts.yml.'
-  task accounts: :environment do
-    Operations::Account.transaction do
-      YAML.load_file(Rails.root.join('config/seed/accounts.yml')).each do |hash|
-        next if Operations::Account.exists?(code: hash.fetch('code'))
-        Operations::Account.create!(hash)
-      end
-    end
-  end
-
   # TODO: Deprecate seed tasks in favour of import:configs
   desc 'Adds missing currencies to database defined at config/seed/currencies.yml.'
   task currencies: :environment do
     Currency.transaction do
       YAML.load_file(Rails.root.join('config/seed/currencies.yml')).each do |hash|
         
-        next if Currency.exists?(id: hash.fetch('id'))
-        Currency.create!(hash.except('networks'))
-
+        next if Currency.exists?(code: hash.fetch('code'))
+        cur = Currency.create!(hash.merge(code: hash.fetch('code')).except('networks'))
         if hash['networks'].present?
           BlockchainCurrency.transaction do
             hash['networks'].each do |network|
-              next if BlockchainCurrency.exists?(currency_code: hash.fetch('id'), blockchain_key: network.fetch('blockchain_key'))
-              BlockchainCurrency.create!(network.merge(currency_code: hash.fetch('id')))
+              puts hash.fetch('code')
+              next if BlockchainCurrency.exists?(currency_id: hash.fetch('code'), blockchain_key: network.fetch('blockchain_key'))
+              BlockchainCurrency.create!(network.merge(currency_id: hash.fetch('code')))
             end
           end
         end
@@ -44,142 +34,24 @@ namespace :seed do
     end
   end
 
-  desc 'Adds missing engines to database defined at config/seed/engines.yml.'
-  task engines: :environment do
-    Engine.transaction do
-      YAML.load_file(Rails.root.join('config/seed/engines.yml')).each do |hash|
-        next if Engine.exists?(name: hash.fetch('name'))
-        Engine.create!(hash)
-      end
-    end
-  end
-
-  desc 'Adds missing markets to database defined at config/seed/markets.yml.'
-  task markets: :environment do
-    Market.transaction do
-      YAML.load_file(Rails.root.join('config/seed/markets.yml'))
-        .map(&:symbolize_keys)
-        .each do |hash|
-          next if Market.exists?(id: hash.fetch(:id))
-          # For compatibility with old markets.yml
-          # If state is not defined set it from enabled.
-          enabled = hash.delete(:enabled)
-          hash[:state] ||= enabled ? :enabled : :disabled
-
-          # For compatibility with old markets.yml we keep legacy-new keys mapping.
-          # New key value has higher priority than legacy.
-          legacy_keys_mappings = { ask_unit:       :base_unit,
-                                   bid_unit:       :quote_unit,
-                                   ask_precision:  :amount_precision,
-                                   bid_precision:  :price_precision,
-                                   min_ask_price:  :min_price,
-                                   max_bid_price:  :max_price,
-                                   min_ask_amount: :min_amount,
-                                   min_bid_amount: :min_amount }
-
-          legacy_keys_mappings.each do |old_key, new_key|
-            legacy_key_value = hash.delete(old_key)
-            hash[new_key] ||= legacy_key_value
-          end
-
-          # Select engine with provided name
-          engine = Engine.find_by(name: hash[:engine_name])
-          if engine.present?
-            hash.delete :engine_name
-            hash[:engine_id] = engine.id
-            Market.create!(hash)
-          else
-            Rails.logger.error "Engine doesn't exist"
-          end
-        end
-    end
-  end
-
   desc 'Adds missing wallets to database defined at config/seed/wallets.yml.'
   task wallets: :environment do
     Wallet.transaction do
       YAML.load_file(Rails.root.join('config/seed/wallets.yml')).each do |hash|
         next if Wallet.exists?(name: hash.fetch('name'))
-        if hash['currency_codes'].is_a?(String)
-          hash['currency_codes'] = hash['currency_codes'].split(',')
+        if hash['currency_ids'].is_a?(String)
+          hash['currency_ids'] = hash['currency_ids'].split(',')
         end
+        ids = Array.new
+        hash['currency_ids'].each do |data|
+          curr = Currency.find_by(code: data)
+          ids.push(curr[:id])
+        end
+        hash['currency_ids'] = ids
+        puts hash
         Wallet.create!(hash)
       end
     end
   end
 
-  desc 'Adds missing trading_fees to database defined at config/seed/trading_fees.yml.'
-  task trading_fees: :environment do
-    TradingFee.transaction do
-      YAML.load_file(Rails.root.join('config/seed/trading_fees.yml')).each do |hash|
-        next if TradingFee.exists?(market_id: hash.fetch('market_id'), group: hash.fetch('group'))
-        TradingFee.create!(hash)
-      end
-    end
-  end
-
-  desc 'Adds missing whitelisted_smart_contracts to database defined at config/seed/whitelisted_smart_contracts.yml.'
-  task whitelisted_smart_contracts: :environment do
-    WhitelistedSmartContract.transaction do
-      YAML.load_file(Rails.root.join('config/seed/whitelisted_smart_contracts.yml')).each do |hash|
-        next if WhitelistedSmartContract.exists?(address: hash.fetch('address'), blockchain_key: hash.fetch('blockchain_key'))
-        next if Blockchain.find_by(key: hash.fetch('blockchain_key')).blank?
-
-        WhitelistedSmartContract.create!(hash)
-      end
-    end
-  end
-
-  desc 'Add reward currency setting'
-  task reward_currencies: :environment do
-    Setting.transaction do
-      return if Setting.find_by(name: 'reward_currencies').present?
-      Setting.create(name: 'reward_currencies', value: 'usdt', description: 'reward currencies when have referral', deleted: false)
-    end
-  end
-
-  # desc 'Adds missing user to database defined at config/seed/p2p_user.yml.'
-  # task p2p_user: :environment do
-  #   P2pUser.transaction do
-  #     YAML.load_file(Rails.root.join('config/seed/p2p_user.yml')).each do |hash|
-  #       P2pUser.create!(hash)
-  #     end
-  #   end
-  # end
-
-  # desc 'Adds missing user to database defined at config/seed/p2p_offers.yml.'
-  # task p2p_offer: :environment do
-  #   P2pOffer.transaction do
-  #     YAML.load_file(Rails.root.join('config/seed/p2p_offers.yml')).each do |hash|
-  #       P2pOffer.create!(hash)
-  #     end
-  #   end
-  # end
-
-  # desc 'Adds Fiat data config/seed/fiat.yml.'
-  # task fiats: :environment do
-  #   P2pPair.transaction do
-  #     YAML.load_file(Rails.root.join('config/seed/fiat_currencies.yml')).each do |hash|
-  #       P2pPair.create!(hash)
-  #     end
-  #   end
-  # end
-
-  # desc 'Adds missing user to database defined at config/seed/p2p_offers.yml.'
-  # task p2p_payment: :environment do
-  #   P2pPayment.transaction do
-  #     YAML.load_file(Rails.root.join('config/seed/payment.yml')).each do |hash|
-  #       P2pPayment.create!(hash)
-  #     end
-  #   end
-  # end
-
-  # desc 'Adds missing user to database defined at config/seed/p2p_offers.yml.'
-  # task p2p_pairs: :environment do
-  #   P2pOffer.transaction do
-  #     YAML.load_file(Rails.root.join('config/seed/p2p_pairs.yml')).each do |hash|
-  #       P2pPair.create!(hash)
-  #     end
-  #   end
-  # end
 end

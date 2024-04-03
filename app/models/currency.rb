@@ -18,7 +18,7 @@ class Currency < ApplicationRecord
 
   # Code is aliased to id because it's more user-bothcasefriendly primary key.
   # It's preferred to use code where this attributes are equal.
-  alias_attribute :code, :id
+
 
   # == Extensions ===========================================================
 
@@ -36,8 +36,6 @@ class Currency < ApplicationRecord
       errors.add(:max, 'Currency limit has been reached')
     end
   end
-
-  validates :code, presence: true, uniqueness: { case_sensitive: false }
 
   validates :position,
             presence: true,
@@ -80,7 +78,7 @@ class Currency < ApplicationRecord
 
   class << self
     def codes(options = {})
-      pluck(:id).yield_self do |downcase_codes|
+      pluck(:code).yield_self do |downcase_codes|
         case
         when options.fetch(:bothcase, false)
           downcase_codes + downcase_codes.map(&:upcase)
@@ -109,7 +107,7 @@ class Currency < ApplicationRecord
   #
   #   id.btc? # true if code equals to "btc".
   #   code.eth? # true if code equals to "eth".
-  def id
+  def code
     super&.inquiry
   end
 

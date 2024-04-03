@@ -14,8 +14,6 @@ module API
 
       helpers V2::Helpers
 
-      do_not_route_options!
-
       logger Rails.logger.dup
       if Rails.env.production?
         logger.formatter = GrapeLogging::Formatters::Json.new
@@ -35,6 +33,7 @@ module API
 
       # mount Public::Mount        => :public
       mount Account::Mount       => :account
+      mount Config::Mount       => :config
 
       # The documentation is accessible at http://localhost:3000/swagger?url=/api/v2/swagger
       # Add swagger documentation for Peatio User API

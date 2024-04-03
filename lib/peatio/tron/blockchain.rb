@@ -95,7 +95,7 @@ module Tron
     end
 
     def convert_from_base_unit(value, currency)
-      value.to_d / 10**currency.fetch(:base_factor).to_d
+      value.to_d / currency.fetch(:base_factor).to_d
     end
 
     def latest_block_number

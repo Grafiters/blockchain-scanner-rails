@@ -7,7 +7,7 @@ class Wallets < ActiveRecord::Migration[5.2]
       t.integer "kind", null: false
       t.string "gateway", limit: 20, default: "", null: false
       t.json "plain_settings"
-      t.string "settings_encrypted", limit: 1024
+      t.json "settings"
       t.json "balance"
       t.decimal "max_balance", precision: 32, scale: 16, default: "0.0", null: false
       t.string "status", limit: 32

@@ -44,11 +44,10 @@ module API
                    desc: 'Page number (defaults to 1).'
         end
         get '/withdraws' do
-          user_authorize! :read, ::Withdraw
 
           currency = Currency.find_by(id: params[:currency]) if params[:currency].present?
 
-          current_user.withdraws.order(id: :desc)
+          Withdraw.order(id: :desc)
                       .tap { |q| q.where!(currency: currency) if currency }
                       .tap { |q| q.where!(aasm_state: params[:state]) if params[:state] }
                       .tap { |q| q.where!(rid: params[:rid]) if params[:rid] }
@@ -58,22 +57,8 @@ module API
                       .tap { |q| present paginate(q), with: API::V2::Entities::Withdraw }
         end
 
-        desc 'Returns withdrawal sums for last 24 hours and 1 month'
-        get '/withdraws/sums' do
-          withdraws_must_be_permitted!
-          user_authorize! :read, ::Withdraw
-
-          sum_24_hours, sum_1_month = Withdraw.sanitize_execute_sum_queries(current_user.id)
-
-          present({ last_24_hours: sum_24_hours, last_1_month: sum_1_month })
-        end
-
         desc 'Creates new withdrawal to active beneficiary.'
         params do
-          requires :otp,
-                   type: { value: Integer, message: 'account.withdraw.non_integer_otp' },
-                   allow_blank: false,
-                   desc: 'OTP to perform action'
           requires :beneficiary_id,
                    type: { value: Integer, message: 'account.withdraw.non_integer_beneficiary_id' },
                    allow_blank: false,
@@ -92,9 +77,6 @@ module API
                    desc: 'Optional user metadata to be applied to the transaction. Used to tag transactions with memorable comments.'
         end
         post '/withdraws' do
-          withdraws_must_be_permitted!
-          user_authorize! :create, ::Withdraw
-
           beneficiary = current_user
                           .beneficiaries
                           .available_to_member
@@ -104,10 +86,6 @@ module API
             error!({ errors: ['account.beneficiary.doesnt_exist'] }, 422)
           elsif !beneficiary.active?
             error!({ errors: ['account.beneficiary.invalid_state_for_withdrawal'] }, 422)
-          end
-
-          unless Vault::TOTP.validate?(current_user.uid, params[:otp])
-            error!({ errors: ['account.withdraw.invalid_otp'] }, 422)
           end
 
           currency = Currency.find(params[:currency])

@@ -19,7 +19,6 @@ class Withdraw < ApplicationRecord
   include AASM
   include AASM::Locking
   include TIDIdentifiable
-  include FeeChargeable
 
   extend Enumerize
 
@@ -28,7 +27,7 @@ class Withdraw < ApplicationRecord
 
   TRANSFER_TYPES = { fiat: 100, crypto: 200 }
 
-  belongs_to :currency, required: true
+  belongs_to :currency, foreign_key: :currency_id, primary_key: :code, required: true
   belongs_to :member, required: true
   belongs_to :blockchain, foreign_key: :blockchain_key, primary_key: :key
   belongs_to :blockchain_coin_currency, -> { where.not(blockchain_key: nil) }, class_name: 'BlockchainCurrency', foreign_key: %i[blockchain_key currency_code], primary_key: %i[blockchain_key currency_code]
@@ -36,9 +35,6 @@ class Withdraw < ApplicationRecord
 
   # Optional beneficiary association gives ability to support both in-peatio
   # beneficiaries and managed by third party application.
-  belongs_to :beneficiary, optional: true
-
-  acts_as_eventable prefix: 'withdraw', on: %i[create update]
 
   after_initialize :initialize_defaults, if: :new_record?
   before_validation(on: :create) { self.rid ||= beneficiary.rid if beneficiary.present? }
@@ -81,32 +77,14 @@ class Withdraw < ApplicationRecord
 
     event :accept do
       transitions from: :prepared, to: :accepted
-      after do
-        lock_funds
-        record_submit_operations!
-      end
-      after_commit do
-        # auto process withdrawal if sum less than limits and WITHDRAW_ADMIN_APPROVE env set to false (not set)
-        process! if verify_limits && ENV.false?('WITHDRAW_ADMIN_APPROVE') && currency.coin?
-      end
     end
 
     event :cancel do
       transitions from: %i[prepared accepted], to: :canceled
-      after do
-        unless aasm.from_state == :prepared
-          unlock_funds
-          record_cancel_operations!
-        end
-      end
     end
 
     event :reject do
       transitions from: %i[to_reject accepted confirming under_review], to: :rejected
-      after do
-        unlock_funds
-        record_cancel_operations!
-      end
     end
 
     event :process do
@@ -116,10 +94,6 @@ class Withdraw < ApplicationRecord
 
     event :load do
       transitions from: :accepted, to: :confirming do
-        # Load event is available only for coin withdrawals.
-        guard do
-          currency.coin? && txid?
-        end
       end
       after_commit do
         tx = blockchain_currency.blockchain_api.fetch_transaction(self)
@@ -135,22 +109,11 @@ class Withdraw < ApplicationRecord
 
     event :dispatch do
       transitions from: %i[processing under_review], to: :confirming do
-        # Validate txid presence on coin withdrawal dispatch.
-        guard do
-          currency.fiat? || txid?
-        end
       end
     end
 
     event :success do
       transitions from: %i[confirming errored under_review], to: :succeed do
-        guard do
-          currency.fiat? || txid?
-        end
-        after do
-          unlock_and_sub_funds
-          record_complete_operations!
-        end
       end
     end
 
@@ -160,10 +123,6 @@ class Withdraw < ApplicationRecord
 
     event :fail do
       transitions from: %i[processing confirming skipped errored under_review], to: :failed
-      after do
-        unlock_funds
-        record_cancel_operations!
-      end
     end
 
     event :err do
@@ -173,33 +132,8 @@ class Withdraw < ApplicationRecord
 
   delegate :protocol, :warning, to: :blockchain
 
-  class << self
-    def sum_query
-      'SELECT sum(w.sum * c.price) as sum FROM withdraws as w ' \
-      'INNER JOIN currencies as c ON c.id=w.currency_code ' \
-      'where w.member_id = ? AND w.aasm_state IN (?) AND w.created_at > ?;'
-    end
-    # def sum_query
-    #   'SELECT sum(w.sum * c.price) as sum FROM withdraws as w ' \
-    #   'INNER JOIN currencies as c ON c.id=w.currency_code ' \
-    #   'where w.member_id = ? AND w.aasm_state IN (?) AND w.created_at > ?;'
-    # end
-
-    def sanitize_execute_sum_queries(member_id)
-      squery_24h = ActiveRecord::Base.sanitize_sql_for_conditions([sum_query, member_id, SUCCEED_PROCESSING_STATES, 24.hours.ago])
-      squery_1m = ActiveRecord::Base.sanitize_sql_for_conditions([sum_query, member_id, SUCCEED_PROCESSING_STATES, 1.month.ago])
-      sum_withdraws_24_hours = ActiveRecord::Base.connection.exec_query(squery_24h).to_hash.first['sum'].to_d
-      sum_withdraws_1_month = ActiveRecord::Base.connection.exec_query(squery_1m).to_hash.first['sum'].to_d
-      [sum_withdraws_24_hours, sum_withdraws_1_month]
-    end
-  end
-
   def initialize_defaults
     self.metadata = {} if metadata.blank?
-  end
-
-  def account
-    member&.get_account(currency)
   end
 
   def add_error(e)
@@ -208,21 +142,6 @@ class Withdraw < ApplicationRecord
     else
       update!(error: error << { class: e.class.to_s, message: e.message })
     end
-  end
-
-  def verify_limits
-    limits = WithdrawLimit.for(kyc_level: member.level, group: member.group)
-
-    # If there are no limits in DB or current user withdraw limit
-    # has 0.0 for 24 hour and 1 mounth it will skip this checks
-    return true if limits.limit_24_hour.zero? && limits.limit_1_month.zero?
-
-    # Withdraw limits in USD and withdraw sum in currency.
-    # Convert withdraw sums with price from the currency model.
-    sum_24_hours, sum_1_month = Withdraw.sanitize_execute_sum_queries(member_id)
-
-    sum_24_hours + sum * currency.get_price <= limits.limit_24_hour &&
-      sum_1_month + sum * currency.get_price <= limits.limit_1_month
   end
 
   def blockchain_currency
@@ -262,82 +181,6 @@ class Withdraw < ApplicationRecord
   end
 
   private
-
-  # @deprecated
-  def lock_funds
-    account.lock_funds(sum)
-  end
-
-  # @deprecated
-  def unlock_funds
-    account.unlock_funds(sum)
-  end
-
-  # @deprecated
-  def unlock_and_sub_funds
-    account.unlock_and_sub_funds(sum)
-  end
-
-  def record_submit_operations!
-    transaction do
-      # Debit main fiat/crypto Liability account.
-      # Credit locked fiat/crypto Liability account.
-      Operations::Liability.transfer!(
-        amount:     sum,
-        currency:   currency,
-        reference:  self,
-        from_kind:  :main,
-        to_kind:    :locked,
-        member_id:  member_id
-      )
-    end
-  end
-
-  def record_cancel_operations!
-    transaction do
-      # Debit locked fiat/crypto Liability account.
-      # Credit main fiat/crypto Liability account.
-      Operations::Liability.transfer!(
-        amount:     sum,
-        currency:   currency,
-        reference:  self,
-        from_kind:  :locked,
-        to_kind:    :main,
-        member_id:  member_id
-      )
-    end
-  end
-
-  def record_complete_operations!
-    transaction do
-      # Debit locked fiat/crypto Liability account.
-      Operations::Liability.debit!(
-        amount:     sum,
-        currency:   currency,
-        reference:  self,
-        kind:       :locked,
-        member_id:  member_id
-      )
-
-      # Credit main fiat/crypto Revenue account.
-      # NOTE: Credit amount = fee.
-      Operations::Revenue.credit!(
-        amount:     fee,
-        currency:   currency,
-        reference:  self,
-        member_id:  member_id
-      )
-
-      # Debit main fiat/crypto Asset account.
-      # NOTE: Debit amount = sum - fee.
-      Operations::Asset.debit!(
-        amount:     amount,
-        currency:   currency,
-        reference:  self
-      )
-    end
-  end
-
   def send_coins!
     AMQP::Queue.enqueue(:withdraw_coin, id: id) if currency.coin?
   end

@@ -18,11 +18,6 @@ auth_args = {
   secret:   Rails.configuration.x.jwt_public_key,
   options:  Rails.configuration.x.jwt_options,
   verify:   Rails.configuration.x.jwt_public_key.present?,
-  exclude:  %w(/api/v2/public /api/v2//public /api/v2/management /api/v2//management
-               /api/v2/swagger /api/v2//swagger /api/v2/admin/swagger /api/v2//admin/swagger
-               /api/v2/coinmarketcap /api/v2//coinmarketcap /api/v2/coingecko /api/v2//coingecko
-               /api/v1/public /api/v1//public /api/v1/swagger /api/v1//swagger),
+  exclude:  %w(/api/v2/account /api/v2//config /api/v2/config /api/v2//config),
   on_error: on_error
 }
-
-Rails.application.config.middleware.use JWT::Rack::Auth, auth_args

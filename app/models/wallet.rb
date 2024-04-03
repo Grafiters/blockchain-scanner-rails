@@ -49,6 +49,7 @@ class Wallet < ApplicationRecord
   scope :active_retired, -> { where(status: %w[active retired]) }
   scope :deposit,  -> { where(kind: kinds(deposit: true, values: true)) }
   scope :fee,      -> { where(kind: kinds(fee: true, values: true)) }
+  scope :hot,      -> { where(kind: kinds(hot: true, values: true)) }
   scope :withdraw, -> { where(kind: kinds(withdraw: true, values: true)) }
   scope :with_currency, ->(currency) { joins(:currencies).where(currencies: { id: currency }) }
   scope :ordered, -> { order(kind: :asc) }
@@ -119,23 +120,23 @@ class Wallet < ApplicationRecord
     # Returns active/retired deposit wallets per network
     def deposit_wallets(currency_code, blockchain_key=nil)
       if blockchain_key
-        Wallet.active_retired.deposit.joins(:currencies).where(currencies: { id: currency_code }, blockchain_key: blockchain_key)
+        Wallet.active.hot.joins(:currencies).where(currencies: { code: currency_code }, blockchain_key: blockchain_key)
       else
-        Wallet.active_retired.deposit.joins(:currencies).where(currencies: { id: currency_code })
+        Wallet.active.hot.joins(:currencies).where(currencies: { code: currency_code })
       end
     end
 
     # Returns active deposit wallets
     def active_deposit_wallets(currency_code)
-      Wallet.active.deposit.joins(:currencies).where(currencies: { id: currency_code })
+      Wallet.active.hot.joins(:currencies).where(currencies: { code: currency_code })
     end
 
     # Returns current active deposit wallet per network
     def active_deposit_wallet(currency_code, blockchain_key=nil)
       if blockchain_key
-        Wallet.active.deposit.joins(:currencies).find_by(currencies: { id: currency_code }, blockchain_key: blockchain_key)
+        Wallet.active.hot.joins(:currencies).find_by(currencies: { code: currency_code }, blockchain_key: blockchain_key)
       else
-        Wallet.active.deposit.joins(:currencies).find_by(currencies: { id: currency_code })
+        Wallet.active.hot.joins(:currencies).find_by(currencies: { code: currency_code })
       end
     end
 
@@ -155,10 +156,10 @@ class Wallet < ApplicationRecord
       WalletService.new(self).load_balance!(currency)
     else
       currencies.each_with_object({}) do |c, balances|
-        balances[c.id] = WalletService.new(self).load_balance!(c)
+        balances[c.code] = WalletService.new(self).load_balance!(c)
       rescue StandardError => e
         report_exception(e)
-        balances[c.id] = NOT_AVAILABLE
+        balances[c.code] = NOT_AVAILABLE
       end
     end
   rescue StandardError => e

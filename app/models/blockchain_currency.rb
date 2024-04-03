@@ -31,9 +31,9 @@ class BlockchainCurrency < ApplicationRecord
 
   # == Relationships ========================================================
 
-  belongs_to :currency, foreign_key: :currency_code, primary_key: :code
+  belongs_to :currency, foreign_key: :currency_id, primary_key: :code
   belongs_to :blockchain, foreign_key: :blockchain_key, primary_key: :key
-  belongs_to :parent, class_name: :BlockchainCurrency, foreign_key: %i[parent_id blockchain_key], primary_key: %i[currency_code blockchain_key]
+  belongs_to :parent, class_name: :BlockchainCurrency, foreign_key: %i[parent_id blockchain_key], primary_key: %i[currency_id blockchain_key]
 
   # == Validations ==========================================================
 
@@ -48,7 +48,7 @@ class BlockchainCurrency < ApplicationRecord
   validates :options, length: { maximum: 1000 }
   validates :base_factor, numericality: { greater_than_or_equal_to: 1, only_integer: true }
 
-  validates :blockchain_key, uniqueness: { scope: :currency_code }
+  validates :blockchain_key, uniqueness: { scope: :currency_id }
 
   validates :deposit_fee,
             :min_deposit_amount,
@@ -92,7 +92,7 @@ class BlockchainCurrency < ApplicationRecord
   end
 
   def blockchain
-    Rails.cache.fetch("#{currency_code}_#{blockchain_key}_blockchain", expires_in: 60) { Blockchain.find_by(key: blockchain_key) }
+    Rails.cache.fetch("#{currency_id}_#{blockchain_key}_blockchain", expires_in: 60) { Blockchain.find_by(key: blockchain_key) }
   end
 
   # subunit (or fractional monetary unit) - a monetary unit
@@ -117,7 +117,7 @@ class BlockchainCurrency < ApplicationRecord
     gas_speed = withdrawal_gas_speed ? blockchain.withdrawal_gas_speed : blockchain.collection_gas_speed
     opt.merge!(gas_price: gas_speed) if gas_speed
 
-    opt.deep_symbolize_keys.merge(id:                    currency_code,
+    opt.deep_symbolize_keys.merge(id:                    currency_id,
                                   base_factor:           base_factor,
                                   min_collection_amount: min_collection_amount,
                                   options:               opt)
@@ -138,7 +138,7 @@ class BlockchainCurrency < ApplicationRecord
       Wallet.active.where(blockchain_key: blockchain_key)
                    .where.not(kind: :fee).with_currency(parent_id).each do |wallet|
         # Link parent currency with wallet
-        CurrencyWallet.create(currency_code: currency_code, wallet_id: wallet.id)
+        CurrencyWallet.create(currency_id: currency_id, wallet_id: wallet.id)
       end
     end
   end
@@ -165,7 +165,7 @@ end
 # Table name: blockchain_currencies
 #
 #  id                       :bigint           not null, primary key
-#  currency_code              :string(255)      not null
+#  currency_id              :string(255)      not null
 #  blockchain_key           :string(255)
 #  parent_id                :string(255)
 #  deposit_fee              :decimal(32, 16)  default(0.0), not null
