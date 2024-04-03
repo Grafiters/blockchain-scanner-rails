@@ -12,10 +12,14 @@ module API
           success: API::V2::Entities::Deposit
 
         params do
+          optional :user_id,
+                  as: :member_id,
+                  type: String,
+                  desc: "User uid to request identifier"
           optional :currency,
-            type: String,
-            desc: 'Currency code'
-          #  values: { value: -> { Currency.visible.codes(bothcase: true) }, message: 'account.currency.doesnt_exist' },
+              type: String,
+              desc: 'Currency code'
+          #   values: { value: -> { Currency.visible.codes(bothcase: true) }, message: 'account.currency.doesnt_exist' },
           optional :state,
               desc: 'Filter deposits by states.'
               # values: { value: ->(v) { (Array.wrap(v) - ::Deposit.aasm.states.map(&:name).map(&:to_s)).blank? }, message: 'account.deposit.invalid_state' },
@@ -49,13 +53,14 @@ module API
           currency = Currency.find(params[:currency]) if params[:currency].present?
 
           Deposit.order(id: :desc)
-                      .tap { |q| q.where!(currency: currency) if currency }
-                      .tap { |q| q.where!(txid: params[:txid]) if params[:txid] }
-                      .tap { |q| q.where!(aasm_state: params[:state]) if params[:state] }
-                      .tap { |q| q.where!(blockchain_key: params[:blockchain_key]) if params[:blockchain_key] }
-                      .tap { |q| q.where!('created_at >= ?', Time.at(params[:time_from])) if params[:time_from].present? }
-                      .tap { |q| q.where!('created_at <= ?', Time.at(params[:time_to]+24*60*60)) if params[:time_to].present? }
-                      .tap { |q| present paginate(q), with: API::V2::Entities::Deposit }
+              .tap { |q| q.where!(member_id: params[:member_id]) if params[:member_id] }
+              .tap { |q| q.where!(currency: currency) if currency }
+              .tap { |q| q.where!(txid: params[:txid]) if params[:txid] }
+              .tap { |q| q.where!(aasm_state: params[:state]) if params[:state] }
+              .tap { |q| q.where!(blockchain_key: params[:blockchain_key]) if params[:blockchain_key] }
+              .tap { |q| q.where!('created_at >= ?', Time.at(params[:time_from])) if params[:time_from].present? }
+              .tap { |q| q.where!('created_at <= ?', Time.at(params[:time_to]+24*60*60)) if params[:time_to].present? }
+              .tap { |q| present paginate(q), with: API::V2::Entities::Deposit }
         end
 
         desc 'Get details of specific deposit.' do
@@ -102,7 +107,11 @@ module API
             error!({ errors: ['account.wallet.not_found'] }, 422)
           end
 
-          pa = PaymentAddress.create!(member_id: params[:member_id], wallet: wallet)
+          pa = PaymentAddress.find_by(member_id: params[:member_id], wallet: wallet)
+          if !pa.present?
+            pa = PaymentAddress.create!(member_id: params[:member_id], wallet: wallet)
+          end
+
 
           present pa, with: API::V2::Entities::PaymentAddress, address_format: params[:address_format]
         end
