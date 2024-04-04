@@ -25,6 +25,8 @@ tmp
 log
 .god
 
+.env
+
 # Ignore bundler config
 /.bundle
 

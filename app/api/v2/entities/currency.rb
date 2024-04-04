@@ -30,37 +30,14 @@ module API
           if: -> (currency){ currency.name.present? }
         )
 
-        expose(
-          :description,
+        expose :type,
           documentation: {
             type: String,
-            desc: 'Currency description'
-          }
-        )
-
-        expose(
-          :homepage,
-          documentation: {
-            type: String,
-            desc: 'Currency homepage'
-          }
-        )
-
-        expose(
-          :price,
-          documentation: {
-            desc: 'Currency current price'
-          }
-        )
-
-        expose(
-          :type,
-          documentation: {
-            type: String,
-            values: -> { ::Currency.types },
             desc: 'Currency type'
-          }
-        )
+          } do |currency|
+            types = currency.currency_type
+            types.present? ? types.type_coin : nil
+          end
 
         expose(
           :precision,
@@ -75,35 +52,6 @@ module API
             desc: 'Position used for defining currencies order'
           }
         )
-
-        expose(
-          :detail_currencies,
-          documentation: {
-            desc: "detail_currencies for defining currencies"
-          }
-        )
-
-        expose(
-          :market_cap,
-          documentation: {
-            desc: "market_cap for defining currencies"
-          }
-        )
-
-        expose(
-          :total_supply,
-          documentation: {
-            desc: "total_supply for defining currencies"
-          }
-        )
-
-        expose(
-          :circulation_supply,
-          documentation: {
-            desc: "circulation_supply for defining currencies"
-          }
-        )
-
 
         expose(
           :options,
@@ -131,7 +79,7 @@ module API
             desc: 'Currency networks.'
           },
         ) do |c|
-          c.blockchain_currencies
+          c.currency_type
         end
       end
     end

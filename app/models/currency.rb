@@ -97,6 +97,10 @@ class Currency < ApplicationRecord
 
   # == Instance Methods =====================================================
 
+  def currency_type
+    BlockchainCurrency.find_by(currency_id: code)
+  end
+
   types.each { |t| define_method("#{t}?") { type == t.to_s } }
 
   def wipe_cache

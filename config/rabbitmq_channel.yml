@@ -1,0 +1,22 @@
+exchanges:
+  - name: blockchain
+    type: direct
+    durable: false
+    auto_delete: false
+  - name: deposit_address
+    type: direct
+    durable: false
+    auto_delete: false
+queues:
+  - name: blockchain_queue
+    durable: true
+    auto_delete: false
+    bindings:
+      - exchange: blockchain
+        routing_key: blockchain.fetch_block
+  - name: deposit_address_queue
+    durable: true
+    auto_delete: false
+    bindings:
+      - exchange: deposit_address
+        routing_key: deposit.global_address

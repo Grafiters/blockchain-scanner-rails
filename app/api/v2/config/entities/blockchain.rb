@@ -152,6 +152,24 @@ module API
             }
           )
 
+          expose :hot_wallet,
+            using: API::V2::Config::Entities::Wallet,
+            documentation: {
+              desc: 'Hot wallet data for this blockchain network',
+              type: API::V2::Config::Entities::Wallet
+            } do |bl|
+              bl.wallets.active.hot.first
+            end
+
+          expose :fee_wallet,
+            using: API::V2::Config::Entities::Wallet,
+            documentation: {
+              desc: 'Hot wallet data for this blockchain network',
+              type: API::V2::Config::Entities::Wallet
+            } do |bl|
+              bl.wallets.active.fee.first
+            end
+
           expose(
             :created_at,
             format_with: :iso8601,

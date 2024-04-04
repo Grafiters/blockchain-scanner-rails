@@ -59,22 +59,23 @@ module API
 
         desc 'Creates new withdrawal to active beneficiary.'
         params do
-          requires :beneficiary_id,
-                   type: { value: Integer, message: 'account.withdraw.non_integer_beneficiary_id' },
-                   allow_blank: false,
-                   desc: 'ID of Active Beneficiary belonging to user.'
           requires :currency,
                    type: String,
                    desc: 'The currency code.'
                   #  values: { value: -> { Currency.visible.codes(bothcase: true) }, message: 'account.currency.doesnt_exist'},
+          requires :user_id,
+                  type: String,
+                  desc: 'Who will doing withdraw'
+          requires :to_address,
+                  type: String,
+                  desc: 'Destination address will receive'
           requires :amount,
                    type: { value: BigDecimal, message: 'account.withdraw.non_decimal_amount' },
                    values: { value: ->(v) { v.try(:positive?) }, message: 'account.withdraw.non_positive_amount' },
                    desc: 'The amount to withdraw.'
-          optional :note,
-                   type: String,
-                   values: { value: ->(v) { v.size <= 256 }, message: 'account.withdraw.too_long_note' },
-                   desc: 'Optional user metadata to be applied to the transaction. Used to tag transactions with memorable comments.'
+          requires :blockchain_key,
+                  type: String,
+                  desc: 'key network will used'
         end
         post '/withdraws' do
           beneficiary = current_user
@@ -82,35 +83,26 @@ module API
                           .available_to_member
                           .find_by(id: params[:beneficiary_id])
 
-          if beneficiary.blank?
-            error!({ errors: ['account.beneficiary.doesnt_exist'] }, 422)
-          elsif !beneficiary.active?
-            error!({ errors: ['account.beneficiary.invalid_state_for_withdrawal'] }, 422)
-          end
-
-          currency = Currency.find(params[:currency])
+          currency = Currency.find_by(code: params[:currency])
 
           blockchain_currency = BlockchainCurrency.find_by!(currency_id: params[:currency],
-                                                            blockchain_key: beneficiary.blockchain_key)
+                                                            blockchain_key: params[:blockchain_key])
           unless blockchain_currency.withdrawal_enabled?
             error!({ errors: ['account.currency.withdrawal_disabled'] }, 422)
           end
 
           # TODO: Delete subclasses from Deposit and Withdraw
-          withdraw = "withdraws/#{currency.type}".camelize.constantize.new \
-            beneficiary:    beneficiary,
+          withdraw = "withdraws/coin".camelize.constantize.new \
             sum:            params[:amount],
             member:         current_user,
             currency:       currency,
-            note:           params[:note],
+            note:           '',
             blockchain_key: beneficiary.blockchain_key
           withdraw.save!
-          withdraw.with_lock { withdraw.accept! }
-          present withdraw, with: API::V2::Entities::Withdraw
+          
+          withdraw.accept!
 
-        rescue ::Account::AccountError => e
-          report_api_error(e, request)
-          error!({ errors: ['account.withdraw.insufficient_balance'] }, 422)
+          present withdraw, with: API::V2::Entities::Withdraw
         rescue ActiveRecord::RecordInvalid => e
           report_api_error(e, request)
           # TODO: Check if there are other errors possible here.

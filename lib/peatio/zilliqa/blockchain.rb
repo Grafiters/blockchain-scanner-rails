@@ -39,6 +39,12 @@ module Zilliqa
       block
     end
 
+    def fetch_transaction(txid)
+      response = client.rest_api(:post, '/get-transaction', {hash: txid})
+    rescue Ether::Client::Error => e
+      raise Peatio::Blockchain::ClientError, e  
+    end
+
     def fetch_blocks!(block_number)
       txss = []
       blocks = []

@@ -41,6 +41,10 @@ class BlockchainService
       @adapter.features[:cash_addr_format]
     end
   
+    def fetch_tx_transacton(txid)
+      @adapter.fetch_transaction(txid)
+    end
+
     def fetch_transaction(transaction)
       tx = Peatio::Transaction.new(currency_id: transaction.currency_id,
                                    hash: transaction.txid,

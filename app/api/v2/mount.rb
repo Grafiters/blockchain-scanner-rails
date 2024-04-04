@@ -37,17 +37,14 @@ module API
 
       # The documentation is accessible at http://localhost:3000/swagger?url=/api/v2/swagger
       # Add swagger documentation for Peatio User API
-      add_swagger_documentation base_path:   File.join(API::Mount::PREFIX, API_VERSION, 'exchange'),
+      add_swagger_documentation base_path:   File.join(API::Mount::PREFIX, API_VERSION, ''),
                                 add_base_path: false,
                                 mount_path:  '/swagger',
                                 api_version: API_VERSION,
                                 doc_version: Peatio::Application::VERSION,
                                 info: {
-                                    title:          "Exchange API #{API::V2::Mount::API_VERSION}",
-                                    description:    'Exchange API high privileged API with RBAC.',
-                                    contact_name:   'heavenexchange.com',
-                                    contact_email:  'hello@hevenexchange.com',
-                                    contact_url:    'https://www.hevenexchange.com'
+                                    title:          "Gadai API #{API::V2::Mount::API_VERSION}",
+                                    description:    'Gadai API high privileged API with RBAC.'
                                   },
                                 models: [
                                   API::V2::Entities::Currency,
@@ -64,14 +61,7 @@ module API
                                   API::V2::Entities::Ticker,
                                   API::V2::Entities::Ticker::TickerEntry,
                                   API::V2::Entities::VirtualAccounts
-                                ],
-                                security_definitions: {
-                                  Bearer: {
-                                    type: "apiKey",
-                                    name: "JWT",
-                                    in:   "header"
-                                  }
-                                }
+                                ]
 
       # Mount Management API after swagger. To separate swagger Management API doc.
       # TODO: Find better solution for separating swagger Management API.

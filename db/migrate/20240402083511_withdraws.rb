@@ -3,7 +3,6 @@ class Withdraws < ActiveRecord::Migration[5.2]
     create_table "withdraws", force: :cascade do |t|
       t.string "blockchain_key", limit: 32
       t.string "member_id", null: false
-      t.bigint "beneficiary_id"
       t.string "currency_id", limit: 10, null: false
       t.decimal "amount", precision: 32, scale: 16, null: false
       t.decimal "fee", precision: 32, scale: 16, null: false

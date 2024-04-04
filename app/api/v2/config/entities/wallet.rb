@@ -38,15 +38,15 @@ module API
             if: -> (wallet) { wallet.blockchain.present? }
           ) { |wallet| wallet.blockchain.protocol }
 
-          expose(
-            :currency_ids,
+          expose :currency_ids,
             as: :currencies,
             documentation: {
                 is_array: true,
                 desc: 'Wallet currency code.',
                 example: -> { ::Currency.visible.codes }
-            }
-          )
+            } do |wal|
+              wal.currencies.pluck(:code)
+            end
 
           expose(
             :address,

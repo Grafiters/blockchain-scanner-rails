@@ -37,6 +37,12 @@ module Stellar
       raise Peatio::Blockchain::ClientError, e
     end
 
+    def fetch_transaction(txid)
+      response = client.rest_api(:post, '/get-transaction', {hash: txid})
+    rescue Ether::Client::Error => e
+      raise Peatio::Blockchain::ClientError, e  
+    end
+
     def load_balance_of_address!(address, currency_code)
       currency = settings[:currencies].find { |c| c[:id] == currency_code.to_s }
       raise UndefinedCurrencyError unless currency

@@ -63,18 +63,11 @@ ActiveRecord::Schema.define(version: 2024_04_03_034906) do
   create_table "currencies", force: :cascade do |t|
     t.string "code"
     t.string "name"
-    t.text "description"
-    t.string "homepage"
     t.string "type", limit: 30, default: "coin", null: false
     t.string "status", limit: 32, default: "enabled", null: false
     t.integer "position", null: false
     t.integer "precision", limit: 2, default: 8, null: false
     t.string "icon_url"
-    t.decimal "price", precision: 32, scale: 16, default: "1.0", null: false
-    t.text "detail_currencies"
-    t.decimal "market_cap", precision: 32, scale: 16, default: "0.0"
-    t.integer "total_supply", default: 0
-    t.integer "circulation_supply", default: 0
     t.json "options"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -173,7 +166,6 @@ ActiveRecord::Schema.define(version: 2024_04_03_034906) do
   create_table "withdraws", force: :cascade do |t|
     t.string "blockchain_key", limit: 32
     t.string "member_id", null: false
-    t.bigint "beneficiary_id"
     t.string "currency_id", limit: 10, null: false
     t.decimal "amount", precision: 32, scale: 16, null: false
     t.decimal "fee", precision: 32, scale: 16, null: false

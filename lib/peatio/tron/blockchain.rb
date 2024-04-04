@@ -98,6 +98,12 @@ module Tron
       value.to_d / currency.fetch(:base_factor).to_d
     end
 
+    def fetch_transaction(txid)
+      response = client.rest_api(:post, '/get-transaction', {hash: txid})
+    rescue Ether::Client::Error => e
+      raise Peatio::Blockchain::ClientError, e  
+    end
+
     def latest_block_number
       response = client.rest_api(:get, '/get-height', {})
       height = response['height']

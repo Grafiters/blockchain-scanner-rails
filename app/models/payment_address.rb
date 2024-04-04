@@ -5,6 +5,8 @@
 class PaymentAddress < ApplicationRecord
   validates :address, uniqueness: { scope: :wallet_id }, if: :address?
 
+  after_commit :enqueue_address_generation
+
   belongs_to :wallet
   belongs_to :member
   belongs_to :blockchain, foreign_key: :blockchain_key, primary_key: :key
@@ -49,12 +51,31 @@ class PaymentAddress < ApplicationRecord
     CashAddr::Converter.to_cash_address(address)
   end
 
+  def enqueue_address_generation
+    AMQP::Queue.enqueue(:deposit_coin_address, { member_id: member.id, wallet_id: wallet.id }, { persistent: true })
+  end
+
   def status
     if address.present?
       # In case when wallet was deleted and payment address still exists in DB
       wallet.present? ? wallet.status : ''
     else
       'pending'
+    end
+  end
+
+  def as_json_publish
+    {
+      blockchain_key: blockchain_key,
+      user_id: member_id,
+      wallet_id: wallet_id,
+      address: address
+    }
+  end
+
+  def publish_only
+    if !address.nil?
+      RabbitmqService.new({routing_key: 'deposit.global_address', exchange_name: 'deposit_address'}).handling_publish(as_json_publish)
     end
   end
 

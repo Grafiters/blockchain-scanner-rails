@@ -79,7 +79,6 @@ class BlockchainCurrency < ApplicationRecord
 
   after_create do
     link_wallets
-    update_fees if auto_update_fees_enabled && currency.coin?
   end
 
   # == Class Methods ========================================================
@@ -104,6 +103,15 @@ class BlockchainCurrency < ApplicationRecord
 
   def subunits
     Math.log(base_factor, 10).round
+  end
+
+  def type_coin
+    opt = options.compact.deep_symbolize_keys
+    if opt[:erc20_contract_address]
+      'token'
+    else
+      'native'
+    end
   end
 
   def to_blockchain_api_settings(withdrawal_gas_speed=true)
@@ -141,15 +149,6 @@ class BlockchainCurrency < ApplicationRecord
         CurrencyWallet.create(currency_id: currency_id, wallet_id: wallet.id)
       end
     end
-  end
-
-  def update_fees
-    update_attributes(
-      min_deposit_amount: round(blockchain.min_deposit_amount / currency.price),
-      min_collection_amount: round(blockchain.min_deposit_amount / currency.price),
-      withdraw_fee: round(blockchain.withdraw_fee / currency.price),
-      min_withdraw_amount: round(blockchain.min_withdraw_amount / currency.price)
-    )
   end
 
   private

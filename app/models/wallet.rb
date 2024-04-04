@@ -85,7 +85,6 @@ class Wallet < ApplicationRecord
                         { persistent: false })
   end
 
-
   class << self
     def gateways
       Peatio::Wallet.registry.adapters.keys

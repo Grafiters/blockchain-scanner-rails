@@ -7,7 +7,7 @@ class RabbitmqService
     def handling_publish(record)
         channel_start
   
-        exchange = channel.exchange(@exchange_name, type: 'topic', durable: true)
+        exchange = channel.exchange(@exchange_name, type: 'direct', durable: false)
         exchange.publish(record, routing_key: @routing_key)
     end
   
