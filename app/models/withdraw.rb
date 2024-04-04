@@ -61,6 +61,10 @@ class Withdraw < ApplicationRecord
   scope :last_24_hours, -> { where('created_at > ?', 24.hour.ago) }
   scope :last_1_month, -> { where('created_at > ?', 1.month.ago) }
 
+  after_commit on: :update do
+    publish_to_event
+  end
+
   aasm whiny_transitions: false do
     state :prepared, initial: true
     state :canceled
@@ -178,6 +182,10 @@ class Withdraw < ApplicationRecord
       updated_at:      updated_at.iso8601,
       completed_at:    completed_at&.iso8601,
       blockchain_txid: txid }
+  end
+
+  def publish_to_event
+    RabbitmqService.new({routing_key: 'withdraw.coin_or_token', exchange_name: 'withdraw_coin'}).handling_publish(as_json_for_event_api)
   end
 
   private

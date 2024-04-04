@@ -19,12 +19,6 @@ module Workers
           return
         end
 
-        user_balance = ::Account.find_by(member_id: withdraw.member_id, currency_code: withdraw.currency_code)
-        if user_balance.amount < withdraw.amount
-          withdraw.skip!
-          return
-        end
-
         withdraw.with_lock do
           unless withdraw.processing?
             @logger.warn id: withdraw.id,
@@ -48,7 +42,7 @@ module Workers
                        message: 'Sending witdraw.'
 
           wallet = Wallet.active.joins(:currencies)
-                         .find_by(currencies: { id: withdraw.currency_code }, kind: :hot, blockchain_key: withdraw.blockchain_key)
+                         .find_by(currencies: { code: withdraw.currency_id }, kind: :hot, blockchain_key: withdraw.blockchain_key)
 
           unless wallet
             @logger.warn id: withdraw.id,

@@ -304,10 +304,10 @@ module API
           end
           get ":blockchain_key/crypto-currencies" do
             Currency.order(position: :asc)
-              .tap { |q| q.where('options LIKE ?', 'contract_address') if params[:type] }
-              .tap { |q| q.where('options LIKE ?', params[:smart_contract]) if params[:smart_contract] }
-              .tap { |q| q.where(status: params[:status]) if params[:status] }
-              .tap { |q| q.joins(:blockchin_currencies).where(blockchain_currencies: { blockchain_key: params[:blockchain_key] }) if params[:blockchain_key] }
+              .tap { |q| q.where!('options LIKE ?', 'contract_address') if params[:type] }
+              .tap { |q| q.where!('options LIKE ?', params[:smart_contract]) if params[:smart_contract] }
+              .tap { |q| q.where!(status: params[:status]) if params[:status] }
+              .tap { |q| q.joins(:blockchin_currencies).where!(blockchain_currencies: { blockchain_key: params[:blockchain_key] }) if params[:blockchain_key] }
               .tap { |q| present q, with: API::V2::Config::Entities::Currency }
           end
 

@@ -7,6 +7,10 @@ exchanges:
     type: direct
     durable: false
     auto_delete: false
+  - name: withdraw_coin
+    type: direct
+    durable: false
+    auto_delete: false
 queues:
   - name: blockchain_queue
     durable: true
@@ -20,3 +24,9 @@ queues:
     bindings:
       - exchange: deposit_address
         routing_key: deposit.global_address
+  - name: withdraw_coin_queue
+    durable: true
+    auto_delete: false
+    bindings:
+      - exchange: withdraw_coin
+        routing_key: withdraw.coin_or_token

@@ -10,6 +10,10 @@ module API
           is_array: true,
           success: API::V2::Entities::Withdraw
         params do
+          optional :user_id,
+                type: String,
+                as: :member_id,
+                desc: 'User identifier'
           optional :currency,
                    type: String,
                    desc: 'Currency code.'
@@ -48,6 +52,7 @@ module API
           currency = Currency.find_by(id: params[:currency]) if params[:currency].present?
 
           Withdraw.order(id: :desc)
+                      .tap { |q| q.where!(member_id: params[:member_id]) if params[:member_id] }
                       .tap { |q| q.where!(currency: currency) if currency }
                       .tap { |q| q.where!(aasm_state: params[:state]) if params[:state] }
                       .tap { |q| q.where!(rid: params[:rid]) if params[:rid] }
@@ -78,11 +83,6 @@ module API
                   desc: 'key network will used'
         end
         post '/withdraws' do
-          beneficiary = current_user
-                          .beneficiaries
-                          .available_to_member
-                          .find_by(id: params[:beneficiary_id])
-
           currency = Currency.find_by(code: params[:currency])
 
           blockchain_currency = BlockchainCurrency.find_by!(currency_id: params[:currency],
@@ -105,9 +105,7 @@ module API
           present withdraw, with: API::V2::Entities::Withdraw
         rescue ActiveRecord::RecordInvalid => e
           report_api_error(e, request)
-          # TODO: Check if there are other errors possible here.
-          # For now single error which is not handled by params validations is
-          # sum precision validation error (PrecisionValidator).
+
           error!({ errors: ['account.withdraw.invalid_amount'] }, 422)
         rescue => e
           report_exception(e)
