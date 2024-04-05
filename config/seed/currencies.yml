@@ -16,6 +16,9 @@
   networks: 
     - blockchain_key: ftm-testnet
       base_factor: 1_000_000_000_000_000_000
+      min_deposit_amount: 0.001
+      min_collection_amount: 0.001
+      min_withdraw_amount: 0.001
       options:
         gas_limit: 75_000
 

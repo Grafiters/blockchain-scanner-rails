@@ -27,9 +27,10 @@ untuk apa saja bisa dilihat di file ```.env_example```
 6. run dengan command `docker-compose up -Vd` maka seluruh services pada comopose dijalankan
 7. traraaaaa, worker sudah berjalan
 
+NOTE: -> { jangan lupa untuk setup blockchain currencies pada bagian deposit_fee, min_deposit_amount, min_collection_amount, withdraw_fee, min_withdraw_amount }
+NOTE: -> { jangan lupa untuk setup blockchain pada bagian min_confirmation, min_deposit_amount, withdraw_fee, min_withdraw_amount }
 NOTE: -> { untuk endpoint list berada pada swaggerhub url `https://app.swaggerhub.com/apis/RYUDELTA7/gadai-endpoint/1.1.0#/` }
 NOTE: -> { jika terdapat data user_id bukan berarti pada database ini teresedia table user karna tidak menggunakan field user user_id digunakan hanya untuk mempermudah indexing antar service dan hanya menggunakan user_id saja }
-
 
 # SERVICES
 - BACKEND -> endpoint services and can be comunicate with fronend or another service
