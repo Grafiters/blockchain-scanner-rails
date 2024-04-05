@@ -27,6 +27,8 @@ untuk apa saja bisa dilihat di file ```.env_example```
 6. run dengan command `docker-compose up -Vd` maka seluruh services pada comopose dijalankan
 7. traraaaaa, worker sudah berjalan
 
+NOTE: -> { untuk endpoint list berada pada swaggerhub url `https://app.swaggerhub.com/apis/RYUDELTA7/gadai-endpoint/1.1.0#/` }
+
 
 # SERVICES
 - BACKEND -> endpoint services and can be comunicate with fronend or another service
