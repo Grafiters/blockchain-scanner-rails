@@ -28,6 +28,7 @@ untuk apa saja bisa dilihat di file ```.env_example```
 7. traraaaaa, worker sudah berjalan
 
 NOTE: -> { untuk endpoint list berada pada swaggerhub url `https://app.swaggerhub.com/apis/RYUDELTA7/gadai-endpoint/1.1.0#/` }
+NOTE: -> { jika terdapat data user_id bukan berarti pada database ini teresedia table user karna tidak menggunakan field user user_id digunakan hanya untuk mempermudah indexing antar service dan hanya menggunakan user_id saja }
 
 
 # SERVICES
