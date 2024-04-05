@@ -7,7 +7,7 @@ class PaymentAddresses < ActiveRecord::Migration[5.2]
       t.string "address", limit: 95
       t.boolean "remote", default: false, null: false
       t.string "secret"
-      t.string "details", limit: 1024
+      t.json "details"
       t.datetime "created_at", null: false
       t.datetime "updated_at", null: false
       t.index ["member_id"], name: "index_payment_addresses_on_member_id"

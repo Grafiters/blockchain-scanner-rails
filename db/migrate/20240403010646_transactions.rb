@@ -7,7 +7,7 @@ class Transactions < ActiveRecord::Migration[5.2]
     t.string "txid"
     t.string "from_address"
     t.string "to_address"
-    t.decimal "amount", precision: 32, scale: 16, default: "0.0", null: false
+    t.decimal "amount", precision: 32, scale: 18, default: "0.0", null: false
     t.integer "block_number"
     t.integer "txout"
     t.string "status"

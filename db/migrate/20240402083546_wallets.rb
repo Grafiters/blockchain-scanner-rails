@@ -9,7 +9,7 @@ class Wallets < ActiveRecord::Migration[5.2]
       t.json "plain_settings"
       t.json "settings"
       t.json "balance"
-      t.decimal "max_balance", precision: 32, scale: 16, default: "0.0", null: false
+      t.decimal "max_balance", precision: 32, scale: 18, default: "0.0", null: false
       t.string "status", limit: 32
       t.datetime "created_at", null: false
       t.datetime "updated_at", null: false

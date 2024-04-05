@@ -4,11 +4,11 @@ class BlockchainCurrencies < ActiveRecord::Migration[5.2]
       t.string "currency_id", null: false
       t.string "blockchain_key"
       t.string "parent_id"
-      t.decimal "deposit_fee", precision: 32, scale: 16, default: "0.0", null: false
-      t.decimal "min_deposit_amount", precision: 32, scale: 16, default: "0.0", null: false
-      t.decimal "min_collection_amount", precision: 32, scale: 16, default: "0.0", null: false
-      t.decimal "withdraw_fee", precision: 32, scale: 16, default: "0.0", null: false
-      t.decimal "min_withdraw_amount", precision: 32, scale: 16, default: "0.0", null: false
+      t.decimal "deposit_fee", precision: 32, scale: 18, default: "0.0", null: false
+      t.decimal "min_deposit_amount", precision: 32, scale: 18, default: "0.0", null: false
+      t.decimal "min_collection_amount", precision: 32, scale: 18, default: "0.0", null: false
+      t.decimal "withdraw_fee", precision: 32, scale: 18, default: "0.0", null: false
+      t.decimal "min_withdraw_amount", precision: 32, scale: 18, default: "0.0", null: false
       t.boolean "deposit_enabled", default: true, null: false
       t.boolean "withdrawal_enabled", default: true, null: false
       t.boolean "auto_update_fees_enabled", default: true, null: false
