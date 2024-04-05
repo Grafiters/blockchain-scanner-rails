@@ -19,27 +19,21 @@ module Workers
 
         wallet_service = WalletService.new(wallet)
 
-        member.payment_address(wallet.id).tap do |pa|
-          pa.with_lock do
-            PaymentAddress.where(wallet_id: wallet.id).each do |pa|
-              next if pa.address.present?
-  
-              # Supply address ID in case of BitGo address generation if it exists.
-              details = {}
-              result = wallet_service.create_address!("-", details.merge(updated_at: pa.updated_at))
-  
-              if result.present?
-                pa.update!(address: result[:address],
-                           secret:  result[:secret],
-                           details: result[:details])
+        PaymentAddress.where(wallet_id: wallet.id).each do |pa|
+          next if pa.address.present?
 
-                pa.trigger_address_event
-              end
-            end 
+          # Supply address ID in case of BitGo address generation if it exists.
+          details = {}
+          result = wallet_service.create_address!("-", details.merge(updated_at: pa.updated_at))
+
+          if result.present?
+            pa.update!(address: result[:address],
+                       secret:  result[:secret],
+                       details: result[:details])
+
+            pa.trigger_address_event
           end
-
-          pa.trigger_address_event unless pa.address.blank?
-        end
+        end 
 
       # Don't re-enqueue this job in case of error.
       # The system is designed in such way that when user will

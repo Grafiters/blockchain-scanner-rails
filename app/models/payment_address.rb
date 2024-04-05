@@ -25,7 +25,6 @@ class PaymentAddress < ApplicationRecord
     self.address = CashAddr::Converter.to_cash_address(address)
   end
 
-
   def blockchain_api
     BlockchainService.new(blockchain)
   end
@@ -52,7 +51,7 @@ class PaymentAddress < ApplicationRecord
   end
 
   def enqueue_address_generation
-    AMQP::Queue.enqueue(:deposit_coin_address, { member_id: member.id, wallet_id: wallet.id }, { persistent: true })
+    AMQP::Queue.enqueue(:deposit_coin_address, { member_id: member_id, wallet_id: wallet.id }, { persistent: true })
   end
 
   def status
@@ -80,6 +79,7 @@ class PaymentAddress < ApplicationRecord
   end
 
   def trigger_address_event
+    publish_only
     ::AMQP::Queue.enqueue_event('private', member_id, :deposit_address, type: :create,
                                 currencies: wallet.currencies.codes,
                                 blockchain_key: blockchain_key,

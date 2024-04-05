@@ -56,7 +56,7 @@ class Currency < ApplicationRecord
   scope :fiats, -> { where(type: :fiat) }
   # This scope select all currencies without parent_id, which means that they are not tokens
   # and where currency type is coin
-  scope :coins_without_tokens, -> { where(type: :coin).includes(:blockchain_currencies).where(blockchain_currencies: { parent_id: nil }).distinct }
+  scope :coins_without_tokens, -> { joins("LEFT OUTER JOIN blockchain_currencies ON blockchain_currencies.currency_id = currencies.code").where(type: :coin).where(blockchain_currencies: { parent_id: nil }).distinct }
 
   # == Callbacks ============================================================
 
@@ -123,11 +123,7 @@ class Currency < ApplicationRecord
   end
 
   def get_price
-    if price.blank? || price.zero?
-      raise "Price for currency #{id} is unknown"
-    else
-      price
-    end
+    0.00000001
   end
 
   def dependent_markets

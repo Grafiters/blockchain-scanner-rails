@@ -109,7 +109,7 @@ module Ether
       end
       # Make sure that we return currency_code
       transaction.currency_id = 'eth' if transaction.currency_id.blank?
-      transaction.amount = amount.to_s.length >= @currency.fetch(:base_factor).to_s.length ? convert_from_base_unit(amount) : amount
+      transaction.amount = convert_from_base_unit(amount)
       transaction.hash = hash
       transaction.options = options
       transaction

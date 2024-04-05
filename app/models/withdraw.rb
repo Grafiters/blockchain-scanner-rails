@@ -19,6 +19,7 @@ class Withdraw < ApplicationRecord
   include AASM
   include AASM::Locking
   include TIDIdentifiable
+  include FeeChargeable
 
   extend Enumerize
 
@@ -28,38 +29,27 @@ class Withdraw < ApplicationRecord
   TRANSFER_TYPES = { fiat: 100, crypto: 200 }
 
   belongs_to :currency, foreign_key: :currency_id, primary_key: :code, required: true
-  belongs_to :member, required: true
   belongs_to :blockchain, foreign_key: :blockchain_key, primary_key: :key
-  belongs_to :blockchain_coin_currency, -> { where.not(blockchain_key: nil) }, class_name: 'BlockchainCurrency', foreign_key: %i[blockchain_key currency_code], primary_key: %i[blockchain_key currency_code]
-  belongs_to :blockchain_fiat_currency, -> { where(blockchain_key: nil) }, class_name: 'BlockchainCurrency', foreign_key: :currency_code, primary_key: :currency_code
+  belongs_to :blockchain_coin_currency, -> { where.not(blockchain_key: nil) }, class_name: 'BlockchainCurrency', foreign_key: %i[blockchain_key currency_id], primary_key: %i[blockchain_key currency_id]
+  belongs_to :blockchain_fiat_currency, -> { where(blockchain_key: nil) }, class_name: 'BlockchainCurrency', foreign_key: :currency_id, primary_key: :currency_id
 
   # Optional beneficiary association gives ability to support both in-peatio
   # beneficiaries and managed by third party application.
 
   after_initialize :initialize_defaults, if: :new_record?
-  before_validation(on: :create) { self.rid ||= beneficiary.rid if beneficiary.present? }
   before_validation { self.completed_at ||= Time.current if completed? }
   before_validation { self.transfer_type ||= currency.coin? ? 'crypto' : 'fiat' }
 
   validates :rid, :aasm_state, presence: true
-  validates :txid, uniqueness: { scope: :currency_code }, if: :txid?
+  validates :txid, uniqueness: { scope: :currency_id }, if: :txid?
   validates :block_number, allow_blank: true, numericality: { greater_than_or_equal_to: 0, only_integer: true }
-  validates :sum,
-            presence: true,
-            numericality: { greater_than_or_equal_to: ->(withdraw) { withdraw.blockchain_currency.min_withdraw_amount }}
 
   validates :blockchain_key,
             inclusion: { in: ->(_) { Blockchain.pluck(:key).map(&:to_s) } },
             if: -> { currency.coin? }
 
-  validate do
-    errors.add(:beneficiary, 'not active') if beneficiary.present? && !beneficiary.active? && !aasm_state.to_sym.in?(COMPLETED_STATES)
-  end
-
   scope :completed, -> { where(aasm_state: COMPLETED_STATES) }
   scope :succeed_processing, -> { where(aasm_state: SUCCEED_PROCESSING_STATES) }
-  scope :last_24_hours, -> { where('created_at > ?', 24.hour.ago) }
-  scope :last_1_month, -> { where('created_at > ?', 1.month.ago) }
 
   after_commit on: :update do
     publish_to_event
@@ -81,6 +71,9 @@ class Withdraw < ApplicationRecord
 
     event :accept do
       transitions from: :prepared, to: :accepted
+      after_commit do
+        process!
+      end
     end
 
     event :cancel do
@@ -171,10 +164,9 @@ class Withdraw < ApplicationRecord
 
   def as_json_for_event_api
     { tid:             tid,
-      user:            { uid: member.uid, email: member.email },
-      uid:             member.uid,
+      user_id:         member_id,
       rid:             rid,
-      currency:        currency_code,
+      currency:        currency_id,
       amount:          amount.to_s('F'),
       fee:             fee.to_s('F'),
       state:           aasm_state,
@@ -185,7 +177,7 @@ class Withdraw < ApplicationRecord
   end
 
   def publish_to_event
-    RabbitmqService.new({routing_key: 'withdraw.coin_or_token', exchange_name: 'withdraw_coin'}).handling_publish(as_json_for_event_api)
+    RabbitmqService.new({routing_key: 'withdraw.coin_or_token', exchange_name: 'withdraw_coin'}).handling_publish(JSON.dump(as_json_for_event_api))
   end
 
   private
@@ -202,7 +194,7 @@ end
 #  id             :bigint           not null, primary key
 #  member_id      :bigint           not null
 #  beneficiary_id :bigint
-#  currency_code    :string(10)       not null
+#  currency_id    :string(10)       not null
 #  blockchain_key :string(255)
 #  amount         :decimal(32, 16)  not null
 #  fee            :decimal(32, 16)  not null
@@ -224,8 +216,8 @@ end
 # Indexes
 #
 #  index_withdraws_on_aasm_state            (aasm_state)
-#  index_withdraws_on_currency_code           (currency_code)
-#  index_withdraws_on_currency_code_and_txid  (currency_code,txid) UNIQUE
+#  index_withdraws_on_currency_id           (currency_id)
+#  index_withdraws_on_currency_id_and_txid  (currency_id,txid) UNIQUE
 #  index_withdraws_on_member_id             (member_id)
 #  index_withdraws_on_tid                   (tid)
 #  index_withdraws_on_type                  (type)

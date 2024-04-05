@@ -33,11 +33,10 @@ queue:
     name: peatio.schaning_block_or_hash
 
 binding:
-  withdraw_coin:s
+  withdraw_coin:
     queue: withdraw_coin
   deposit_coin_address:
     queue: deposit_coin_address
-  influx_writer:
   events_processor:
     queue: events_processor
     exchange: events

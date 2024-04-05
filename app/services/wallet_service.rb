@@ -42,7 +42,7 @@ class WalletService
 
     destination_wallets =
       Wallet.active.withdraw.ordered
-        .joins(:currencies).where(currencies: { id: deposit.currency_id }, blockchain_key: @wallet.blockchain_key)
+        .joins(:currencies).where(currencies: { code: deposit.currency_id }, blockchain_key: @wallet.blockchain_key)
         .map do |w|
         # NOTE: Consider min_collection_amount is defined per wallet.
         #       For now min_collection_amount is currency config.
@@ -272,6 +272,7 @@ class WalletService
   def save_transaction(transaction, reference)
     transaction['txid'] = transaction.delete('hash')
     currency_id = reference[:currency_id]
+    
     Transaction.create!(transaction.merge(reference: reference, currency_id: currency_id))
   end
 end

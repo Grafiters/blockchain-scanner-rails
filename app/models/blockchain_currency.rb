@@ -42,7 +42,7 @@ class BlockchainCurrency < ApplicationRecord
             if: -> { currency.coin? }
 
   validates :parent_id, allow_blank: true,
-            inclusion: { in: ->(_) { Currency.coins_without_tokens.pluck(:id).map(&:to_s) } },
+            inclusion: { in: ->(_) { Currency.coins_without_tokens.pluck(:code).map(&:to_s) } },
             if: -> { currency.coin? }
 
   validates :options, length: { maximum: 1000 }
@@ -142,11 +142,12 @@ class BlockchainCurrency < ApplicationRecord
 
   def link_wallets
     if parent_id.present?
+      parent_currencies = Currency.find_by(code: parent_id)
       # Iterate through active deposit/withdraw wallets
       Wallet.active.where(blockchain_key: blockchain_key)
-                   .where.not(kind: :fee).with_currency(parent_id).each do |wallet|
+                   .where.not(kind: :fee).with_currency(parent_currencies.id).each do |wallet|
         # Link parent currency with wallet
-        CurrencyWallet.create(currency_id: currency_id, wallet_id: wallet.id)
+        CurrencyWallet.create(currency_id: currency.id, wallet_id: wallet.id)
       end
     end
   end

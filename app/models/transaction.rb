@@ -12,7 +12,7 @@ class Transaction < ApplicationRecord
   # == Relationships ========================================================
 
   belongs_to :reference, polymorphic: true
-  belongs_to :currency, foreign_key: :currency_id
+  belongs_to :currency, foreign_key: :currency_id, primary_key: :code
 
   # == Validations ==========================================================
 

@@ -5,25 +5,25 @@ services:
     image: "gadai:0.1"
     restart: always
     environment:
-      - GROUP_ID=
-      - RAILS_ROOT=
-      - DATABASE_ADAPTER=
-      - DATABASE_NAME=
-      - DATABASE_HOST=
-      - DATABASE_PORT=
-      - DATABASE_USER=
-      - DATABASE_PASS=
-      - RABBITMQ_HOST=
-      - RABBITMQ_PORT=
-      - RABBITMQ_USERNAME=
-      - RABBITMQ_PASSWORD=
-      - ENCRYPTION_KEY=
-      - BLOCK_EXCHANGE_NAME=
-      - BLOCK_QUEUE_NAME=
-      - BLOCK_ROUTEING_KEY=
-      - RPC_BSC_NETWORK=
-      - RPC_TRON_NETWORK=
-      - SECRET_KEY_BASE=
+      - GROUP_ID=2
+      - RAILS_ROOT=/home/app
+      - DATABASE_ADAPTER=postgresql
+      - DATABASE_NAME=block_production
+      - DATABASE_HOST=192.168.0.121
+      - DATABASE_PORT=5432
+      - DATABASE_USER=Alone
+      - DATABASE_PASS=Alone123!*
+      - RABBITMQ_HOST=192.168.0.121
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USERNAME=guest
+      - RABBITMQ_PASSWORD=guest
+      - ENCRYPTION_KEY=8eH4y0P/vGq3Gf0GTmqooDPrYL4tbNFDqFyRhQGWA9s=
+      - BLOCK_EXCHANGE_NAME=blockchain
+      - BLOCK_QUEUE_NAME=blockchain_queue
+      - BLOCK_ROUTEING_KEY=blockchain.fetch_block
+      - RPC_BSC_NETWORK=https://data-seed-prebsc-1-s1.bnbchain.org:8545
+      - RPC_TRON_NETWORK=https://api.nileex.io
+      - SECRET_KEY_BASE=12345678913456
     ports:
       - "3000:3000"
     command: bash -c "bundle exec puma --config config/puma.rb"
@@ -36,55 +36,51 @@ services:
     image: "gadai:0.1"
     restart: always
     environment:
-      - GROUP_ID=
-      - RAILS_ROOT=
-      - DATABASE_ADAPTER=
-      - DATABASE_NAME=
-      - DATABASE_HOST=
-      - DATABASE_PORT=
-      - DATABASE_USER=
-      - DATABASE_PASS=
-      - RABBITMQ_HOST=
-      - RABBITMQ_PORT=
-      - RABBITMQ_USERNAME=
-      - RABBITMQ_PASSWORD=
-      - ENCRYPTION_KEY
-      - BLOCK_EXCHANGE_NAME=
-      - BLOCK_QUEUE_NAME=
-      - BLOCK_ROUTEING_KEY=
-      - SECRET_KEY_BASE
+      - GROUP_ID=0
+      - RAILS_ROOT=/home/app
+      - DATABASE_ADAPTER=postgresql
+      - DATABASE_NAME=block_production
+      - DATABASE_HOST=192.168.0.121
+      - DATABASE_PORT=5432
+      - DATABASE_USER=Alone
+      - DATABASE_PASS=Alone123!*
+      - RABBITMQ_HOST=192.168.0.121
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USERNAME=guest
+      - RABBITMQ_PASSWORD=guest
+      - ENCRYPTION_KEY=
+      - BLOCK_EXCHANGE_NAME=blockchain
+      - BLOCK_QUEUE_NAME=blockchain_queue
+      - BLOCK_ROUTEING_KEY=blockchain.fetch_block
+      - SECRET_KEY_BASE=
     command: bash -c "bundle exec ruby lib/daemons/amqp_daemon.rb deposit_coin_address"
     logging:
       driver: "json-file"
       options:
           max-size: "50m"
-    
-  proces_block:
+
+  withdraw_coin:
     image: "gadai:0.1"
     restart: always
-    volumes:
-      - ./app/services:/home/app/app/services
-    ports:
-      - "3001:3000"
     environment:
-      - GROUP_ID=
-      - RAILS_ROOT=
-      - DATABASE_ADAPTER=
-      - DATABASE_NAME=
-      - DATABASE_HOST=
-      - DATABASE_PORT=
-      - DATABASE_USER=
-      - DATABASE_PASS=
-      - RABBITMQ_HOST=
-      - RABBITMQ_PORT=
-      - RABBITMQ_USERNAME=
-      - RABBITMQ_PASSWORD=
-      - ENCRYPTION_KEY=
-      - BLOCK_EXCHANGE_NAME=
-      - BLOCK_QUEUE_NAME=
-      - BLOCK_ROUTEING_KEY=
-      - SECRET_KEY_BASE=
-    command: bash -c "bundle exec ruby bin/block.rb run"
+      - GROUP_ID=0
+      - RAILS_ROOT=/home/app
+      - DATABASE_ADAPTER=postgresql
+      - DATABASE_NAME=block_production
+      - DATABASE_HOST=192.168.0.121
+      - DATABASE_PORT=5432
+      - DATABASE_USER=Alone
+      - DATABASE_PASS=Alone123!*
+      - RABBITMQ_HOST=192.168.0.121
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USERNAME=guest
+      - RABBITMQ_PASSWORD=guest
+      - ENCRYPTION_KEY=8eH4y0P/vGq3Gf0GTmqooDPrYL4tbNFDqFyRhQGWA9s=
+      - BLOCK_EXCHANGE_NAME=blockchain
+      - BLOCK_QUEUE_NAME=blockchain_queue
+      - BLOCK_ROUTEING_KEY=blockchain.fetch_block
+      - SECRET_KEY_BASE=12345678913456
+    command: bash -c "bundle exec ruby lib/daemons/amqp_daemon.rb withdraw_coin"
     logging:
       driver: "json-file"
       options:
@@ -95,26 +91,24 @@ services:
     restart: always
     volumes:
       - ./app/services:/home/app/app/services
-    ports:
-      - "3001:3000"
     environment:
-      - GROUP_ID=
-      - RAILS_ROOT=
-      - DATABASE_ADAPTER=
-      - DATABASE_NAME=
-      - DATABASE_HOST=
-      - DATABASE_PORT=
-      - DATABASE_USER=
-      - DATABASE_PASS=
-      - RABBITMQ_HOST=
-      - RABBITMQ_PORT=
-      - RABBITMQ_USERNAME=
-      - RABBITMQ_PASSWORD=
-      - ENCRYPTION_KEY=
-      - BLOCK_EXCHANGE_NAME=
-      - BLOCK_QUEUE_NAME=
-      - BLOCK_ROUTEING_KEY=
-      - SECRET_KEY_BASE=
+      - GROUP_ID=0
+      - RAILS_ROOT=/home/app
+      - DATABASE_ADAPTER=postgresql
+      - DATABASE_NAME=block_production
+      - DATABASE_HOST=192.168.0.121
+      - DATABASE_PORT=5432
+      - DATABASE_USER=Alone
+      - DATABASE_PASS=Alone123!*
+      - RABBITMQ_HOST=192.168.0.121
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USERNAME=guest
+      - RABBITMQ_PASSWORD=guest
+      - ENCRYPTION_KEY=8eH4y0P/vGq3Gf0GTmqooDPrYL4tbNFDqFyRhQGWA9s=
+      - BLOCK_EXCHANGE_NAME=blockchain
+      - BLOCK_QUEUE_NAME=blockchain_queue
+      - BLOCK_ROUTEING_KEY=blockchain.fetch_block
+      - SECRET_KEY_BASE=12345678913456
     command: bash -c "bundle exec ruby bin/block.rb run"
     logging:
       driver: "json-file"
@@ -125,23 +119,23 @@ services:
     image: "gadai:0.1"
     restart: always
     environment:
-      - GROUP_ID=
-      - RAILS_ROOT=
-      - DATABASE_ADAPTER=
-      - DATABASE_NAME=
-      - DATABASE_HOST=
-      - DATABASE_PORT=
-      - DATABASE_USER=
-      - DATABASE_PASS=
-      - RABBITMQ_HOST=
-      - RABBITMQ_PORT=
-      - RABBITMQ_USERNAME=
-      - RABBITMQ_PASSWORD=
-      - ENCRYPTION_KEY=
-      - BLOCK_EXCHANGE_NAME=
-      - BLOCK_QUEUE_NAME=
-      - BLOCK_ROUTEING_KEY=
-      - SECRET_KEY_BASE=
+      - GROUP_ID=0
+      - RAILS_ROOT=/home/app
+      - DATABASE_ADAPTER=postgresql
+      - DATABASE_NAME=block_production
+      - DATABASE_HOST=192.168.0.121
+      - DATABASE_PORT=5432
+      - DATABASE_USER=Alone
+      - DATABASE_PASS=Alone123!*
+      - RABBITMQ_HOST=192.168.0.121
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USERNAME=guest
+      - RABBITMQ_PASSWORD=guest
+      - ENCRYPTION_KEY=8eH4y0P/vGq3Gf0GTmqooDPrYL4tbNFDqFyRhQGWA9s=
+      - BLOCK_EXCHANGE_NAME=blockchain
+      - BLOCK_QUEUE_NAME=blockchain_queue
+      - BLOCK_ROUTEING_KEY=blockchain.fetch_block
+      - SECRET_KEY_BASE=12345678913456
     command: bash -c "bundle exec ruby lib/daemons/daemons.rb deposit"
     logging:
       driver: "json-file"
@@ -151,23 +145,23 @@ services:
     image: "gadai:0.1"
     restart: always
     environment:
-      - GROUP_ID=
-      - RAILS_ROOT=
-      - DATABASE_ADAPTER=
-      - DATABASE_NAME=
-      - DATABASE_HOST=
-      - DATABASE_PORT=
-      - DATABASE_USER=
-      - DATABASE_PASS=
-      - RABBITMQ_HOST=
-      - RABBITMQ_PORT=
-      - RABBITMQ_USERNAME=
-      - RABBITMQ_PASSWORD=
-      - ENCRYPTION_KEY=
-      - BLOCK_EXCHANGE_NAME=
-      - BLOCK_QUEUE_NAME=
-      - BLOCK_ROUTEING_KEY=
-      - SECRET_KEY_BASE=
+      - GROUP_ID=1
+      - RAILS_ROOT=/home/app
+      - DATABASE_ADAPTER=postgresql
+      - DATABASE_NAME=block_production
+      - DATABASE_HOST=192.168.0.121
+      - DATABASE_PORT=5432
+      - DATABASE_USER=Alone
+      - DATABASE_PASS=Alone123!*
+      - RABBITMQ_HOST=192.168.0.121
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USERNAME=guest
+      - RABBITMQ_PASSWORD=guest
+      - ENCRYPTION_KEY=8eH4y0P/vGq3Gf0GTmqooDPrYL4tbNFDqFyRhQGWA9s=
+      - BLOCK_EXCHANGE_NAME=blockchain
+      - BLOCK_QUEUE_NAME=blockchain_queue
+      - BLOCK_ROUTEING_KEY=blockchain.fetch_block
+      - SECRET_KEY_BASE=12345678913456
     command: bash -c "bundle exec ruby lib/daemons/daemons.rb blockchain"
     logging:
       driver: "json-file"
@@ -177,23 +171,23 @@ services:
     image: "gadai:0.1"
     restart: always
     environment:
-      - GROUP_ID=
-      - RAILS_ROOT=
-      - DATABASE_ADAPTER=
-      - DATABASE_NAME=
-      - DATABASE_HOST=
-      - DATABASE_PORT=
-      - DATABASE_USER=
-      - DATABASE_PASS=
-      - RABBITMQ_HOST=
-      - RABBITMQ_PORT=
-      - RABBITMQ_USERNAME=
-      - RABBITMQ_PASSWORD=
-      - ENCRYPTION_KEY=
-      - BLOCK_EXCHANGE_NAME=
-      - BLOCK_QUEUE_NAME=
-      - BLOCK_ROUTEING_KEY=
-      - SECRET_KEY_BASE=
+      - GROUP_ID=2
+      - RAILS_ROOT=/home/app
+      - DATABASE_ADAPTER=postgresql
+      - DATABASE_NAME=block_production
+      - DATABASE_HOST=192.168.0.121
+      - DATABASE_PORT=5432
+      - DATABASE_USER=Alone
+      - DATABASE_PASS=Alone123!*
+      - RABBITMQ_HOST=192.168.0.121
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USERNAME=guest
+      - RABBITMQ_PASSWORD=guest
+      - ENCRYPTION_KEY=8eH4y0P/vGq3Gf0GTmqooDPrYL4tbNFDqFyRhQGWA9s=
+      - BLOCK_EXCHANGE_NAME=blockchain
+      - BLOCK_QUEUE_NAME=blockchain_queue
+      - BLOCK_ROUTEING_KEY=blockchain.fetch_block
+      - SECRET_KEY_BASE=12345678913456
     command: bash -c "bundle exec ruby lib/daemons/daemons.rb blockchain"
     logging:
       driver: "json-file"

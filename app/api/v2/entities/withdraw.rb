@@ -91,6 +91,7 @@ module API
 
         expose(
           :rid,
+          as: :to_address,
           documentation: {
             type: String,
             desc: 'The beneficiary ID or wallet address on the Blockchain.'

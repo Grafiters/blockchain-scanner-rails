@@ -11,24 +11,24 @@ module API
           success: API::V2::Entities::Withdraw
         params do
           optional :user_id,
-                type: String,
-                as: :member_id,
-                desc: 'User identifier'
+                  type: String,
+                  as: :member_id,
+                  desc: 'User identifier'
           optional :currency,
-                   type: String,
-                   desc: 'Currency code.'
-                  #  values: { value: -> { Currency.visible.codes(bothcase: true) }, message: 'account.currency.doesnt_exist'},
+                  type: String,
+                  values: { value: -> { Currency.visible.codes(bothcase: true) }, message: 'account.currency.doesnt_exist'},
+                  desc: 'Currency code.'
           optional :blockchain_key,
-          desc: 'Blockchain key of the requested withdrawal'
-          #  values: { value: -> { ::Blockchain.pluck(:key) }, message: 'account.withdraw.blockchain_key_doesnt_exist' },
+                  values: { value: -> { ::Blockchain.pluck(:key) }, message: 'account.withdraw.blockchain_key_doesnt_exist' },
+                  desc: 'Blockchain key of the requested withdrawal'
           optional :limit,
-                   type: { value: Integer, message: 'account.withdraw.non_integer_limit' },
-                   values: { value: 1..100, message: 'account.withdraw.invalid_limit' },
-                   default: 100,
-                   desc: "Number of withdraws per page (defaults to 100, maximum is 100)."
+                  type: { value: Integer, message: 'account.withdraw.non_integer_limit' },
+                  values: { value: 1..100, message: 'account.withdraw.invalid_limit' },
+                  default: 100,
+                  desc: "Number of withdraws per page (defaults to 100, maximum is 100)."
           optional :state,
-          desc: 'Filter withdrawals by states.'
-          # values: { value: ->(v) { (Array.wrap(v) - Withdraw::STATES.map(&:to_s)).blank? }, message: 'account.withdraw.invalid_state' },
+                  values: { value: ->(v) { (Array.wrap(v) - Withdraw::STATES.map(&:to_s)).blank? }, message: 'account.withdraw.invalid_state' },
+                  desc: 'Filter withdrawals by states.'
           optional :rid,
                    type: String,
                    allow_blank: false,
@@ -66,9 +66,10 @@ module API
         params do
           requires :currency,
                    type: String,
+                   values: { value: -> { Currency.visible.codes(bothcase: true) }, message: 'account.currency.doesnt_exist'},
                    desc: 'The currency code.'
-                  #  values: { value: -> { Currency.visible.codes(bothcase: true) }, message: 'account.currency.doesnt_exist'},
           requires :user_id,
+                  as: :member_id,
                   type: String,
                   desc: 'Who will doing withdraw'
           requires :to_address,
@@ -79,6 +80,7 @@ module API
                    values: { value: ->(v) { v.try(:positive?) }, message: 'account.withdraw.non_positive_amount' },
                    desc: 'The amount to withdraw.'
           requires :blockchain_key,
+                  values: { value: -> { ::Blockchain.pluck(:key) }, message: 'account.withdraw.blockchain_key_doesnt_exist' },
                   type: String,
                   desc: 'key network will used'
         end
@@ -94,10 +96,11 @@ module API
           # TODO: Delete subclasses from Deposit and Withdraw
           withdraw = "withdraws/coin".camelize.constantize.new \
             sum:            params[:amount],
-            member:         current_user,
+            member_id:      params[:member_id],
             currency:       currency,
             note:           '',
-            blockchain_key: beneficiary.blockchain_key
+            rid:            params[:to_address],
+            blockchain_key: params[:blockchain_key]
           withdraw.save!
           
           withdraw.accept!
@@ -110,6 +113,43 @@ module API
         rescue => e
           report_exception(e)
           error!({ errors: ['account.withdraw.create_error'] }, 422)
+        end
+
+        desc 'Take an action on the withdrawal.',
+             success: API::V2::Config::Entities::Withdraw
+        params do
+          requires :tid,
+                   type: Integer,
+                   desc: -> { API::V2::Config::Entities::Withdraw.documentation[:id][:desc] }
+          requires :action,
+                   type: String,
+                   values: { value: -> { ::Withdraw.aasm.events.map(&:name).map(&:to_s) }, message: 'admin.withdraw.invalid_action' },
+                   desc: "Valid actions are #{::Withdraw.aasm.events.map(&:name)}."
+          given action: ->(action) { %w[load dispatch success].include?(action) } do
+            optional :txid,
+                     type: String,
+                     desc: -> { API::V2::Config::Entities::Withdraw.documentation[:blockchain_txid][:desc] }
+          end
+        end
+        post '/withdraws/actions' do
+          declared_params = declared(params, include_missing: false)
+          withdraw = Withdraw.find_by(tid: declared_params[:tid])
+
+          transited = withdraw.transaction do
+            withdraw.update!(txid: declared_params[:txid]) if declared_params[:txid].present?
+            withdraw.public_send("#{declared_params[:action]}!").tap do |success|
+              raise ActiveRecord::Rollback unless success
+            end
+          rescue StandardError
+            raise ActiveRecord::Rollback
+          end
+
+          if transited
+            present withdraw, with: API::V2::Config::Entities::Withdraw
+          else
+            body errors: ["withdraw.cannot_#{declared_params[:action]}"]
+            status 422
+          end
         end
       end
     end

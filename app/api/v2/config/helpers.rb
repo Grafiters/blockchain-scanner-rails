@@ -127,9 +127,9 @@ module API
                                                    network:         blockchain.protocol})
                 wallets_per_blockchain = active_wallets.where(blockchain_key: blockchain_key)
                 # Information about wallet per specific blockchain
-                result[index][:blockchains][b_index][:balances] = wallet_info(wallets_per_blockchain, currency.id)
+                result[index][:blockchains][b_index][:balances] = wallet_info(wallets_per_blockchain, currency.code)
 
-                wallet_total = calculate_wallet_total(result[index][:blockchains][b_index][:balances], currency.price)
+                wallet_total = calculate_wallet_total(result[index][:blockchains][b_index][:balances], 1)
                 result[index][:blockchains][b_index].merge!(wallet_total)
               end
 

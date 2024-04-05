@@ -31,7 +31,7 @@ class Deposit < ApplicationRecord
             numericality: {
               greater_than_or_equal_to:
                 -> (deposit) {
-                  deposit.currency.coin? ? deposit.blockchain_coin_currency.min_deposit_amount : deposit.blockchain_fiat_currency.min_deposit_amount
+                  deposit.blockchain_coin_currency.min_deposit_amount
                 }
             }, on: :create
 
@@ -39,7 +39,7 @@ class Deposit < ApplicationRecord
   scope :collected, -> { where(aasm_state: 'collected') }
 
   before_validation { self.completed_at ||= Time.current if completed? }
-  before_validation { self.transfer_type ||= currency.coin? ? 'crypto' : 'fiat' }
+  before_validation { self.transfer_type ||= 'crypto' }
 
   aasm whiny_transitions: false do
     state :submitted, initial: true
@@ -65,6 +65,10 @@ class Deposit < ApplicationRecord
 
     event :process do
       transitions from: %i[aml_processing aml_suspicious accepted errored], to: :aml_processing do
+        guard do
+          Peatio::AML.adapter.present? || Peatio::App.config.manual_deposit_approval
+        end
+
         after do
           process_collect! if aml_check!
         end
@@ -104,19 +108,12 @@ class Deposit < ApplicationRecord
   end
 
   def aml_check!
-    # If there is no AML adapter on a platform and manual deposit approval enabled
-    # system will return nil value to not proceed with automatic deposit collection in aml cron job
-    return nil if Peatio::App.config.manual_deposit_approval && Peatio::AML.adapter.blank?
-
-    from_addresses.each do |address|
-    end
     true
   end
 
   delegate :protocol, :warning, to: :blockchain
 
   def blockchain_api
-    Rails.logger.warn blockchain
     blockchain.blockchain_api
   end
 
@@ -143,7 +140,6 @@ class Deposit < ApplicationRecord
 
   def spread_between_wallets!
     return false if spread.present?
-
     spread = WalletService.new(Wallet.active_deposit_wallet(currency_id, blockchain_key)).spread_deposit(self)
     update!(spread: spread.map(&:as_json))
   end
@@ -183,7 +179,7 @@ class Deposit < ApplicationRecord
   end
 
   def blockchain_currency
-    currency.coin? ? blockchain_coin_currency : blockchain_fiat_currency
+    blockchain_coin_currency
   end
 
   private

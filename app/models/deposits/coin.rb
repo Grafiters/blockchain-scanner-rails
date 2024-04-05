@@ -7,7 +7,7 @@ module Deposits
   class Coin < Deposit
     # validate { errors.add(:currency, :invalid) if currency && !currency.coin? }
     validates :address, :txid, presence: true
-    validates :txid, uniqueness: { scope: %i[currency_code txout] }
+    validates :txid, uniqueness: { scope: %i[currency_id txout] }
 
     before_validation do
       if blockchain_api.present? && blockchain_api.case_sensitive? == false

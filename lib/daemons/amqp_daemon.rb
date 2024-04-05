@@ -1,7 +1,7 @@
 # encoding: UTF-8
 # frozen_string_literal: true
 
-require File.join(ENV.fetch('RAILS_ROOT'), 'config', 'environment')
+require File.join(ENV.fetch('RAILS_ROOT', './'), 'config', 'environment')
 
 raise "bindings must be provided." if ARGV.size == 0
 

@@ -311,7 +311,7 @@ module API
               .tap { |q| present q, with: API::V2::Config::Entities::Currency }
           end
 
-          desc 'Get list of crypto currencies' do
+          desc 'Create crypto currencies' do
             success API::V2::Config::Entities::Currency
           end
           params do
@@ -322,6 +322,10 @@ module API
             requires :currency_code,
               type: String,
               desc: -> { API::V2::Config::Entities::Currency.documentation[:code][:desc] }
+            requires :parent_id,
+              type: String,
+              values: { value: -> { ::BlockchainCurrency.where('parent_id IS NULL').pluck(:currency_id) }, message: 'blockchain.blockchain_key_doesnt_exist' },
+              desc: -> { API::V2::Config::Entities::BlockchainCurrency.documentation[:parent_id][:desc] }
             requires :currency_name,
               type: String,
               desc: -> { API::V2::Config::Entities::Currency.documentation[:name][:desc] }
@@ -386,6 +390,7 @@ module API
                 block_params = {
                   blockchain_key: params[:blockchain_key],
                   currency_id: currency.code,
+                  parent_id: params[:parent_id],
                   base_factor: 10 ** params[:base_factor_network],
                   deposit_fee: params[:deposit_fee],
                   min_deposit_amount: params[:min_deposit_amount],
@@ -416,6 +421,9 @@ module API
               type: String,
               values: { value: -> { ::Blockchain.pluck(:key) }, message: 'blockchain.blockchain_key_doesnt_exist' },
               desc: -> { API::V2::Config::Entities::Blockchain.documentation[:key][:desc] }
+            requires :parent_id,
+              type: String,
+              desc: -> { API::V2::Config::Entities::BlockchainCurrency.documentation[:parent_id][:desc] }
             requires :currency_code,
               type: String,
               desc: -> { API::V2::Config::Entities::Currency.documentation[:code][:desc] }
@@ -486,6 +494,7 @@ module API
                 block_params = {
                   blockchain_key: params[:blockchain_key] || bc[:blockchain_key],
                   currency_id: currency.code || bc[:code],
+                  parent_id: params[:parent_id] || bc[:parent_id],
                   base_factor: 10 ** params[:base_factor_network] || bc[:base_factor_network],
                   deposit_fee: params[:deposit_fee] || bc[:deposit_fee],
                   min_deposit_amount: params[:min_deposit_amount] || bc[:min_deposit_amount],
