@@ -41,6 +41,18 @@ class Deposit < ApplicationRecord
   before_validation { self.completed_at ||= Time.current if completed? }
   before_validation { self.transfer_type ||= 'crypto' }
 
+  after_commit on: :create do
+    publish_to_deposit_process
+  end
+
+  after_commit on: :update do
+    if aasm_state == 'processing'
+      publish_to_deposit_process
+    elsif aasm_state == 'errored'
+      publish_to_deposit_process
+    end
+  end
+
   aasm whiny_transitions: false do
     state :submitted, initial: true
     state :canceled
@@ -160,8 +172,7 @@ class Deposit < ApplicationRecord
 
   def as_json_for_event_api
     { tid:                      tid,
-      user:                     { uid: member.uid, email: member.email },
-      uid:                      member.uid,
+      user_id:                  member_id,
       currency:                 currency_id,
       amount:                   amount.to_s('F'),
       state:                    aasm_state,
@@ -183,6 +194,9 @@ class Deposit < ApplicationRecord
   end
 
   private
+  def publish_to_deposit_process
+    RabbitmqService.new({routing_key: ENV.fetch('DEPOSIT_PROCESS_ROUTING'), exchange_name: ENV.fetch('DEPOSIT_EXCHANGE_NAME')}).handling_publish(JSON.dump(as_json_for_event_api))
+  end
 end
 
 # == Schema Information

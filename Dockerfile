@@ -9,7 +9,7 @@ MAINTAINER qenjie@nusatech.id
 #
 # See https://docs.docker.com/engine/reference/commandline/build/#set-build-time-variables-build-arg
 #
-ARG RAILS_ENV=development
+ARG RAILS_ENV=production
 ENV RAILS_ENV=${RAILS_ENV} APP_HOME=/home/app KAIGARA_VERSION=0.1.28
 
 # Allow customization of user ID and group ID (it's useful when you use Docker bind mounts)
@@ -26,11 +26,7 @@ RUN groupadd -r --gid ${GID} app \
 
 # Install system dependencies.
 RUN apt-get update && apt-get upgrade -y
-RUN apt-get install default-libmysqlclient-dev -y
-
-# Install Kaigara
-RUN curl -Lo /usr/bin/kaigara https://github.com/openware/kaigara/releases/download/${KAIGARA_VERSION}/kaigara \
-  && chmod +x /usr/bin/kaigara
+RUN apt-get update -qq && apt-get install -y postgresql-client
 
 WORKDIR $APP_HOME
 

@@ -6,9 +6,9 @@ source 'https://rubygems.org'
 ruby '~> 2.6'
 
 gem 'ransack', '~> 2.3.2'
+gem "pg", "~> 1.2"
 gem 'rails', '~> 5.2.4.5'
 gem 'puma', '~> 3.12.2'
-gem 'mysql2', '~> 0.5.2'
 gem 'redis', '~> 4.1.2', require: ['redis', 'redis/connection/hiredis']
 gem 'hiredis', '~> 0.6.0'
 gem 'figaro', '~> 1.1.1'
@@ -99,5 +99,3 @@ end
 Dir.glob File.expand_path('../Gemfile.plugin', __FILE__) do |file|
   eval_gemfile file
 end
-
-gem "pg", "~> 1.2"

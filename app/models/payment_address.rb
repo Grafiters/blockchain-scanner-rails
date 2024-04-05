@@ -66,6 +66,7 @@ class PaymentAddress < ApplicationRecord
   def as_json_publish
     {
       blockchain_key: blockchain_key,
+      currencies: wallet.currencies.codes,
       user_id: member_id,
       wallet_id: wallet_id,
       address: address

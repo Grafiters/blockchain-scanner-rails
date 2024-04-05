@@ -11,6 +11,10 @@ exchanges:
     type: direct
     durable: false
     auto_delete: false
+  - name: deposit
+    type: direct
+    durable: false
+    auto_delete: false
 queues:
   - name: blockchain_queue
     durable: true
@@ -30,3 +34,9 @@ queues:
     bindings:
       - exchange: withdraw_coin
         routing_key: withdraw.coin_or_token
+  - name: deposit_proces_queue
+    durable: true
+    auto_delete: false
+    bindings:
+      - exchange: deposit
+        routing_key: deposit.process
