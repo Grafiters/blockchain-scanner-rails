@@ -1,0 +1,31 @@
+
+- code:                   bnb
+  name:                   Binance Coin
+  type:                   coin
+  status:                 enabled
+  precision:              8
+  networks:
+    - blockchain_key: bsc-testnet
+      base_factor: 1_000_000_000_000_000_000
+
+- code:                   ftm
+  name:                   Fantom
+  type:                   coin
+  status:                 enabled
+  precision:              8
+  networks: 
+    - blockchain_key: ftm-testnet
+      base_factor: 1_000_000_000_000_000_000
+      options:
+        gas_limit: 75_000
+
+- code:                   btc
+  name:                   Bitcoin
+  type:                   coin
+  status:                 enabled
+  precision:              8
+  networks:
+    - blockchain_key: btc-testnet
+      base_factor: 1_000_000_000_000_000_000
+      options:
+        gas_limit: 75_000

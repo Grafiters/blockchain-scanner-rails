@@ -1,0 +1,78 @@
+
+- key:               bsc-mainnet
+  name:              Binance Mainnet
+  client:            ether                 # API client name.
+  server:            https://bnb.pexbank.io  # Public Ethereum node endpoint. IMPORTANT: full syncmode.
+  height:            37524119                # Initial block number from which sync will be started.
+  min_confirmations: 2                      # Minimal confirmations needed for withdraw and deposit confirmation.
+  explorer:
+    address:         https://www.bscscan.com//address/#{address}
+    transaction:     https://www.bscscan.com//tx/#{txid}
+  status:            disabled
+  blockchain_group:             2
+  protocol:          BRC20
+
+- key:               bsc-testnet
+  name:              Binance testnet
+  client:            ether                   # API client name.
+  server:            http://46.250.226.42:10000  # Public Ethereum node endpoint. IMPORTANT: full syncmode.
+  height:            25104247                # Initial block number from which sync will be started.
+  min_confirmations: 6                      # Minimal confirmations needed for withdraw and deposit confirmation.
+  explorer:
+    address:         https://rinkeby.etherscan.io/address/#{address}
+    transaction:     https://rinkeby.etherscan.io/tx/#{txid}
+  status:            active
+  blockchain_group:             2
+  protocol:          BRCT20
+
+- key:               ftm-mainet
+  name:              Fantom Mainet
+  client:            ether                   # API client name.
+  server:            https://eth.pexbank.io  # Public Ethereum node endpoint. IMPORTANT: full syncmode.
+  height:            19572218                # Initial block number from which sync will be started.
+  min_confirmations: 6                      # Minimal confirmations needed for withdraw and deposit confirmation.
+  explorer:
+    address:         https://etherscan.io/address/#{address}
+    transaction:     https://etherscan.io/tx/#{txid}
+  status:            disabled
+  blockchain_group:             1
+  protocol:          FTM20
+
+- key:               ftm-testnet
+  name:              Fantom Testnet
+  client:            ether                              # API client name.
+  server:            http://46.250.226.42:20000 # Public Bitcoin node endpoint.
+  height:            39132970                              # Initial block number from which sync will be started.
+  min_confirmations: 6                                    # Minimal confirmations needed for withdraw and deposit confirmation.
+  explorer:
+    address:         https://testnet.blockchain.info/address/#{address}
+    transaction:     https://testnet.blockchain.info/tx/#{txid}
+  status:            active
+  blockchain_group:             1
+  protocol:          FTMT20
+
+- key:               btc-mainnet
+  name:              Bitcoin Mainet
+  client:            bitcoin                   # API client name.
+  server:            https://eth.pexbank.io  # Public Ethereum node endpoint. IMPORTANT: full syncmode.
+  height:            19572218                # Initial block number from which sync will be started.
+  min_confirmations: 6                      # Minimal confirmations needed for withdraw and deposit confirmation.
+  explorer:
+    address:         https://etherscan.io/address/#{address}
+    transaction:     https://etherscan.io/tx/#{txid}
+  status:            disabled
+  blockchain_group:             0
+  protocol:          BTC20
+
+- key:               btc-testnet
+  name:              Bitcoin Testnet
+  client:            bitcoin                              # API client name.
+  server:            http://127.0.0.1 # Public Bitcoin node endpoint.
+  height:            39132970                              # Initial block number from which sync will be started.
+  min_confirmations: 6                                    # Minimal confirmations needed for withdraw and deposit confirmation.
+  explorer:
+    address:         https://testnet.blockchain.info/address/#{address}
+    transaction:     https://testnet.blockchain.info/tx/#{txid}
+  status:            disabled
+  blockchain_group:             0
+  protocol:          BTCT20

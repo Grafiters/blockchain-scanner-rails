@@ -1,0 +1,48 @@
+
+- blockchain_key: bsc-testnet
+  name: binance hot wallet
+  address: "0x7698365Ba070891a2Fea9f3A66e5e9F9aF710302"
+  kind: hot
+  gateway: ether
+  currency_ids: bnb
+  settings: 
+    uri: http://46.250.226.42:10000
+    secret: "0x539384cfd461487a4f5544c8c8c08de919c87d9071e5c199faa4136cfb40121b"
+  max_balance: 100000.0
+  status: active
+
+- blockchain_key: bsc-testnet
+  name: binance fee wallet
+  address: "0x7D6DE6b705B4f0C9DF2b55b61062c6038f967280"
+  kind: fee
+  gateway: ether
+  currency_ids: bnb
+  settings: 
+    uri: http://46.250.226.42:10000
+    secret: "0xe8aa1a0a2903f408fb183bbf2917c70e49df67a7b9de216172051e8d2aafcce0"
+  max_balance: 100000.0
+  status: active
+
+- blockchain_key: eth-testnet
+  name: ethereum hot wallet
+  address: "0xf36fcB737b097AbB359fB4560E92328dAF8cA73a"
+  kind: hot
+  gateway: ether
+  currency_ids: eth
+  settings:
+    uri: http://46.250.226.42:20000
+    secret: "0x08bb0e10f0571966977947c57fb1626f3b571375f4035e2dba7f7df12ebd170a"
+  max_balance: 100000.0
+  status: active
+
+- blockchain_key: eth-testnet
+  name: ethereum fee wallet
+  address: "0x251A93d5a77EDc020A6c244915d31e290e75e92E"
+  kind: fee
+  gateway: ether
+  currency_ids: eth
+  settings:
+    uri: http://46.250.226.42:20000
+    secret: "0x898e0ff3360c62ccd0b58c79f74d5b8dc684bce293e0569e0cae553e53d1faa4"
+  max_balance: 100000.0
+  status: active
