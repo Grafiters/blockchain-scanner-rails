@@ -11,6 +11,19 @@
 - [x] Deposit transaction
 - [x] Wallet endpoint configuration
 - [x] Withdraw transaction
+- [x] Encrypted user secret data
+
+## ======> MINOR UPDATE <========
+minor update untuk menenkripsi data rahasia user sepert key maupun data sensitif lainnya, untuk mendapatkan perubahan silahkan pull kemudian jalankan komen dibawah ini
+`migration`
+```
+bundle exec rake db:migrate
+```
+
+`seed`
+```
+bundle exec rake seed:encrypted_filled
+```
 
 # Karena badan dan pikiran tidak optimal jadi untuk readme dibuat singkat saja
 ## Kebutuhan
