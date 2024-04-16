@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_04_03_034906) do
+ActiveRecord::Schema.define(version: 2024_04_16_065401) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -117,10 +117,12 @@ ActiveRecord::Schema.define(version: 2024_04_03_034906) do
     t.bigint "wallet_id"
     t.string "address", limit: 95
     t.boolean "remote", default: false, null: false
-    t.string "secret"
-    t.string "details", limit: 1024
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.json "details_payment"
+    t.string "secret_payment", limit: 1024
+    t.string "secret_encrypted", limit: 1024
+    t.string "details_encrypted", limit: 1024
     t.index ["member_id"], name: "index_payment_addresses_on_member_id"
     t.index ["wallet_id"], name: "index_payment_addresses_on_wallet_id"
   end
@@ -132,7 +134,7 @@ ActiveRecord::Schema.define(version: 2024_04_03_034906) do
     t.string "txid"
     t.string "from_address"
     t.string "to_address"
-    t.decimal "amount", precision: 32, scale: 16, default: "0.0", null: false
+    t.decimal "amount", precision: 32, scale: 18, default: "0.0", null: false
     t.integer "block_number"
     t.integer "txout"
     t.string "status"
@@ -152,12 +154,13 @@ ActiveRecord::Schema.define(version: 2024_04_03_034906) do
     t.integer "kind", null: false
     t.string "gateway", limit: 20, default: "", null: false
     t.json "plain_settings"
-    t.json "settings"
+    t.json "setting_wallet"
     t.json "balance"
     t.decimal "max_balance", precision: 32, scale: 16, default: "0.0", null: false
     t.string "status", limit: 32
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "settings_encrypted", limit: 1024
     t.index ["kind", "status"], name: "index_wallets_on_kind_and_currency_id_and_status"
     t.index ["kind"], name: "index_wallets_on_kind"
     t.index ["status"], name: "index_wallets_on_status"

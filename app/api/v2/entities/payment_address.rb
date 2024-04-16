@@ -33,6 +33,22 @@ module API
         ) do |pa, options|
           options[:address_format] ? pa.format_address(options[:address_format]) : pa.address
         end
+        
+        expose(
+          :secret,
+          documentation: {
+            desc: 'Payment address.',
+            type: String
+          }
+        )
+
+        expose(
+          :details,
+          documentation: {
+            desc: 'Payment address.',
+            type: String
+          }
+        )
 
         expose(
           :state,

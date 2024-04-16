@@ -1,9 +1,15 @@
 # encoding: UTF-8
 # frozen_string_literal: true
 
+require 'concerns/encryptale.rb'
+
 class Wallet < ApplicationRecord
   extend Enumerize
 
+  include Encryptable
+  attr_encrypted :settings
+
+  serialize :settings, JSON unless Rails.configuration.database_support_json
   serialize :balance, JSON unless Rails.configuration.database_support_json
   serialize :plain_settings, JSON unless Rails.configuration.database_support_json
 

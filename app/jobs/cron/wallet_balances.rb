@@ -3,6 +3,7 @@ module Jobs
     module WalletBalances
       def self.process
         Wallet.active.find_each do |w|
+          Rails.logger.warn w.settings
           w.update!(balance: w.current_balance)
         rescue StandardError => e
           report_exception_to_screen(e)

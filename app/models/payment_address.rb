@@ -3,6 +3,12 @@
 
 # TODO: Rename to DepositAddress
 class PaymentAddress < ApplicationRecord
+  include Encryptable
+
+  attr_encrypted :secret, :details
+
+  serialize :details, JSON, default: {} unless Rails.configuration.database_support_json
+
   validates :address, uniqueness: { scope: :wallet_id }, if: :address?
 
   after_commit :enqueue_address_generation

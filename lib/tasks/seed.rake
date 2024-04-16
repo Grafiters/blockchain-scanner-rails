@@ -54,4 +54,36 @@ namespace :seed do
     end
   end
 
+  desc 'fill the nullable encryptd field'
+  task encrypted_filled: :environment do
+    if ActiveRecord::Base.connection.column_exists?(:wallets, :setting_wallet)
+      Wallet.all.each do |wal|
+        wal.update(settings: wal[:setting_wallet])
+      end
+  
+      if ActiveRecord::Base.connection.column_exists?(:wallets, :setting_wallet)
+        ActiveRecord::Migration.remove_column :wallets, :setting_wallet
+        puts "Column 'setting_wallet' removed successfully from 'wallet' table."
+      else
+        puts "Column 'setting_wallet' does not exist in 'wallet' table."
+      end
+    end
+
+    if ActiveRecord::Base.connection.column_exists?(:payment_addresses, :details_payment) && ActiveRecord::Base.connection.column_exists?(:payment_addresses, :secret_payment)
+      PaymentAddress.all.each do |wal|
+        wal.update({
+          details: wal[:details_payment],
+          secret: wal[:secret_payment]
+        })
+      end
+  
+      if ActiveRecord::Base.connection.column_exists?(:payment_addresses, :details_payment) && ActiveRecord::Base.connection.column_exists?(:payment_addresses, :secret_payment)
+        ActiveRecord::Migration.remove_column :payment_addresses, :details_payment
+        ActiveRecord::Migration.remove_column :payment_addresses, :secret_payment
+        puts "Column 'setting_wallet' removed successfully from 'wallet' table."
+      else
+        puts "Column 'setting_wallet' does not exist in 'wallet' table."
+      end
+    end
+  end
 end
